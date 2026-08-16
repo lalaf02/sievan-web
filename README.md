@@ -60,3 +60,7 @@ committed, so a normal build never needs it.
 - **`seed_news_articles.json` is an object**, not an array, unlike every other seed file.
 - **Scan edge cases** that break naive code: `MS-AR-00003` has two files (`I`/`II`),
   `MSAR00025` is a JPG, `MSAR00026` is 29 MB / 15 pages, and 20 objects have no scan.
+
+## Deployment
+
+Live at [the-sievan-experience.vercel.app](https://the-sievan-experience.vercel.app). Auto-deploys on push to `main`.
