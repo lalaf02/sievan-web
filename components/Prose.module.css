@@ -1,0 +1,110 @@
+/* Shared record-page primitives. */
+
+.header {
+  border-bottom: 1px solid var(--rule);
+  padding-bottom: var(--s-4);
+  margin-bottom: var(--s-5);
+}
+
+.back {
+  font-family: var(--sans);
+  font-size: var(--t-sm);
+  display: inline-block;
+  margin-bottom: var(--s-3);
+}
+
+/* Definition list used by every record page */
+.dl {
+  display: grid;
+  grid-template-columns: minmax(9rem, max-content) 1fr;
+  gap: var(--s-2) var(--s-5);
+  margin: 0 0 var(--s-5);
+  font-size: var(--t-base);
+}
+
+.dl dt {
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-faint);
+  padding-top: 0.25em;
+}
+
+.dl dd { margin: 0; }
+
+@media (max-width: 620px) {
+  .dl { grid-template-columns: 1fr; gap: 0 0; }
+  .dl dd { margin-bottom: var(--s-3); }
+}
+
+/*
+ * Verbatim manifest text. The bordered mono block is the archive's honesty
+ * mechanism made visible: a reader can see exactly what the record was derived
+ * from, and judge the parse for themselves.
+ */
+.verbatimBlock {
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--rule-strong);
+  background: var(--paper-deep);
+  padding: var(--s-3) var(--s-4);
+  margin: 0 0 var(--s-5);
+}
+
+.verbatimLabel {
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-faint);
+  margin: 0 0 var(--s-2);
+}
+
+/* A stated absence, not a broken frame. */
+.absent {
+  border: 1px dashed var(--rule-strong);
+  background: var(--paper-deep);
+  padding: var(--s-5);
+  text-align: center;
+  color: var(--ink-muted);
+  font-family: var(--sans);
+  font-size: var(--t-sm);
+  margin: 0 0 var(--s-5);
+}
+
+.absent strong { display: block; color: var(--ink); margin-bottom: var(--s-1); }
+
+/* Editorial caveat carried from the data's own notes field. */
+.note {
+  border-left: 3px solid var(--flag);
+  background: color-mix(in srgb, var(--flag) 7%, transparent);
+  padding: var(--s-3) var(--s-4);
+  margin: 0 0 var(--s-5);
+  font-size: var(--t-base);
+}
+
+.noteLabel {
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--flag);
+  margin: 0 0 var(--s-1);
+}
+
+.section { margin: 0 0 var(--s-6); }
+
+.sectionTitle {
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--ink-faint);
+  border-bottom: 1px solid var(--rule);
+  padding-bottom: var(--s-2);
+  margin: 0 0 var(--s-3);
+}
+
+.list { list-style: none; margin: 0; padding: 0; }
+.list > li { padding: var(--s-2) 0; border-bottom: 1px solid var(--rule); }
+.list > li:last-child { border-bottom: 0; }

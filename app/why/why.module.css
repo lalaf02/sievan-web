@@ -1,0 +1,179 @@
+.intro {
+  font-size: var(--t-md);
+  color: var(--ink);
+  margin-bottom: var(--s-6);
+  max-width: 58ch;
+}
+
+.section {
+  margin: var(--s-7) 0;
+  padding-top: var(--s-6);
+  border-top: 1px solid var(--rule);
+}
+
+.section h2 {
+  font-size: var(--t-lg);
+  margin-bottom: var(--s-4);
+}
+
+.sectionIntro {
+  max-width: 58ch;
+  margin-bottom: var(--s-5);
+  color: var(--ink-muted);
+}
+
+.context {
+  margin-top: var(--s-4);
+  font-size: var(--t-base);
+  color: var(--ink-muted);
+  max-width: 58ch;
+}
+
+.subhead {
+  font-size: var(--t-md);
+  font-weight: 600;
+  margin: var(--s-5) 0 var(--s-3);
+}
+
+/* Peer network list */
+.peerList {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 var(--s-5);
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+  gap: var(--s-3);
+}
+
+.peerList li {
+  display: flex;
+  flex-direction: column;
+  padding: var(--s-3);
+  background: var(--paper-deep);
+}
+
+.peerList strong {
+  font-size: var(--t-base);
+}
+
+.peerNote {
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  color: var(--ink-muted);
+}
+
+/* Exhibition list */
+.exhibitionList {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 var(--s-4);
+}
+
+.exhibitionList li {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--s-2) 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+.exName {
+  font-weight: 500;
+}
+
+.exYears {
+  font-family: var(--sans);
+  font-size: var(--t-sm);
+  color: var(--ink-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Museum list */
+.museumList {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 var(--s-5);
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+  gap: var(--s-2);
+}
+
+.museumList li {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: var(--s-2) var(--s-3);
+  background: var(--paper-deep);
+}
+
+.museumList li.notable {
+  background: var(--paper-sunk);
+  border-left: 3px solid var(--oxide);
+}
+
+.museumName {
+  font-weight: 500;
+}
+
+.museumLocation {
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  color: var(--ink-muted);
+}
+
+/* Critic list */
+.criticList {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 var(--s-5);
+}
+
+.criticList li {
+  padding: var(--s-3) 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+.criticList strong {
+  display: block;
+  font-size: var(--t-base);
+}
+
+.criticRole {
+  font-family: var(--sans);
+  font-size: var(--t-sm);
+  color: var(--ink-muted);
+}
+
+.criticNote {
+  display: block;
+  font-style: italic;
+  font-size: var(--t-sm);
+  color: var(--oxide);
+  margin-top: var(--s-1);
+}
+
+/* Call to action */
+.cta {
+  margin: var(--s-8) 0;
+  padding: var(--s-6);
+  background: var(--paper-deep);
+  border: 1px solid var(--rule);
+}
+
+.cta h3 {
+  font-size: var(--t-md);
+  margin-bottom: var(--s-4);
+}
+
+.cta ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.cta li {
+  margin-bottom: var(--s-3);
+}
+
+.cta a {
+  font-weight: 600;
+}

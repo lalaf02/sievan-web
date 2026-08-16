@@ -1,0 +1,144 @@
+.spread {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--s-6);
+  align-items: start;
+  margin-bottom: var(--s-8);
+  padding-bottom: var(--s-6);
+  border-bottom: 1px solid var(--rule);
+}
+
+@media (max-width: 860px) {
+  .spread { grid-template-columns: 1fr; gap: var(--s-4); }
+}
+
+.figure { margin: 0; }
+
+.figure img {
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--rule-strong);
+  background: var(--paper-deep);
+  display: block;
+}
+
+.pageNo {
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  color: var(--ink-faint);
+  margin-top: var(--s-2);
+}
+
+.text { position: sticky; top: var(--s-5); }
+
+@media (max-width: 860px) { .text { position: static; } }
+
+.heading {
+  font-size: var(--t-lg);
+  margin-bottom: var(--s-4);
+}
+
+.plates,
+.caption {
+  font-family: var(--sans);
+  font-size: var(--t-sm);
+  color: var(--ink-muted);
+}
+
+.plates { font-variant-numeric: tabular-nums; }
+
+.caption {
+  border-left: 2px solid var(--rule-strong);
+  padding-left: var(--s-3);
+}
+
+/* ---------------------------------------------------------------------- CV */
+
+.cvGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr));
+  gap: var(--s-6);
+  margin-top: var(--s-5);
+}
+
+.cvSection { break-inside: avoid; }
+
+.cvTitle {
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--ink-faint);
+  border-bottom: 1px solid var(--rule-strong);
+  padding-bottom: var(--s-2);
+  margin: 0 0 var(--s-3);
+}
+
+.cvList { margin: 0; }
+
+.cvRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--s-3);
+  padding: 0.2em 0;
+  border-bottom: 1px solid var(--rule);
+  font-size: var(--t-base);
+}
+
+.cvRow dt { margin: 0; }
+
+.cvRow dd {
+  margin: 0;
+  font-family: var(--sans);
+  font-size: var(--t-sm);
+  color: var(--ink-muted);
+  white-space: nowrap;
+}
+
+.plain {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: var(--t-base);
+}
+
+.plain li {
+  padding: 0.2em 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+/* Contact sheet of every page */
+.contact {
+  list-style: none;
+  margin: var(--s-5) 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr));
+  gap: var(--s-4);
+}
+
+.contact a {
+  display: block;
+  position: relative;
+  border: 1px solid var(--rule);
+  background: var(--paper-deep);
+  transition: border-color 150ms;
+}
+
+.contact a:hover { border-color: var(--oxide); }
+
+.contact img { width: 100%; height: auto; display: block; }
+
+.contactNo {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  background: var(--paper);
+  border-top: 1px solid var(--rule);
+  border-left: 1px solid var(--rule);
+  padding: 0.1em 0.4em;
+  color: var(--ink-muted);
+}

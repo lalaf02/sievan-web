@@ -1,0 +1,22 @@
+.footer {
+  border-top: 1px solid var(--rule);
+  background: var(--paper-deep);
+  padding: var(--s-5) 0;
+  margin-top: auto;
+}
+
+.inner {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--s-5);
+  flex-wrap: wrap;
+  align-items: baseline;
+}
+
+.counts,
+.meta {
+  font-family: var(--sans);
+  font-size: var(--t-sm);
+  color: var(--ink-muted);
+  margin: 0;
+}

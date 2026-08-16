@@ -1,0 +1,65 @@
+/* Archive resource cards - reuses homepage door card pattern */
+.archiveGrid {
+  margin-top: var(--s-7);
+}
+
+.archiveGrid h2 {
+  margin-bottom: var(--s-5);
+}
+
+.cards {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: var(--s-5);
+  border-top: 1px solid var(--rule-strong);
+  padding-top: var(--s-5);
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  height: 100%;
+  text-decoration: none;
+  color: inherit;
+}
+
+.cardNum {
+  font-family: var(--serif);
+  font-size: var(--t-xl);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+  transition: color 150ms;
+}
+
+.cardIcon {
+  font-size: var(--t-xl);
+  line-height: 1;
+  color: var(--ink);
+  transition: color 150ms;
+}
+
+.card:hover .cardNum,
+.card:hover .cardIcon,
+.card:hover .cardTitle {
+  color: var(--oxide);
+}
+
+.cardTitle {
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--ink-faint);
+  transition: color 150ms;
+}
+
+.cardText {
+  font-size: var(--t-base);
+  color: var(--ink-muted);
+  max-width: 34ch;
+}

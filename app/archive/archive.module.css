@@ -1,0 +1,107 @@
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  gap: var(--s-4);
+  border-top: 1px solid var(--rule-strong);
+  border-bottom: 1px solid var(--rule-strong);
+  padding: var(--s-5) 0;
+  margin-bottom: var(--s-4);
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-1);
+  text-decoration: none;
+  color: inherit;
+}
+
+a.stat:hover .statNum { color: var(--oxide); }
+
+.statNum {
+  font-family: var(--serif);
+  font-size: var(--t-xl);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  transition: color 150ms;
+}
+
+.statOf { color: var(--ink-faint); font-size: var(--t-md); }
+
+.statLabel {
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-faint);
+}
+
+.typeList {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 var(--s-6);
+  columns: 2;
+  column-gap: var(--s-6);
+  max-width: 34rem;
+  font-family: var(--sans);
+  font-size: var(--t-sm);
+  color: var(--ink-muted);
+}
+
+.typeList li { margin-bottom: var(--s-2); break-inside: avoid; }
+
+.typeCount {
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.objects { list-style: none; padding: 0; margin: 0; }
+
+.objectRow {
+  display: grid;
+  grid-template-columns: 4.5rem 1fr auto;
+  gap: var(--s-4);
+  align-items: baseline;
+  padding: var(--s-3) 0;
+  border-bottom: 1px solid var(--rule);
+  text-decoration: none;
+  color: inherit;
+}
+
+.objectRow:hover .objectLead { color: var(--oxide); }
+
+.objectYear {
+  font-family: var(--sans);
+  font-size: var(--t-sm);
+  color: var(--ink-muted);
+}
+
+.objectLead {
+  font-size: var(--t-base);
+  transition: color 150ms;
+}
+
+.objectMeta {
+  display: flex;
+  gap: var(--s-3);
+  align-items: baseline;
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+}
+
+.objectId { color: var(--ink-faint); font-family: var(--mono); }
+
+.notScanned {
+  color: var(--ink-faint);
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  padding: 0 0.35em;
+  white-space: nowrap;
+}
+
+@media (max-width: 620px) {
+  .objectRow { grid-template-columns: 3.5rem 1fr; }
+  .objectMeta { grid-column: 2; }
+  .typeList { columns: 1; }
+}

@@ -1,0 +1,136 @@
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+  margin-bottom: var(--s-6);
+  padding-bottom: var(--s-4);
+  border-bottom: 1px solid var(--rule);
+}
+
+.chip {
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  padding: 0.25em 0.7em;
+  border: 1px solid var(--rule-strong);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink-muted);
+  cursor: pointer;
+  transition: background 150ms, color 150ms, border-color 150ms;
+}
+
+.chip:hover { border-color: var(--oxide); color: var(--oxide); }
+.chipOn { background: var(--oxide); border-color: var(--oxide); color: var(--paper); }
+.chipCount { opacity: 0.65; margin-left: 0.4em; font-variant-numeric: tabular-nums; }
+
+.timeline { position: relative; }
+
+.decade { margin-bottom: var(--s-6); }
+
+.decadeTitle {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--ink-faint);
+  border-bottom: 1px solid var(--rule-strong);
+  padding-bottom: var(--s-2);
+  margin: 0 0 var(--s-4);
+}
+
+.decadeCount { font-variant-numeric: tabular-nums; }
+
+/* A stated absence. */
+.gap {
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  text-align: center;
+  border-top: 1px dashed var(--rule-strong);
+  border-bottom: 1px dashed var(--rule-strong);
+  padding: var(--s-3) 0;
+  margin: 0 0 var(--s-6);
+}
+
+.year {
+  display: grid;
+  grid-template-columns: 3.5rem 1fr;
+  gap: var(--s-4);
+  align-items: start;
+  margin-bottom: var(--s-4);
+}
+
+.yearLabel {
+  font-family: var(--sans);
+  font-size: var(--t-sm);
+  color: var(--ink-muted);
+  margin: 0;
+  padding-top: 0.15em;
+  position: sticky;
+  top: var(--s-4);
+}
+
+.entries { list-style: none; margin: 0; padding: 0; }
+
+.entry {
+  display: block;
+  padding: var(--s-2) 0 var(--s-2) var(--s-4);
+  border-left: 3px solid var(--rule-strong);
+  margin-bottom: var(--s-2);
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 150ms;
+}
+
+.entry:hover { border-left-color: var(--oxide); }
+.entry:hover .entryTitle { color: var(--oxide); }
+
+/* Kind is carried by the rule colour, not by an icon or a badge. */
+.article { border-left-color: var(--rule-strong); }
+.exhibition { border-left-color: var(--oxide); }
+.object { border-left-color: var(--rule); }
+.painting { border-left-color: var(--ink-muted); }
+.video { border-left-color: var(--flag); }
+.event { border-left-color: var(--ink); }
+
+/* A year-only date is a soft band; a hedged date is dashed. */
+.vague { border-left-style: solid; opacity: 0.92; }
+.uncertain { border-left-style: dashed; }
+
+.entryTitle {
+  display: block;
+  font-size: var(--t-base);
+  line-height: 1.35;
+  transition: color 150ms;
+}
+
+.entrySub {
+  display: block;
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  color: var(--ink-faint);
+}
+
+.testimony {
+  margin-top: var(--s-7);
+  padding-top: var(--s-5);
+  border-top: 1px solid var(--rule-strong);
+}
+
+.testimonyNote {
+  font-family: var(--sans);
+  font-size: var(--t-sm);
+  color: var(--ink-muted);
+  max-width: 56ch;
+  margin: 0 0 var(--s-4);
+}
+
+@media (max-width: 620px) {
+  .year { grid-template-columns: 1fr; gap: var(--s-2); }
+  .yearLabel { position: static; }
+}

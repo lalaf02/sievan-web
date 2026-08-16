@@ -1,0 +1,191 @@
+/*
+ * Design tokens and base styles.
+ *
+ * This is a typographic site: the archive has almost no photography, so the type
+ * and the documents themselves carry the design. Colours are derived from paper
+ * rather than a palette generator, and there is exactly one accent.
+ */
+
+:root {
+  /* Paper */
+  --paper: #f8f5ef;
+  --paper-deep: #efe9de;
+  --paper-sunk: #e7e0d2;
+  --ink: #17150f;
+  --ink-muted: #6b6455;
+  --ink-faint: #948b78;
+  --rule: #d8d0c0;
+  --rule-strong: #bcb2a0;
+
+  /* One accent, plus a flag colour used only for review markers */
+  --oxide: #8c3a22;
+  --oxide-soft: #b8563a;
+  --flag: #a67c00;
+
+  /* Type */
+  --serif: var(--font-serif), Iowan Old Style, Palatino, Georgia, serif;
+  --sans: var(--font-sans), -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  /* 1.25 scale */
+  --t-xs: 0.7rem;
+  --t-sm: 0.8rem;
+  --t-base: 0.95rem;
+  --t-body: 1.1rem;
+  --t-md: 1.25rem;
+  --t-lg: 1.6rem;
+  --t-xl: 2.1rem;
+  --t-2xl: 2.8rem;
+
+  /* Space */
+  --s-1: 0.25rem;
+  --s-2: 0.5rem;
+  --s-3: 0.75rem;
+  --s-4: 1rem;
+  --s-5: 1.5rem;
+  --s-6: 2rem;
+  --s-7: 3rem;
+  --s-8: 4.5rem;
+
+  --measure: 68ch;
+  --page: 1180px;
+  --rail: 250px;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  -webkit-text-size-adjust: 100%;
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: var(--t-body);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--serif);
+  font-weight: 600;
+  line-height: 1.2;
+  margin: 0 0 var(--s-4);
+  letter-spacing: -0.011em;
+}
+
+h1 { font-size: var(--t-xl); }
+h2 { font-size: var(--t-lg); }
+h3 { font-size: var(--t-md); }
+h4 { font-size: var(--t-base); }
+
+p { margin: 0 0 var(--s-4); }
+
+ul, ol { margin: 0 0 var(--s-4); padding-left: 1.2em; }
+
+a {
+  color: var(--oxide);
+  text-decoration-color: color-mix(in srgb, var(--oxide) 35%, transparent);
+  text-underline-offset: 0.16em;
+}
+a:hover { text-decoration-color: currentColor; }
+
+:focus-visible {
+  outline: 2px solid var(--oxide);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+hr {
+  border: 0;
+  border-top: 1px solid var(--rule);
+  margin: var(--s-6) 0;
+}
+
+/* Interface type: filters, labels, counts, metadata */
+.ui {
+  font-family: var(--sans);
+  font-size: var(--t-sm);
+  letter-spacing: 0.01em;
+}
+
+/* Numerals line up in tables and timelines */
+.tnum { font-variant-numeric: tabular-nums; }
+
+/*
+ * Monospace is a semantic signal here, not decoration: it marks text reproduced
+ * verbatim from the archive manifest, unedited.
+ */
+.verbatim {
+  font-family: var(--mono);
+  font-size: 0.85em;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  color: var(--ink-muted);
+}
+
+.eyebrow {
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--ink-faint);
+  margin: 0 0 var(--s-2);
+}
+
+.muted { color: var(--ink-muted); }
+.faint { color: var(--ink-faint); }
+.measure { max-width: var(--measure); }
+
+.page {
+  width: 100%;
+  max-width: var(--page);
+  margin: 0 auto;
+  padding: 0 var(--s-5);
+}
+
+/* Layout: rail + content. Used by every browser and the transcript reader. */
+.railLayout {
+  display: grid;
+  grid-template-columns: var(--rail) minmax(0, 1fr);
+  gap: var(--s-7);
+  align-items: start;
+}
+
+.rail {
+  position: sticky;
+  top: var(--s-5);
+  font-family: var(--sans);
+  font-size: var(--t-sm);
+}
+
+@media (max-width: 860px) {
+  .railLayout { grid-template-columns: 1fr; gap: var(--s-5); }
+  .rail { position: static; }
+}
+
+/* Archives should feel still. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+::selection { background: color-mix(in srgb, var(--oxide) 22%, transparent); }
+
+mark {
+  background: color-mix(in srgb, var(--flag) 32%, transparent);
+  color: inherit;
+  padding: 0 0.1em;
+  border-radius: 2px;
+}

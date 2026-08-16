@@ -1,0 +1,136 @@
+.railLabel {
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--ink-faint);
+  margin: 0 0 var(--s-2);
+}
+
+.searchGroup { margin-bottom: var(--s-5); }
+
+.search {
+  width: 100%;
+  font-family: var(--sans);
+  font-size: var(--t-base);
+  padding: var(--s-2) var(--s-3);
+  border: 1px solid var(--rule-strong);
+  border-radius: 2px;
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.matchCount {
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  color: var(--ink-muted);
+  margin: var(--s-2) 0 0;
+}
+
+.pageNav { margin-bottom: var(--s-5); }
+
+.pageList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-1);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.pageLink {
+  display: inline-block;
+  min-width: 1.7rem;
+  text-align: center;
+  padding: 0.1em 0.3em;
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  font-variant-numeric: tabular-nums;
+  text-decoration: none;
+  color: var(--ink-muted);
+}
+
+.pageLink:hover { border-color: var(--oxide); color: var(--oxide); }
+
+/* Reading column */
+.body { max-width: 68ch; }
+
+.page {
+  position: relative;
+  padding-top: var(--s-5);
+}
+
+/*
+ * The page number is a citation anchor, set in the margin so it never interrupts
+ * the dialogue. scroll-margin keeps it clear of the header when linked to.
+ */
+.pageMark {
+  position: absolute;
+  left: -3.5rem;
+  top: var(--s-5);
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-faint);
+  border-top: 1px solid var(--rule);
+  padding-top: 0.2em;
+  width: 2.5rem;
+  text-align: right;
+  scroll-margin-top: var(--s-6);
+}
+
+@media (max-width: 1080px) {
+  .pageMark {
+    position: static;
+    display: block;
+    width: auto;
+    text-align: left;
+    border-top: 0;
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: var(--s-1);
+    margin-bottom: var(--s-3);
+  }
+}
+
+.para {
+  font-size: 1.15rem;
+  line-height: 1.65;
+  margin: 0 0 var(--s-4);
+}
+
+.speakers {
+  border: 1px solid var(--rule);
+  background: var(--paper-deep);
+  padding: var(--s-3) var(--s-4);
+  margin: var(--s-4) 0 var(--s-6);
+  font-family: var(--sans);
+}
+
+.speakersSummary {
+  font-size: var(--t-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-faint);
+  cursor: pointer;
+}
+
+.speakersNote {
+  font-size: var(--t-sm);
+  color: var(--ink-muted);
+  margin: var(--s-3) 0 var(--s-2);
+}
+
+.speakerList {
+  font-size: var(--t-sm);
+  color: var(--ink-muted);
+  columns: 3;
+  column-gap: var(--s-5);
+  margin: 0;
+  padding-left: 1.4em;
+}
+
+@media (max-width: 620px) {
+  .speakerList { columns: 2; }
+}

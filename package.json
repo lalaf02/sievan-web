@@ -1,0 +1,31 @@
+{
+  "name": "web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "data": "node scripts/build-data.mjs && node scripts/check-data.mjs",
+    "predev": "npm run data",
+    "dev": "next dev",
+    "prebuild": "npm run data",
+    "build": "next build",
+    "postbuild": "node scripts/check-export.mjs",
+    "start": "next start",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint"
+  },
+  "dependencies": {
+    "next": "16.2.12",
+    "react": "19.2.4",
+    "react-dom": "19.2.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "ajv": "^8.20.0",
+    "ajv-formats": "^3.0.1",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.12",
+    "typescript": "^5"
+  }
+}
