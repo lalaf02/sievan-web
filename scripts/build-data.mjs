@@ -24,6 +24,12 @@ const DM = join(ROOT, 'DataModel');
 const SEED = join(DM, 'seed');
 const OUT = join(WEB, 'data');
 
+// Skip generation if data already exists and DataModel is missing (e.g., on Vercel)
+if (!existsSync(DM) && existsSync(join(OUT, 'archive.generated.json'))) {
+  console.log('  build-data: skipping (DataModel not found, using committed data)');
+  process.exit(0);
+}
+
 /** seed file -> [schema $def, dataset key] */
 const SEEDS = {
   'seed_collections.json': ['Collection', 'collections'],

@@ -13,6 +13,10 @@ import { fileURLToPath } from 'node:url';
 const HERE = dirname(fileURLToPath(import.meta.url));
 const WEB = join(HERE, '..');
 const ROOT = join(WEB, '..');
+const DM = join(ROOT, 'DataModel');
+
+// On Vercel (no DataModel), skip file existence checks - scans are in public/scans/
+const SKIP_FILE_CHECKS = !existsSync(DM);
 
 const bundlePath = join(WEB, 'data', 'archive.generated.json');
 if (!existsSync(bundlePath)) {
@@ -50,7 +54,7 @@ for (const o of d.archiveObjects) {
     need(!art || art.archive_object_id === o.id, `${o.id}: ${aid} does not back-reference it`);
   }
   for (const s of o.scan_files ?? []) {
-    need(existsSync(join(ROOT, 'MS-CS-001', s.filename)), `${o.id}: scan ${s.filename} missing on disk`);
+    need(SKIP_FILE_CHECKS || existsSync(join(ROOT, 'MS-CS-001', s.filename)), `${o.id}: scan ${s.filename} missing on disk`);
   }
 }
 
@@ -60,10 +64,10 @@ for (const v of d.videoAssets) {
     need(PE.has(pid), `${v.id}: subject_person_ids -> ${pid} not found`);
   }
   for (const m of v.media_files ?? []) {
-    need(existsSync(join(ROOT, m.path)), `${v.id}: media ${m.path} missing on disk`);
+    need(SKIP_FILE_CHECKS || existsSync(join(ROOT, m.path)), `${v.id}: media ${m.path} missing on disk`);
   }
   for (const key of ['transcript_source_file', 'transcript_text_file']) {
-    if (v[key]) need(existsSync(join(ROOT, v[key])), `${v.id}: ${key} ${v[key]} missing on disk`);
+    if (v[key]) need(SKIP_FILE_CHECKS || existsSync(join(ROOT, v[key])), `${v.id}: ${key} ${v[key]} missing on disk`);
   }
 }
 
