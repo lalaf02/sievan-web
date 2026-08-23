@@ -36,12 +36,31 @@ checked. So the site never asserts what it cannot evidence. Gaps are stated rath
 hidden, inferred connections show their working, and nothing is ever fabricated — see
 [Development guidelines](#development-guidelines).
 
-Live at [sievan-archive.vercel.app](https://sievan-archive.vercel.app), the Vercel project
-`sievan-archive`, which auto-deploys on push to `main`. The original generated alias
-`web-three-olive-55.vercel.app` still resolves to the same deployments.
+### Where it deploys
 
-`the-sievan-experience.vercel.app` is **not** this project — it belongs elsewhere and still
-serves the pre-revamp site. A custom domain is planned but not yet attached.
+| | |
+|---|---|
+| Live | [sievan-archive.vercel.app](https://sievan-archive.vercel.app) |
+| Vercel project | `sievan-archive` (called `web` until Aug 2026) |
+| Scope | team `lalas-projects-d5f6f75a` — **not** a personal scope |
+| Dashboard | [vercel.com/lalas-projects-d5f6f75a/sievan-archive](https://vercel.com/lalas-projects-d5f6f75a/sievan-archive) |
+| Git | `lalaf02/sievan-web`, auto-deploys on push to `main` |
+| Node on Vercel | 24.x |
+| Legacy alias | `web-three-olive-55.vercel.app` — still resolves to the same deployments |
+
+Two things that have already cost an afternoon between them:
+
+- **The dashboard hides it if you are in the wrong scope.** The project sits under the team,
+  and it was named `web` until recently, so searching for "sievan" found nothing. If you
+  cannot see the project, check the scope switcher before assuming a deploy failed.
+- **`the-sievan-experience.vercel.app` is a different Vercel account** and still serves the
+  pre-revamp site. It is not reachable from the `laurynfuld2021@gmail.com` login — querying
+  both the team and personal scopes returns only `sievan-archive`, `penn-advisor` and
+  `frontend`. Two public copies of this archive therefore exist; see BACKLOG.md.
+
+**Renaming a Vercel project does not change its URL.** The generated alias is fixed at
+creation, so `sievan-archive.vercel.app` had to be added explicitly as a project domain after
+the rename.
 
 ```bash
 npm install

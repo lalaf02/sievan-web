@@ -114,6 +114,11 @@ seed files, not the source spreadsheet.
 
 ## 5. Open decisions
 
+- **Two public copies of the archive exist.** `the-sievan-experience.vercel.app` sits on a
+  Vercel account not reachable from the `laurynfuld2021@gmail.com` login (verified against
+  both the team and personal scopes) and still serves the pre-revamp site. Deliberately left
+  alone for now — but anyone sent that link sees the old version indefinitely. Resolve when
+  the custom domain is set up, ideally by pointing that host at this project.
 - **Link `catalog.mauricesievan.com`?** The estate's earlier catalogue site. If this site
   supersedes it, linking would send researchers backwards; if the two coexist, it belongs on
   the Research page. Not yet decided, so not yet linked.

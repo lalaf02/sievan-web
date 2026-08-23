@@ -13,12 +13,11 @@ npm run dev      # http://localhost:3000
 npm run build    # -> out/
 ```
 
-Live at [sievan-archive.vercel.app](https://sievan-archive.vercel.app), the Vercel project
-`sievan-archive`, which auto-deploys on push to `main`. The original generated alias
-`web-three-olive-55.vercel.app` still resolves to the same deployments.
-
-`the-sievan-experience.vercel.app` is **not** this project — it belongs elsewhere and still
-serves the pre-revamp site. A custom domain is planned but not yet attached.
+Live at [sievan-archive.vercel.app](https://sievan-archive.vercel.app) — Vercel project
+`sievan-archive` under the team scope `lalas-projects-d5f6f75a`
+([dashboard](https://vercel.com/lalas-projects-d5f6f75a/sievan-archive)), auto-deployed on
+push to `main`. Note `the-sievan-experience.vercel.app` is a different account and still
+serves the old site; see [CLAUDE.md](./CLAUDE.md).
 
 ---
 
