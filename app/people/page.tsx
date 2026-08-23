@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import {
@@ -27,7 +28,7 @@ export default function PeoplePage() {
   }));
 
   return (
-    <div className="page" style={{ paddingTop: 'var(--s-6)', maxWidth: '54rem' }}>
+    <div className="page" style={{ paddingTop: 'var(--s-6)', maxWidth: 'var(--page)' }}>
       <header style={{ marginBottom: 'var(--s-6)' }}>
         <h1>People</h1>
         <p className="measure muted">
@@ -59,7 +60,11 @@ export default function PeoplePage() {
             <h2 className={styles.groupTitle}>
               {ROLE_LABELS[role]}s <span className={styles.groupCount}>{members.length}</span>
             </h2>
-            <ul className={styles.list}>
+            {/* A group is as wide as it is long: 24 critics take four columns, one gallery owner takes one. */}
+            <ul
+              className={styles.list}
+              style={{ '--columns': columnsFor(members.length) } as CSSProperties}
+            >
               {members.map(({ person, articles, interviews, mentions }) => (
                 <li key={person.id}>
                   <Link href={`/people/${person.id}/`} className={styles.row}>
@@ -82,4 +87,16 @@ export default function PeoplePage() {
       })}
     </div>
   );
+}
+
+/**
+ * Column count by group size. The four groups here hold 24, 5, 2 and 1 people, and a
+ * flat two columns turned "Gallery owners" into a heading over a single name in a
+ * two-column box while cramming the 24 critics into a narrow pair.
+ */
+function columnsFor(n: number): number {
+  if (n <= 2) return 1;
+  if (n <= 8) return 2;
+  if (n <= 16) return 3;
+  return 4;
 }

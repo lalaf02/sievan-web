@@ -3,11 +3,17 @@
   margin: 0;
   padding: 0;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
+  /*
+   * Three across, not auto-fill. Six interviews then make two clean rows, and the
+   * studio reel takes the full width below them — auto-fill against seven records
+   * stranded an empty cell at every width the site is actually read at.
+   */
+  grid-template-columns: repeat(3, 1fr);
   gap: var(--s-5);
 }
 
 .item { display: flex; flex-direction: column; gap: var(--s-2); }
+.itemWide { grid-column: 1 / -1; }
 
 .card {
   display: flex;
@@ -83,4 +89,19 @@ a.card:hover .cardTitle { color: var(--oxide); }
 .help {
   font-family: var(--sans);
   font-size: var(--t-xs);
+}
+
+/*
+ * The still, not the loop. Seven autoplaying videos in one grid is a page nobody
+ * waits for, and here the poster carries all of the information the card needs.
+ */
+.cardFace {
+  display: block;
+  margin: calc(var(--s-4) * -1) calc(var(--s-4) * -1) var(--s-3);
+}
+
+.cardFace figure { margin: 0; }
+
+@media (max-width: 860px) {
+  .grid { grid-template-columns: 1fr; }
 }

@@ -97,7 +97,11 @@
 
 .cvGrid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  /*
+   * The one-man exhibitions list runs fourteen rows; the museums and awards beside it
+   * run seventeen between them. Weight the tracks rather than splitting evenly.
+   */
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
   gap: var(--s-6);
   align-items: start;
 }

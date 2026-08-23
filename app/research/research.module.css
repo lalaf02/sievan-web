@@ -6,15 +6,24 @@
 
 .columns {
   display: grid;
-  grid-template-columns: 1fr var(--rail);
-  gap: var(--s-6);
+  /*
+   * The main track used to be `1fr` while .main capped itself at --measure, so the
+   * track was always wider than anything in it — dead space inside the layout, on top
+   * of the dead space beside it. Size the track to the measure and let the rail sit
+   * against it.
+   */
+  grid-template-columns: minmax(0, var(--measure)) var(--rail);
+  gap: var(--s-7);
   align-items: start;
+  /*
+   * Centred, not start-aligned. Prose plus a 250px rail cannot fill 1350px, and
+   * pushing the leftover to one side reads as a layout fault; split evenly it reads
+   * as a margin.
+   */
+  justify-content: center;
 }
 
-.main {
-  min-width: 0;
-  max-width: var(--measure);
-}
+.main { min-width: 0; }
 
 .section {
   margin-bottom: var(--s-7);

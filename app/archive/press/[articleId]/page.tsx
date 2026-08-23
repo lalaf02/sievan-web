@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import {
-  allArticles, articleTitle, getArticle, getObject, getPerson, getPublication,
+  allArticles, articleTitle, coverFor, getArticle, getObject, getPerson, getPublication,
   articlesForObject, OBJECT_TYPE_LABELS,
 } from '@/lib/data';
 import { formatArticleDate } from '@/lib/dates';
@@ -10,6 +10,8 @@ import {
   EditorialNote, Fact, Facts, RecordHeader, RecordList, Section, Verbatim,
 } from '@/components/Record';
 import { LikelyReviewsSection, SameYearSection } from '@/components/RelatedSection';
+import { SheetTile } from '@/components/MediaTile';
+import styles from './record.module.css';
 
 export function generateStaticParams() {
   return allArticles.map((a) => ({ articleId: a.id }));
@@ -41,9 +43,11 @@ export default async function ArticlePage({ params }: Props) {
 
   const date = formatArticleDate(article.date_normalized, article.date_text, article.date_uncertain);
   const corrected = article.review_status === 'reviewed_corrected';
+  const sheet = object ? coverFor(object.id) : undefined;
+  const onSheet = object ? articlesForObject(object.id).length : 0;
 
   return (
-    <div className="page" style={{ paddingTop: 'var(--s-6)', maxWidth: '52rem' }}>
+    <div className="page" style={{ paddingTop: 'var(--s-6)' }}>
       <RecordHeader
         backHref="/archive/press/"
         backLabel="Press archive"
@@ -52,6 +56,42 @@ export default async function ArticlePage({ params }: Props) {
           .join(' · ')}
         title={articleTitle(article)}
       />
+
+      <div className={styles.layout}>
+        <div className={styles.sheet}>
+          <div className={styles.sheetInner}>
+          {sheet && object ? (
+            <>
+              <SheetTile
+                sheet={sheet}
+                href={`/archive/objects/${object.id}/`}
+                aspect="3 / 4"
+                alt={`The photocopied sheet ${object.id}, which carries this notice`}
+                eager
+              />
+              {/*
+                Careful about what this image is. The sheet is the object, and most
+                sheets carry several notices photocopied together — showing it beside
+                one record must not imply the whole sheet is that record.
+              */}
+              <p className={styles.sheetNote}>
+                {onSheet > 1
+                  ? `The sheet this notice was photocopied onto, with ${onSheet - 1} other${onSheet - 1 === 1 ? '' : 's'}. The scans have no text layer, so the words printed here are not searchable.`
+                  : 'The sheet this notice was photocopied onto. The scans have no text layer, so the words printed here are not searchable.'}
+                {' '}
+                <Link href={`/archive/objects/${object.id}/`}>See the object record</Link>.
+              </p>
+            </>
+          ) : object ? (
+            <p className={styles.sheetNote}>
+              The object this notice was cut from, <Link href={`/archive/objects/${object.id}/`}>{object.id}</Link>,
+              is catalogued but not yet digitised, so the clipping itself cannot be shown.
+            </p>
+          ) : null}
+          </div>
+        </div>
+
+        <div className={styles.body}>
 
       {/* The record's own note, where a curator has left one worth reading. */}
       {article.notes && (
@@ -119,11 +159,13 @@ export default async function ArticlePage({ params }: Props) {
         </Section>
       )}
 
-      <LikelyReviewsSection articleId={article.id} />
-      <SameYearSection
-        year={article.date_earliest}
-        exclude={[article.id, article.archive_object_id, ...siblings.map((s) => s.id)]}
-      />
+          <LikelyReviewsSection articleId={article.id} />
+          <SameYearSection
+            year={article.date_earliest}
+            exclude={[article.id, article.archive_object_id, ...siblings.map((s) => s.id)]}
+          />
+        </div>
+      </div>
     </div>
   );
 }

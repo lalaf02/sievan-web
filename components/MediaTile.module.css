@@ -1,0 +1,99 @@
+/*
+ * The two things the archive can actually show: a scanned sheet, and a silent loop.
+ * Both are used inside a Mosaic tile, so both fill the tile they are given.
+ */
+
+.frame {
+  position: relative;
+  display: block;
+  /*
+   * The aspect is what gives a tile its height, so a column of tiles has a height
+   * that follows from its contents rather than from a row count that has to be kept
+   * in step by hand. --aspect is set per tile; the fallback is the 3:2-ish shape of
+   * the standard-definition footage.
+   */
+  aspect-ratio: var(--aspect, 720 / 486);
+  border: 1px solid var(--rule);
+  background: var(--paper-deep);
+  overflow: hidden;
+}
+
+/* Sheets are documents: show the whole sheet, never crop the masthead off. */
+.sheet {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+/* Footage is pictorial: fill the frame. */
+.footage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  background: var(--ink);
+}
+
+/* An item is the frame plus its caption: the unit a column stacks. */
+.item {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+}
+
+/* A link tile darkens its sheet very slightly on hover — the only affordance needed. */
+a.frame { text-decoration: none; }
+a.frame:hover .sheet, a.frame:hover .footage { opacity: 0.92; }
+
+@media (prefers-reduced-motion: reduce) {
+  a.frame:hover .sheet, a.frame:hover .footage { opacity: 1; }
+}
+
+/*
+ * Not digitised. Twenty of the fifty objects are in this state and they stay in
+ * every listing — an archive that hides what it does not have is not a record.
+ */
+.absent {
+  aspect-ratio: var(--aspect, 720 / 486);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-1);
+  padding: var(--s-4);
+  border: 1px dashed var(--rule-strong);
+  background: transparent;
+  text-align: center;
+}
+
+.absentTitle {
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-faint);
+}
+
+.absentNote {
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  color: var(--ink-faint);
+  max-width: 22ch;
+  line-height: 1.4;
+}
+
+.caption {
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  line-height: 1.45;
+  color: var(--ink-muted);
+  margin-top: var(--s-2);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.captionMeta { color: var(--ink-faint); }
+
+.caption a { color: inherit; }

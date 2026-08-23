@@ -23,8 +23,13 @@ export default function MethodPage() {
   const stated = allObjects.filter((o) => o.stated_item_count).length;
 
   return (
-    <div className="page" style={{ paddingTop: 'var(--s-6)' }}>
-      <div className="measure">
+    /*
+      A prose page, so the container is the measure rather than the full page width.
+      It used to be a 1180px container wrapping a 68ch column, which left the widest
+      unused gutter on the site for the whole length of the page.
+    */
+    <div className="record" style={{ paddingTop: 'var(--s-6)' }}>
+      <div>
         <p className="eyebrow">About</p>
         <h1>How this archive was made</h1>
         <p>

@@ -11,29 +11,18 @@
   margin-bottom: var(--s-2);
 }
 
-.pdf {
-  width: 100%;
-  height: min(80vh, 900px);
-  border: 1px solid var(--rule-strong);
-  background: var(--paper-deep);
-  display: block;
+.sheets {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
 }
 
-.image {
+.sheet {
   width: 100%;
   height: auto;
   border: 1px solid var(--rule-strong);
   background: var(--paper-deep);
   display: block;
-}
-
-.fallback {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  font-family: var(--sans);
-  font-size: var(--t-sm);
 }
 
 .heavy {

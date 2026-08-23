@@ -1,24 +1,17 @@
 /*
  * The landing zone.
  *
- * A twelve-column mosaic with deliberately unequal spans — 7+5, 5+4+3, 12, 5+4+3 —
- * so the eye moves diagonally instead of scanning even rows. Everything is explicit
- * grid placement, no masonry script: the page has to render fully without JavaScript.
+ * Structure comes from components/Mosaic — a twelve-column grid over fixed rows, so
+ * tiles of unequal height tile together instead of stranding paper. What lives here
+ * is only what is particular to this page: the name, the two full-bleed media bands,
+ * the collections panel, the peers strip and the doors.
  *
  * The register stays archival on purpose. Paper, ink, hairline rules and one oxide
- * accent. The asymmetry does the work that colour would do elsewhere.
+ * accent. The asymmetry and the imagery do the work that colour would do elsewhere.
  */
 
-.mosaic {
-  display: grid;
-  grid-template-columns: repeat(12, 1fr);
-  gap: var(--s-4);
-  align-items: start;
-}
-
-.tile {
-  min-width: 0; /* grid children default to min-content and would refuse to shrink */
-}
+.top { margin-bottom: var(--s-6); }
+.middle { margin-bottom: var(--s-6); }
 
 .tileLabel {
   font-family: var(--sans);
@@ -29,11 +22,11 @@
   margin: 0 0 var(--s-3);
 }
 
-/* ------------------------------------------------------------------ row one */
+/* ------------------------------------------------------------------- the name */
 
 .hero {
-  grid-column: span 7;
-  padding: var(--s-5) var(--s-6) var(--s-6) 0;
+  padding: var(--s-5) var(--s-6) var(--s-5) 0;
+  justify-content: center;
 }
 
 .name {
@@ -52,39 +45,73 @@
   line-height: 1.15;
 }
 
+/*
+ * No max-width here. It used to be 34ch inside a 620px column, which stranded white
+ * space to the right of the lede and forced the row tall at the same time — the
+ * single clearest instance of the problem this page had.
+ */
 .lede {
   font-size: var(--t-md);
   line-height: 1.5;
   color: var(--ink-muted);
-  max-width: 34ch;
   margin: 0;
 }
 
 .creed {
-  grid-column: span 5;
   background: var(--paper-sunk);
   padding: var(--s-5);
-  align-self: start;
+  justify-content: center;
 }
 
-/* ------------------------------------------------------------------ row two */
+/* ------------------------------------------------------------- media bands */
 
-.clip {
-  grid-column: span 5;
-  margin: 0;
+/*
+ * Full-bleed. The archive's imagery is its argument, and boxing the only moving
+ * picture of Sievan inside a text measure was most of why the page read as paper.
+ */
+.band {
+  padding-top: var(--s-6);
+  padding-bottom: var(--s-6);
+  margin-bottom: var(--s-6);
+  background: var(--paper-deep);
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
 }
+
+.bandTitle {
+  font-family: var(--serif);
+  font-size: var(--t-md);
+  margin: 0 0 var(--s-5);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--s-2) var(--s-4);
+}
+
+.bandNote {
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  font-weight: normal;
+  line-height: 1.5;
+  color: var(--ink-muted);
+  max-width: 62ch;
+}
+
+/* ------------------------------------------------------------- collections */
 
 .case {
-  grid-column: span 4;
   background: var(--paper-deep);
   padding: var(--s-5);
-  align-self: stretch;
 }
 
 .points {
   list-style: none;
   margin: 0;
   padding: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  flex: 1;
 }
 
 .points li {
@@ -117,56 +144,9 @@
 .points li:last-child { border-bottom: none; padding-bottom: 0; }
 .points li:first-child { padding-top: 0; }
 
-.plate {
-  grid-column: span 3;
-  margin: 0;
-}
+/* ------------------------------------------------------------------ the company */
 
-.plate img {
-  display: block;
-  width: 100%;
-  height: auto;
-  border: 1px solid var(--rule);
-}
-
-/* --------------------------------------------------------------- media bits */
-
-.video {
-  display: block;
-  width: 100%;
-  height: auto;
-  background: var(--ink);
-  border: 1px solid var(--rule);
-}
-
-.caption {
-  font-family: var(--sans);
-  font-size: var(--t-xs);
-  line-height: 1.5;
-  color: var(--ink-faint);
-  margin-top: var(--s-2);
-}
-
-/* ----------------------------------------------------------------- row four */
-
-.quoteA { grid-column: span 5; }
-.quoteB { grid-column: span 4; }
-
-/* Deliberately NOT stretched. Making these fill the row's height squares the edge
-   off but leaves each panel taller than its own words, which is dead space wearing
-   a background colour. A quote should be the size of the quote. */
-
-.clipSmall {
-  grid-column: span 3;
-  margin: 0;
-}
-
-/* ----------------------------------------------------------------- row five */
-
-.peers {
-  grid-column: span 12;
-  padding-top: var(--s-3);
-}
+.peers { padding-top: var(--s-3); }
 
 .peerList {
   display: grid;
@@ -200,10 +180,7 @@
 
 /* ------------------------------------------------------------------ the doors */
 
-.doors {
-  grid-column: span 12;
-  margin-top: var(--s-4);
-}
+.doors { margin-top: var(--s-4); }
 
 .doorList {
   display: grid;
@@ -266,14 +243,7 @@
 /* ------------------------------------------------------------- narrow screens */
 
 @media (max-width: 1020px) {
-  .hero { grid-column: span 12; padding-right: 0; }
-  .creed { grid-column: span 12; }
-  .clip { grid-column: span 7; }
-  .case { grid-column: span 5; }
-  .plate { grid-column: span 5; }
-  .quoteA { grid-column: span 7; }
-  .quoteB { grid-column: span 5; }
-  .clipSmall { grid-column: span 5; }
+  .hero { padding-right: 0; }
   .peerList { grid-template-columns: repeat(3, 1fr); }
   .doorList { grid-template-columns: repeat(2, 1fr); }
   .doorList li:nth-child(odd) .door { border-left: none; }
@@ -281,15 +251,16 @@
 }
 
 @media (max-width: 860px) {
-  .mosaic { gap: var(--s-5); }
-  .tile,
-  .hero, .creed, .clip, .case, .plate,
-  .quoteA, .quoteB, .clipSmall, .peers, .doors {
-    grid-column: span 12;
-  }
   .name { font-size: var(--t-xl); }
+  .hero { padding: 0 0 var(--s-3); }
   .peerList { grid-template-columns: repeat(2, 1fr); }
   .doorList { grid-template-columns: 1fr; }
   .doorList li .door { border-left: none; }
   .doorList li + li .door { border-top: 1px solid var(--rule); }
+}
+
+.bandMore {
+  font-family: var(--sans);
+  font-size: var(--t-sm);
+  margin: var(--s-5) 0 0;
 }

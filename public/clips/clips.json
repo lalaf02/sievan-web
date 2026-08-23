@@ -1,0 +1,122 @@
+[
+  {
+    "id": "painting-portrait",
+    "videoId": "MS-VI-00007",
+    "src": "/clips/painting-portrait.mp4",
+    "poster": "/clips/painting-portrait.jpg",
+    "width": 720,
+    "height": 486,
+    "duration": 22,
+    "alt": "Maurice Sievan working a brush across the face of a portrait in progress."
+  },
+  {
+    "id": "painting-landscape",
+    "videoId": "MS-VI-00007",
+    "src": "/clips/painting-landscape.mp4",
+    "poster": "/clips/painting-landscape.jpg",
+    "width": 720,
+    "height": 486,
+    "duration": 22,
+    "alt": "Sievan painting outdoors at an easel, working a blue-grey landscape canvas."
+  },
+  {
+    "id": "drawing-portrait",
+    "videoId": "MS-VI-00007",
+    "src": "/clips/drawing-portrait.mp4",
+    "poster": "/clips/drawing-portrait.jpg",
+    "width": 720,
+    "height": 486,
+    "duration": 12,
+    "alt": "A charcoal portrait on the easel, drawn in line, being worked at the mouth."
+  },
+  {
+    "id": "mixing-palette",
+    "videoId": "MS-VI-00007",
+    "src": "/clips/mixing-palette.mp4",
+    "poster": "/clips/mixing-palette.jpg",
+    "width": 720,
+    "height": 486,
+    "duration": 11,
+    "alt": "Sievan's hand drawing colour across a loaded palette with a knife."
+  },
+  {
+    "id": "painting-outdoors",
+    "videoId": "MS-VI-00007",
+    "src": "/clips/painting-outdoors.mp4",
+    "poster": "/clips/painting-outdoors.jpg",
+    "width": 720,
+    "height": 486,
+    "duration": 13,
+    "alt": "Sievan painting at an easel outdoors while a crowd stands watching behind him."
+  },
+  {
+    "id": "easel-demonstration",
+    "videoId": "MS-VI-00007",
+    "src": "/clips/easel-demonstration.mp4",
+    "poster": "/clips/easel-demonstration.jpg",
+    "width": 720,
+    "height": 486,
+    "duration": 20,
+    "alt": "A plein-air demonstration: Sievan in a hat at the easel, onlookers gathered round."
+  },
+  {
+    "id": "interview-karp",
+    "videoId": "MS-VI-00001",
+    "src": "/clips/interview-karp.mp4",
+    "poster": "/clips/interview-karp.jpg",
+    "width": 640,
+    "height": 360,
+    "duration": 10,
+    "alt": "Ivan Karp, seated and talking, in the interview held by the estate."
+  },
+  {
+    "id": "interview-dobkin",
+    "videoId": "MS-VI-00002",
+    "src": "/clips/interview-dobkin.mp4",
+    "poster": "/clips/interview-dobkin.jpg",
+    "width": 640,
+    "height": 360,
+    "duration": 10,
+    "alt": "John Dobkin, in a bow tie before a framed landscape, speaking to camera."
+  },
+  {
+    "id": "interview-solman",
+    "videoId": "MS-VI-00003",
+    "src": "/clips/interview-solman.mp4",
+    "poster": "/clips/interview-solman.jpg",
+    "width": 640,
+    "height": 360,
+    "duration": 10,
+    "alt": "Joseph Solman, of The Ten, gesturing as he speaks in his own front room."
+  },
+  {
+    "id": "interview-wolins",
+    "videoId": "MS-VI-00004",
+    "src": "/clips/interview-wolins.mp4",
+    "poster": "/clips/interview-wolins.jpg",
+    "width": 640,
+    "height": 360,
+    "duration": 10,
+    "alt": "Joseph Wolins speaking, a painting on the wall behind him."
+  },
+  {
+    "id": "interview-unidentified",
+    "videoId": "MS-VI-00006",
+    "src": "/clips/interview-unidentified.mp4",
+    "poster": "/clips/interview-unidentified.jpg",
+    "width": 640,
+    "height": 436,
+    "duration": 8,
+    "alt": "The unidentified interviewee on tape #010, seated against a plain wall."
+  },
+  {
+    "id": "interview-barnet",
+    "videoId": "MS-VI-00005",
+    "src": "/clips/interview-barnet.mp4",
+    "poster": "/clips/interview-barnet.jpg",
+    "width": 640,
+    "height": 360,
+    "duration": 10,
+    "alt": "Will Barnet, seated, talking about the years he and Sievan both worked in."
+  }
+]

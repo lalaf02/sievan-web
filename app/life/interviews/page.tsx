@@ -1,10 +1,11 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { allVideos, counts, getPerson } from '@/lib/data';
+import { allVideos, clipFor, counts, getPerson } from '@/lib/data';
 import styles from './interviews.module.css';
 import { formatDuration } from '@/lib/dates';
 import { CONTACT, mailtoHref } from '@/lib/contact';
 import { Pending } from '@/components/Pending';
+import { ClipTile } from '@/components/MediaTile';
 
 export const metadata: Metadata = {
   title: 'Interviews',
@@ -56,13 +57,28 @@ export default function InterviewsPage() {
       </Pending>
 
       <ul className={styles.grid}>
-        {[...interviews, ...other].map((v) => {
+        {[...interviews, ...other].map((v, i) => {
+          // The studio reel takes the full row, so its still has to be a strip rather
+          // than a 16:9 frame — at this width that would be 760px of one video.
+          const wide = i >= interviews.length;
           const person = v.subject_person_ids.map((id) => getPerson(id)).find(Boolean);
           const readable = !!v.transcript_text_file;
           const totalBytes = v.media_files.reduce((n, m) => n + (m.size_bytes ?? 0), 0);
 
+          const clip = clipFor(v.id);
+
           const card = (
             <>
+              {/*
+                A face on every card. The posters existed in public/clips/ all along
+                and only the homepage used them, so seven records of recorded human
+                testimony rendered as seven boxes of type.
+              */}
+              {clip && (
+                <span className={styles.cardFace}>
+                  <ClipTile clip={clip} still aspect={wide ? '48 / 9' : '16 / 9'} />
+                </span>
+              )}
               <p className={styles.cardEyebrow}>
                 {v.subject_type === 'process_footage' ? 'Studio footage' : 'Interview'}
                 {v.physical_tape_no && ` · Tape #${v.physical_tape_no}`}
@@ -96,7 +112,12 @@ export default function InterviewsPage() {
           );
 
           return (
-            <li key={v.id} className={styles.item}>
+            // The studio reel is not an interview and is the seventh of seven, which
+            // otherwise strands an empty cell. Give it the full width it deserves.
+            <li
+              key={v.id}
+              className={`${styles.item} ${i >= interviews.length ? styles.itemWide : ''}`}
+            >
               {readable ? (
                 <Link href={`/life/interviews/${v.id}/`} className={styles.card}>
                   {card}

@@ -1,8 +1,9 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import {
-  allObjects, archive, counts, objectLead, OBJECT_TYPE_LABELS,
+  allObjects, archive, counts, coverFor, objectLead, OBJECT_TYPE_LABELS,
 } from '@/lib/data';
+import { SheetTile, AbsentTile } from '@/components/MediaTile';
 import styles from './archive.module.css';
 
 export const metadata: Metadata = {
@@ -75,23 +76,60 @@ export default function ArchivePage() {
           ))}
       </ul>
 
-      <h2 style={{ marginTop: 'var(--s-7)' }}>Every object, in date order</h2>
-      <ol className={styles.objects}>
-        {objects.map((o) => (
-          <li key={o.id}>
-            <Link href={`/archive/objects/${o.id}/`} className={styles.objectRow}>
-              <span className={`${styles.objectYear} tnum`}>{o.date_text ?? '—'}</span>
-              <span className={styles.objectLead}>{objectLead(o)}</span>
-              <span className={styles.objectMeta}>
-                {o.scan_files.length === 0 && (
-                  <span className={styles.notScanned}>not digitised</span>
-                )}
-                <span className={styles.objectId}>{o.id}</span>
-              </span>
-            </Link>
-          </li>
-        ))}
+      <h2 className={styles.gridHeading}>Every object, in date order</h2>
+      <p className="ui muted" style={{ marginBottom: 'var(--s-5)' }}>
+        The sheet itself, where there is one. Everything links to its catalogue record.
+      </p>
+
+      {/*
+        This was fifty rows of text across the full width, with a long horizontal void
+        between each object's one-line description and its right-aligned id. The box
+        is mostly paper with something printed on it, so the box should look like it.
+        The twenty undigitised objects keep their place in the sequence as labelled
+        empty frames — dropping them would make the archive look more complete than it
+        is.
+      */}
+      {/*
+        A plain grid, five across, and the fifty objects fill ten rows exactly.
+        Deliberately uniform where the rest of the site is not: this is an index of
+        fifty like-for-like things and reading order is the point, so the tiles run
+        left to right in date order. Stacking them into columns of varying height
+        looked better and quietly made "in date order" false — you would have been
+        reading down one column and across another.
+      */}
+      <ol className={styles.objectGrid}>
+        {objects.map((o) => {
+          const cover = coverFor(o.id);
+          const href = `/archive/objects/${o.id}/`;
+          const caption = (
+            <Link href={href} className={styles.tileLead}>{objectLead(o)}</Link>
+          );
+          const meta = `${o.id} · ${o.date_text ?? 'undated'}`;
+
+          return (
+            <li key={o.id}>
+              {cover ? (
+                <SheetTile
+                  sheet={cover}
+                  href={href}
+                  aspect="3 / 4"
+                  alt={`${objectLead(o)} — ${o.id}`}
+                  caption={caption}
+                  meta={meta}
+                />
+              ) : (
+                <AbsentTile
+                  aspect="3 / 4"
+                  note="Catalogued from the manifest; no scan on file."
+                  caption={caption}
+                  meta={meta}
+                />
+              )}
+            </li>
+          );
+        })}
       </ol>
+
     </div>
   );
 }

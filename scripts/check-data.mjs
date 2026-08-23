@@ -65,6 +65,13 @@ for (const o of d.archiveObjects) {
   }
   for (const s of o.scan_files ?? []) {
     need(SKIP_FILE_CHECKS || existsSync(join(ROOT, 'MS-CS-001', s.filename)), `${o.id}: scan ${s.filename} missing on disk`);
+    // The rasterised pages are committed to public/, so unlike the source PDF they
+    // exist on Vercel too — check them unconditionally. This is the one file check
+    // in here that is not disabled by a missing DataModel/.
+    for (const pg of s.pages ?? []) {
+      need(existsSync(join(WEB, 'public', pg.page)), `${o.id}: page image ${pg.page} missing on disk`);
+      need(existsSync(join(WEB, 'public', pg.thumb)), `${o.id}: thumb ${pg.thumb} missing on disk`);
+    }
   }
 }
 
@@ -128,4 +135,11 @@ if (errors.length) {
   process.exit(1);
 }
 
-console.log(`  check-data: OK - all references resolve, all scan/media/transcript files present`);
+// Clips are committed too, and the same reasoning applies.
+for (const c of d.derived.clips ?? []) {
+  need(existsSync(join(WEB, 'public', c.src)), `clip ${c.id}: ${c.src} missing on disk`);
+  need(existsSync(join(WEB, 'public', c.poster)), `clip ${c.id}: poster ${c.poster} missing on disk`);
+}
+
+console.log(`  check-data: OK - all references resolve, all scan/media/transcript files present`
+  + `\n              ${d.derived.counts.scanPageImages} page images \u00b7 ${d.derived.counts.clips} clips verified in public/`);

@@ -32,3 +32,19 @@
   font-size: var(--t-sm);
   color: var(--ink-muted);
 }
+
+.header { margin-bottom: var(--s-6); }
+
+/*
+ * The index is a grid of documenting objects now, not a list of rows. What used to be
+ * .list/.row/.year/.body survives only for anything still rendering a plain line.
+ */
+.name {
+  color: var(--ink);
+  text-decoration: none;
+  font-family: var(--serif);
+  font-size: var(--t-base);
+  line-height: 1.3;
+}
+
+.name:hover { color: var(--oxide); }

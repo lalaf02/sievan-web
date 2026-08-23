@@ -4,8 +4,8 @@
  */
 import bundle from '@/data/archive.generated.json';
 import type {
-  Archive, ArchiveObject, Exhibition, NewsArticle, Painting, Person,
-  Publication, TranscriptPage, VideoAsset,
+  Archive, ArchiveObject, Clip, Exhibition, NewsArticle, Painting, Person,
+  Publication, ScanPage, TranscriptPage, VideoAsset,
 } from './types';
 
 // Runtime validation to catch corrupted bundles early
@@ -161,4 +161,80 @@ export const ROLE_LABELS: Record<string, string> = {
   historical_figure: 'Historical figure',
   family: 'Family',
   other: 'Other',
+};
+
+// ------------------------------------------------------------------- imagery
+
+/**
+ * Scans and clips, resolved in scripts/build-data.mjs and read only through here.
+ *
+ * Thirty of the fifty objects have a readable sheet. The other twenty are catalogued
+ * but not digitised, and `coverFor` returns undefined for them on purpose — callers
+ * are expected to render that absence, not skip the record.
+ */
+
+/** Every rasterised sheet of an object, in page order across its scan files. */
+export const pagesForObject = (object: ArchiveObject): ScanPage[] =>
+  (object.scan_files ?? []).flatMap((s) => s.pages ?? []);
+
+/** The tile face for an object, or undefined when nothing has been digitised. */
+export const coverFor = (id: string): ScanPage | undefined =>
+  archive.derived.coverByObject[id];
+
+export const hasImagery = (id: string): boolean => Boolean(coverFor(id));
+
+/** Objects with a readable sheet, in the archive's own date order. */
+export const objectsWithImagery = (): ArchiveObject[] =>
+  archive.derived.objectsWithImagery
+    .map((id) => objects.get(id))
+    .filter((o): o is ArchiveObject => Boolean(o));
+
+/** Silent loops cut from a tape. Empty for any video that has not been clipped. */
+export const clipsForVideo = (videoId: string): Clip[] =>
+  archive.derived.clipsByVideo[videoId] ?? [];
+
+export const clipFor = (videoId: string): Clip | undefined =>
+  clipsForVideo(videoId)[0];
+
+export const allClips: Clip[] = archive.derived.clips;
+
+const clipsById = new Map(archive.derived.clips.map((c) => [c.id, c]));
+
+/** Look a clip up by its own id, for the places that choose a specific moment. */
+export const getClip = (id: string): Clip | undefined => clipsById.get(id);
+
+/**
+ * The tile face for an exhibition: the cover of an object the archive actually
+ * records as documenting it.
+ *
+ * Only `source_archive_object_ids` counts. Eight of the fifteen shows are documented
+ * by an object in the undigitised tail, so eight have no cover — and the right answer
+ * there is to say so, not to reach for another sheet from the same year. The archive
+ * holds a 1963 Albert Landry catalogue, for instance, but what is recorded as
+ * documenting the 1963 Albert Landry show is a poster that has not been scanned.
+ */
+export const coverForExhibition = (
+  exhibition: Exhibition,
+): { cover: ScanPage; objectId: string } | undefined => {
+  for (const objectId of exhibition.source_archive_object_ids ?? []) {
+    const cover = coverFor(objectId);
+    if (cover) return { cover, objectId };
+  }
+  return undefined;
+};
+
+/** The documenting object, whether or not it has been digitised. */
+export const documentingObject = (exhibition: Exhibition): ArchiveObject | undefined =>
+  (exhibition.source_archive_object_ids ?? [])
+    .map((id) => objects.get(id))
+    .find((o): o is ArchiveObject => Boolean(o));
+
+/** The clip of a person speaking, where their interview has been cut into one. */
+export const clipForPerson = (personId: string): Clip | undefined =>
+  videosForPerson(personId).map((v) => clipFor(v.id)).find(Boolean);
+
+/** A specific sheet of an object, 1-indexed. For the few places that cite one page. */
+export const pageOf = (objectId: string, page: number): ScanPage | undefined => {
+  const object = objects.get(objectId);
+  return object ? pagesForObject(object)[page - 1] : undefined;
 };

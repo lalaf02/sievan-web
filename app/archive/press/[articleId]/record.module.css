@@ -1,0 +1,43 @@
+/*
+ * The press record, as two columns: the sheet on the left, the catalogue record on
+ * the right.
+ *
+ * Sixty of these pages described a photocopied clipping and never showed it — the
+ * scan lived only on the object page, one click away and unmentioned. The sheet is
+ * the evidence the record is about, so it belongs on the record.
+ */
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  gap: var(--s-7);
+  /*
+   * stretch, not start. The sticky lives on .sheetInner, and a sticky element only
+   * travels inside its containing block — as a start-aligned grid item the column was
+   * exactly as tall as the sheet, so there was nowhere to stick to and it simply
+   * scrolled away.
+   */
+  align-items: stretch;
+}
+
+.sheet { min-width: 0; }
+
+/* The sheet stays in view while the facts and cross-links scroll past it. */
+.sheetInner {
+  position: sticky;
+  top: var(--s-5);
+}
+
+.sheetNote {
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  line-height: 1.5;
+  color: var(--ink-muted);
+  margin: var(--s-3) 0 0;
+}
+
+.body { min-width: 0; }
+
+@media (max-width: 1020px) {
+  .layout { grid-template-columns: 1fr; gap: var(--s-6); }
+  .sheetInner { position: static; max-width: 26rem; }
+}

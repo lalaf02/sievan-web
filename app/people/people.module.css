@@ -55,11 +55,16 @@
   list-style: none;
   margin: 0;
   padding: 0;
-  columns: 2;
+  /*
+   * Column count follows the group's size, set inline from the row count. The groups
+   * here are 24, 5, 2 and 1 people, and giving all four the same two columns turned
+   * "Gallery owners" into a bordered heading over a single name in a two-column box.
+   */
+  columns: var(--columns, 2);
   column-gap: var(--s-6);
 }
 
-@media (max-width: 620px) { .list { columns: 1; } }
+@media (max-width: 860px) { .list { columns: 1; } }
 
 .list li { break-inside: avoid; }
 

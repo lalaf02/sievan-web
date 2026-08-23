@@ -16,8 +16,8 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const WEB = join(dirname(fileURLToPath(import.meta.url)), '..');
-const ROOT = join(WEB, '..');
-const SRC = join(ROOT, 'MS-CS-001', 'MSAR00026.pdf');
+// MS-CS-001/ lives inside the repo, not beside it.
+const SRC = join(WEB, 'MS-CS-001', 'MSAR00026.pdf');
 const OUT = join(WEB, 'public', 'retrospective');
 const TMP = join(WEB, '.retrospective-tmp');
 

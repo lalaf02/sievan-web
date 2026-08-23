@@ -1,10 +1,13 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { archive, counts, getVideo, allExhibitions, allPersons } from '@/lib/data';
+import {
+  archive, counts, getVideo, allExhibitions, allPersons, clipForPerson, pageOf,
+} from '@/lib/data';
 import { getQuote } from '@/lib/quotes';
 import { MUSEUM_COLLECTIONS, MAJOR_EXHIBITIONS, CRITICS } from '@/lib/validation';
 import { PullQuote } from '@/components/PullQuote';
 import { Chronology } from '@/components/Chronology';
+import { ClipTile, SheetTile } from '@/components/MediaTile';
 import { formatRange } from '@/lib/dates';
 import styles from './life.module.css';
 
@@ -38,6 +41,8 @@ export default function LifePage() {
   // The five people who sat for a filmed interview are the archive's primary
   // witnesses; everyone else is a byline or a mention.
   const witnesses = allPersons.filter((p) => p.roles.includes('interview_subject'));
+  const studio = pageOf('MS-AR-00027', 2);
+  const rothko = pageOf('MS-AR-00029', 4);
 
   return (
     <div className="page" style={{ paddingTop: 'var(--s-6)' }}>
@@ -89,11 +94,27 @@ export default function LifePage() {
         <div className={styles.quoteRail}>
           <PullQuote quote={getQuote('solman-suburbs')} showSource />
           <PullQuote quote={getQuote('barnet-rembrandt')} showSource />
+          {/*
+            The archive holds two photographs of Sievan, both buried inside gallery
+            catalogues, and nothing on the site used either. A life page with no
+            picture of the man was the clearest case of imagery going to waste.
+          */}
+          {studio && (
+            <SheetTile
+              sheet={studio}
+              aspect="4 / 3"
+              href="/archive/objects/MS-AR-00027/"
+              alt="Maurice Sievan seated by a window in his studio."
+              caption="Sievan in the studio."
+              meta="From the Albert Landry Gallery catalogue, 1963 · MS-AR-00027"
+            />
+          )}
         </div>
       </section>
 
       {/* ------------------------------------------------------- why he vanished */}
-      <section className={`${styles.section} measure`}>
+      <section className={`${styles.section} ${styles.bio}`}>
+        <div className={styles.bioProse}>
         <h2>Why he remained unknown</h2>
         <p>
           Sievan was not an outsider by failure. He was represented by galleries, reviewed
@@ -112,6 +133,20 @@ export default function LifePage() {
           transcripts — <Link href="/life/retrospective/">read the catalogue</Link> or{' '}
           <Link href="/life/interviews/">the interviews in full</Link>.
         </p>
+        </div>
+
+        <div className={styles.quoteRail}>
+          {rothko && (
+            <SheetTile
+              sheet={rothko}
+              aspect="3 / 4"
+              href="/archive/objects/MS-AR-00029/"
+              alt="Maurice Sievan in Mark Rothko's studio, Provincetown, 1961."
+              caption="Sievan in Mark Rothko’s studio, Provincetown, 1961."
+              meta="Photograph by Lee C. Sievan, from the Vanderwoude Tananbaum catalogue · MS-AR-00029"
+            />
+          )}
+        </div>
       </section>
 
       {/* ---------------------------------------------------------- the timeline */}
@@ -199,13 +234,29 @@ export default function LifePage() {
           searchable.
         </p>
 
+        {/*
+          Faces, not a list of names. These five are the only people who spoke about
+          Sievan on the record, and the page carried them as five links in a four-wide
+          auto-fill grid — one full row and an orphan.
+        */}
         <ul className={styles.witnessList}>
-          {witnesses.map((p) => (
-            <li key={p.id}>
-              <Link href={`/people/${p.id}/`} className={styles.witnessName}>{p.name}</Link>
-              {p.notes && <span className={styles.witnessNote}>{p.notes}</span>}
-            </li>
-          ))}
+          {witnesses.map((p) => {
+            const clip = clipForPerson(p.id);
+            return (
+              <li key={p.id}>
+                {clip && (
+                  <ClipTile
+                    clip={clip}
+                    still
+                    aspect="4 / 3"
+                    href={`/people/${p.id}/`}
+                  />
+                )}
+                <Link href={`/people/${p.id}/`} className={styles.witnessName}>{p.name}</Link>
+                {p.notes && <span className={styles.witnessNote}>{p.notes}</span>}
+              </li>
+            );
+          })}
         </ul>
 
         <p className={styles.railNote}>

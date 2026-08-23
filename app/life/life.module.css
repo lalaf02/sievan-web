@@ -47,7 +47,11 @@
    measure leaves empty gets used instead of sitting blank. */
 .bio {
   display: grid;
-  grid-template-columns: minmax(0, var(--measure)) minmax(16rem, 1fr);
+  /*
+   * The rail is capped rather than 1fr. At the wider page a 1fr rail was ~700px, and
+   * a portrait photograph in it stood taller than the prose it accompanies.
+   */
+  grid-template-columns: minmax(0, var(--measure)) minmax(16rem, 26rem);
   gap: var(--s-6);
   align-items: start;
 }
@@ -72,7 +76,11 @@
 
 .twoUp {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  /*
+   * The CV lists eight venues; the archive documents fifteen. An even split left the
+   * shorter column ending seven rows early, so the wider track goes to the longer list.
+   */
+  grid-template-columns: minmax(0, 4fr) minmax(0, 5fr);
   gap: var(--s-6);
   margin-top: var(--s-5);
   align-items: start;
@@ -117,11 +125,16 @@ a.venueName:hover { color: var(--oxide); }
 
 .museumList {
   list-style: none;
-  margin: 0;
+  margin: var(--s-5) 0 0;
   padding: 0;
+  /*
+   * Thirteen is prime, so no column count divides it. Two columns of rows reads as a
+   * list rather than as a grid with two holes punched in the last row, which is what
+   * auto-fill at five columns produced.
+   */
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
-  gap: var(--s-4);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 var(--s-6);
 }
 
 .museumList li {
@@ -156,8 +169,12 @@ a.venueName:hover { color: var(--oxide); }
   list-style: none;
   margin: var(--s-5) 0 0;
   padding: 0;
+  /*
+   * Exactly five, because there are exactly five people who spoke on the record.
+   * auto-fill resolved to four columns and left the fifth stranded on its own row.
+   */
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  grid-template-columns: repeat(5, 1fr);
   gap: var(--s-4);
 }
 
@@ -198,4 +215,21 @@ a.venueName:hover { color: var(--oxide); }
   .twoUp {
     grid-template-columns: 1fr;
   }
+}
+
+.witnessList li {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-1);
+}
+
+.witnessList figure { margin: 0 0 var(--s-2); }
+
+@media (max-width: 1020px) {
+  .witnessList { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (max-width: 860px) {
+  .witnessList { grid-template-columns: repeat(2, 1fr); }
+  .museumList { grid-template-columns: 1fr; }
 }

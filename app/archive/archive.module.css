@@ -105,3 +105,37 @@ a.stat:hover .statNum { color: var(--oxide); }
   .objectMeta { grid-column: 2; }
   .typeList { columns: 1; }
 }
+
+.gridHeading { margin-top: var(--s-7); }
+
+.tileLead {
+  color: var(--ink);
+  text-decoration: none;
+  font-family: var(--serif);
+  font-size: var(--t-sm);
+  line-height: 1.35;
+}
+
+.tileLead:hover { color: var(--oxide); }
+
+/*
+ * Five columns, so fifty objects come out as ten complete rows with nothing
+ * stranded. align-items: start lets each cell keep its own caption height.
+ */
+.objectGrid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: var(--s-5) var(--s-4);
+  align-items: start;
+}
+
+@media (max-width: 1020px) {
+  .objectGrid { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (max-width: 860px) {
+  .objectGrid { grid-template-columns: repeat(2, 1fr); }
+}

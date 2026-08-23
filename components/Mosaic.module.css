@@ -1,0 +1,69 @@
+/*
+ * The mosaic: a twelve-column grid whose columns are deliberately unequal.
+ *
+ * The homepage already worked this way and the rest of the site did not, which is
+ * most of why everything else read as type in a narrow column. This is that grid,
+ * lifted out so /archive/, /exhibitions/, /life/ and / all speak one vocabulary.
+ *
+ * Two corrections to how it used to work:
+ *
+ * Asymmetry is not raggedness. The old grid let every tile sit at its natural height
+ * under `align-items: start`, so whatever a row had left over became bare paper —
+ * tiles of different heights that leave holes rather than tiling.
+ *
+ * And height is decided by the media, not by row arithmetic. A tile is a column: it
+ * stacks its children, and each child declares an aspect. Column heights then differ
+ * because their contents differ, which is the asymmetry, and no column can strand a
+ * hole because a column is a single grid cell. Row spans and dense packing both
+ * looked like the answer and both leave gaps as soon as the spans stop dividing
+ * evenly, which for this corpus is immediately.
+ *
+ * Pure CSS grid, no masonry script: the archive has to render without JavaScript.
+ */
+
+.mosaic {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: var(--s-4);
+  align-items: start;
+}
+
+/* A tile is a column. Stacked children, evenly spaced. */
+.tile {
+  min-width: 0; /* grid children default to min-content and would refuse to shrink */
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+  margin: 0;
+}
+
+/* Panels fill the column they are given, so a short list does not float in paper. */
+.fill { height: 100%; }
+
+.panel {
+  background: var(--paper-deep);
+  padding: var(--s-5);
+}
+
+.panelSunk { background: var(--paper-sunk); }
+
+.label {
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin: 0 0 var(--s-3);
+}
+
+/*
+ * Below 861px the grid is one column and every span is ignored. A phone reads the
+ * mosaic as a stack; nothing is cropped to a shape chosen for a wide screen.
+ */
+@media (max-width: 860px) {
+  .mosaic {
+    grid-template-columns: 1fr;
+    gap: var(--s-5);
+  }
+  .tile { grid-column: 1 / -1 !important; }
+}

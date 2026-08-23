@@ -1,9 +1,14 @@
 .spread {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  /*
+   * Not an even split. The left half is a portrait page scan and the right is three
+   * short paragraphs, so an exact 50/50 left the transcription floating in a column
+   * far taller than itself.
+   */
+  grid-template-columns: minmax(0, 5fr) minmax(0, 4fr);
   gap: var(--s-6);
   align-items: start;
-  margin-bottom: var(--s-8);
+  margin-bottom: var(--s-7);
   padding-bottom: var(--s-6);
   border-bottom: 1px solid var(--rule);
 }
@@ -56,7 +61,8 @@
 
 .cvGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr));
+  /* Three fixed columns; auto-fit reflowed six CV blocks of very unequal length. */
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--s-6);
   margin-top: var(--s-5);
 }
@@ -114,7 +120,8 @@
   margin: var(--s-5) 0 0;
   padding: 0;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(8rem, 1fr));
+  /* Five across: fifteen pages make three complete rows. auto-fill gave 7 / 7 / 1. */
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: var(--s-4);
 }
 

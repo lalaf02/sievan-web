@@ -426,6 +426,126 @@ for (const o of data.archiveObjects) {
 }
 if (missingScans.length) fail(`scan files referenced but not on disk:\n  ${missingScans.join('\n  ')}`);
 
+// ------------------------------------------------------- rasterised scan pages
+
+/**
+ * The scans ship twice: as the original PDF (the archival object, downloadable) and
+ * as page images produced by scripts/extract-scans.mjs. Only the images can go in an
+ * <img>, so they are what the record pages and the mosaics actually render.
+ *
+ * Resolving them here rather than in a component keeps the "does this page exist on
+ * disk" question on the build side, where check-data can fail on it.
+ */
+const pagesDir = join(publicScans, 'pages');
+const thumbsDir = join(publicScans, 'thumbs');
+const pageFiles = existsSync(pagesDir) ? readdirSync(pagesDir).filter((f) => f.endsWith('.jpg')).sort() : [];
+
+const pagesByStem = new Map();
+for (const f of pageFiles) {
+  const stem = f.replace(/-p\d+\.jpg$/, '');
+  if (!pagesByStem.has(stem)) pagesByStem.set(stem, []);
+  pagesByStem.get(stem).push(f);
+}
+
+/**
+ * MS-AR-00026 is the retrospective catalogue. extract-scans skips it because
+ * extract-retrospective.mjs already publishes its fifteen pages with transcriptions
+ * attached; point at those rather than duplicating 15 sheets under a second name.
+ */
+const RETROSPECTIVE_STEM = 'MSAR00026';
+const retrospectiveDir = join(WEB, 'public', 'retrospective');
+const retrospectivePages = existsSync(retrospectiveDir)
+  ? readdirSync(retrospectiveDir).filter((f) => f.endsWith('.jpg')).sort()
+  : [];
+
+let pageImages = 0;
+for (const o of data.archiveObjects) {
+  for (const sf of o.scan_files ?? []) {
+    const stem = sf.filename.replace(/\.[^.]+$/, '');
+    if (stem === RETROSPECTIVE_STEM) {
+      sf.pages = retrospectivePages.map((f) => ({
+        page: `/retrospective/${f}`,
+        thumb: `/retrospective/${f}`,
+      }));
+    } else {
+      sf.pages = (pagesByStem.get(stem) ?? []).map((f) => ({
+        page: `/scans/pages/${f}`,
+        thumb: existsSync(join(thumbsDir, f)) ? `/scans/thumbs/${f}` : `/scans/pages/${f}`,
+      }));
+    }
+    // The extracted images are the authoritative page count. The regex fallback above
+    // over-counts /Type/Page in some files — it read MSAR00003I and II as 2 pages each
+    // when both are single sheets.
+    if (sf.pages.length) sf.pageCount = sf.pages.length;
+    pageImages += sf.pages.length;
+  }
+}
+
+/** Objects whose sheets can actually be shown, for the imagery-led listings. */
+const objectsWithImagery = data.archiveObjects
+  .filter((o) => (o.scan_files ?? []).some((sf) => (sf.pages ?? []).length > 0))
+  .map((o) => o.id);
+
+/** First readable sheet per object — the tile face used by every mosaic. */
+const coverByObject = {};
+for (const o of data.archiveObjects) {
+  const first = (o.scan_files ?? []).flatMap((sf) => sf.pages ?? [])[0];
+  if (first) coverByObject[o.id] = first;
+}
+
+/**
+ * Hang each timeline event off the sheet that evidences it.
+ *
+ * The chronology is 125 one-line rows, and every one of them is backed by something
+ * physical in the box — the notice itself, the catalogue, the object. Carrying the
+ * thumbnail here means the timeline can show what it is describing rather than
+ * listing it, and the lookup happens once at build time rather than per row.
+ */
+const objectIdForArticle = Object.fromEntries(
+  data.newsArticles.map((a) => [a.id, a.archive_object_id]),
+);
+const objectIdForExhibition = Object.fromEntries(
+  data.exhibitions.map((e) => [e.id, (e.source_archive_object_ids ?? [])[0]]),
+);
+
+let timelineThumbs = 0;
+for (const ev of timeline) {
+  const objectId = ev.kind === 'object' ? ev.id
+    : ev.kind === 'article' ? objectIdForArticle[ev.id]
+      : objectIdForExhibition[ev.id];
+  const cover = objectId ? coverByObject[objectId] : undefined;
+  if (cover) {
+    ev.thumb = cover.thumb;
+    ev.thumbObjectId = objectId;
+    timelineThumbs++;
+  }
+}
+
+// ------------------------------------------------------------------- clips
+
+/**
+ * Silent web loops cut from the masters by scripts/extract-clips.mjs. The masters are
+ * 25 GB and are never served; these are excerpts and the UI says so.
+ */
+const clipsManifest = join(WEB, 'public', 'clips', 'clips.json');
+const clips = existsSync(clipsManifest)
+  ? JSON.parse(readFileSync(clipsManifest, 'utf8'))
+  : [];
+
+const videoIds = new Set(data.videoAssets.map((v) => v.id));
+for (const c of clips) {
+  if (c.videoId && !videoIds.has(c.videoId)) {
+    fail(`clip ${c.id} references unknown videoId ${c.videoId}`);
+  }
+}
+
+const clipsByVideo = {};
+for (const v of data.videoAssets) {
+  const own = clips.filter((c) => c.videoId === v.id);
+  if (own.length) clipsByVideo[v.id] = own;
+}
+
+
 // ---------------------------------------------------------------- emit
 
 const bundle = {
@@ -442,6 +562,10 @@ const bundle = {
     publicationMergeGroups,
     timeline,
     undatedVideos,
+    objectsWithImagery,
+    coverByObject,
+    clips,
+    clipsByVideo,
     counts: {
       archiveObjects: data.archiveObjects.length,
       newsArticles: data.newsArticles.length,
@@ -452,6 +576,10 @@ const bundle = {
       paintings: data.paintings.length,
       scholarship: data.scholarship.length,
       objectsWithScans: data.archiveObjects.filter((o) => (o.scan_files ?? []).length > 0).length,
+      objectsWithImagery: objectsWithImagery.length,
+      scanPageImages: pageImages,
+      timelineThumbs,
+      clips: clips.length,
       scanFiles: data.archiveObjects.reduce((n, o) => n + (o.scan_files ?? []).length, 0),
       transcribedInterviews: Object.keys(transcripts).length,
       transcriptWords: data.videoAssets.reduce((n, v) => n + (v.transcript_word_count ?? 0), 0),

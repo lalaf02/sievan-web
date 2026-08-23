@@ -23,6 +23,19 @@ export interface Collection {
   notes: string | null;
 }
 
+/**
+ * One rasterised sheet of a scan, produced by scripts/extract-scans.mjs.
+ *
+ * The scans ship twice: the PDF is the archival object and stays downloadable, but
+ * only these images can go in an <img>, so they are what the site actually renders.
+ */
+export interface ScanPage {
+  /** ~1500px. The readable sheet. */
+  page: string;
+  /** ~600px. Mosaic tiles — a grid of page-tier images would weigh ~24 MB. */
+  thumb: string;
+}
+
 export interface ScanFile {
   filename: string;
   /** "I" / "II" for the one object (MS-AR-00003) split across two files. */
@@ -32,6 +45,8 @@ export interface ScanFile {
    * Null only if build-data.mjs fails to read the file (shouldn't happen in normal operation).
    */
   sizeBytes: number | null;
+  /** Rasterised sheets, in page order. Empty only if extract-scans has not been run. */
+  pages: ScanPage[];
   /**
    * Added at build time. For PDFs, extracted from the file; for images, always 1.
    * Null only if PDF parsing fails (fallback is 1 in build script).
@@ -247,6 +262,12 @@ export interface TimelineEvent {
   title: string;
   subtitle: string | null;
   href: string;
+  /**
+   * The sheet that evidences this event, where the archive holds one — 82 of the 125
+   * events have been digitised. Resolved in build-data.mjs, not here.
+   */
+  thumb?: string;
+  thumbObjectId?: string;
 }
 
 /** One page of an interview transcript. */
@@ -278,9 +299,32 @@ export interface Counts {
   paintings: number;
   scholarship: number;
   objectsWithScans: number;
+  /** Objects with at least one rasterised sheet the site can display. */
+  objectsWithImagery: number;
   scanFiles: number;
+  scanPageImages: number;
+  clips: number;
   transcribedInterviews: number;
   transcriptWords: number;
+}
+
+/**
+ * A silent web loop cut from a video master by scripts/extract-clips.mjs.
+ *
+ * The masters are ~25 GB and are never served. These are excerpts, and anything
+ * displaying one has to say so — a loop is not the interview.
+ */
+export interface Clip {
+  id: string;
+  /** The VideoAsset this was cut from. */
+  videoId: string;
+  src: string;
+  poster: string;
+  width: number;
+  height: number;
+  /** Seconds. */
+  duration: number;
+  alt: string;
 }
 
 export interface Derived {
@@ -306,6 +350,12 @@ export interface Derived {
   publicationMergeGroups: string[][];
   timeline: TimelineEvent[];
   undatedVideos: string[];
+  /** Object ids with at least one rasterised sheet — 30 of 50. */
+  objectsWithImagery: string[];
+  /** First readable sheet per object: the tile face used by the mosaics. */
+  coverByObject: Record<string, ScanPage>;
+  clips: Clip[];
+  clipsByVideo: Record<string, Clip[]>;
   counts: Counts;
 }
 
