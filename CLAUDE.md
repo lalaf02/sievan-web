@@ -36,10 +36,12 @@ checked. So the site never asserts what it cannot evidence. Gaps are stated rath
 hidden, inferred connections show their working, and nothing is ever fabricated — see
 [Development guidelines](#development-guidelines).
 
-Live at [web-three-olive-55.vercel.app](https://web-three-olive-55.vercel.app) —
-the production URL of the linked Vercel project (`web`), which auto-deploys on push to
-`main`. Note `the-sievan-experience.vercel.app` is **not** this project and still serves
-the pre-revamp site; no custom domain is attached here yet.
+Live at [sievan-archive.vercel.app](https://sievan-archive.vercel.app), the Vercel project
+`sievan-archive`, which auto-deploys on push to `main`. The original generated alias
+`web-three-olive-55.vercel.app` still resolves to the same deployments.
+
+`the-sievan-experience.vercel.app` is **not** this project — it belongs elsewhere and still
+serves the pre-revamp site. A custom domain is planned but not yet attached.
 
 ```bash
 npm install
