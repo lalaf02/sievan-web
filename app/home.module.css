@@ -64,7 +64,7 @@
   grid-column: span 5;
   background: var(--paper-sunk);
   padding: var(--s-5);
-  align-self: stretch;
+  align-self: start;
 }
 
 /* ------------------------------------------------------------------ row two */
@@ -88,12 +88,30 @@
 }
 
 .points li {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--s-3);
   font-family: var(--serif);
   font-size: var(--t-sm);
-  line-height: 1.45;
+  line-height: 1.3;
   color: var(--ink);
-  padding: var(--s-3) 0;
+  padding: 0.3rem 0;
   border-bottom: 1px solid var(--rule);
+}
+
+/* MoMA, the Hirshhorn and Brooklyn carry more weight than a university gallery;
+   flattening them into one list would overstate the smaller holdings. */
+.pointNotable {
+  font-size: var(--t-body);
+}
+
+.pointWhere {
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  color: var(--ink-faint);
+  text-align: right;
+  white-space: nowrap;
 }
 
 .points li:last-child { border-bottom: none; padding-bottom: 0; }
@@ -129,67 +147,14 @@
   margin-top: var(--s-2);
 }
 
-/* ---------------------------------------------------------------- row three */
-
-.stats {
-  grid-column: span 12;
-  border-top: 1px solid var(--rule-strong);
-  border-bottom: 1px solid var(--rule-strong);
-  padding: var(--s-5) 0;
-}
-
-.statList {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: var(--s-5);
-  margin: 0;
-}
-
-.stat dt {
-  font-family: var(--sans);
-  font-size: var(--t-xs);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--ink-muted);
-}
-
-.stat dd {
-  font-family: var(--serif);
-  font-size: var(--t-xl);
-  line-height: 1;
-  color: var(--oxide);
-  font-variant-numeric: tabular-nums;
-  margin: var(--s-2) 0;
-}
-
-.stat p {
-  font-family: var(--sans);
-  font-size: var(--t-xs);
-  line-height: 1.5;
-  color: var(--ink-faint);
-  margin: 0;
-}
-
 /* ----------------------------------------------------------------- row four */
 
 .quoteA { grid-column: span 5; }
 .quoteB { grid-column: span 4; }
 
-/* The clip beside them is taller than either quote, and letting the quote panels
-   sit short leaves a dead band under the row. Stretching makes the panel a block
-   of colour that squares the row off. */
-.quoteA,
-.quoteB {
-  align-self: stretch;
-}
-
-.quoteA > figure,
-.quoteB > figure {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
+/* Deliberately NOT stretched. Making these fill the row's height squares the edge
+   off but leaves each panel taller than its own words, which is dead space wearing
+   a background colour. A quote should be the size of the quote. */
 
 .clipSmall {
   grid-column: span 3;
@@ -273,6 +238,14 @@
   color: var(--oxide);
 }
 
+.doorNum {
+  font-family: var(--serif);
+  font-size: var(--t-lg);
+  line-height: 1;
+  color: var(--ink-faint);
+  font-variant-numeric: tabular-nums;
+}
+
 .doorTitle {
   font-family: var(--serif);
   font-size: var(--t-md);
@@ -311,11 +284,10 @@
   .mosaic { gap: var(--s-5); }
   .tile,
   .hero, .creed, .clip, .case, .plate,
-  .quoteA, .quoteB, .clipSmall, .stats, .peers, .doors {
+  .quoteA, .quoteB, .clipSmall, .peers, .doors {
     grid-column: span 12;
   }
   .name { font-size: var(--t-xl); }
-  .statList { grid-template-columns: repeat(2, 1fr); }
   .peerList { grid-template-columns: repeat(2, 1fr); }
   .doorList { grid-template-columns: 1fr; }
   .doorList li .door { border-left: none; }

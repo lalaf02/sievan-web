@@ -1,12 +1,12 @@
 /**
- * Synthesized validation data.
+ * The institutional record, pulled out of the retrospective catalogue's CV page
+ * (retrospective.ts) into shapes the UI can render.
  *
- * This module extracts and organizes the institutional validation evidence from
- * the CV page of the retrospective catalogue (retrospective.ts) and other sources.
- * It transforms raw archival data into compelling proof points.
+ * These are lists of things — museums that hold work, critics who wrote about it,
+ * venues that showed it, artists he worked alongside. They exist so pages can
+ * *exhibit* the record rather than characterise it: naming thirteen institutions
+ * says more, and asks less to be taken on trust, than calling him important.
  */
-
-import { CV } from './retrospective';
 
 export interface Museum {
   name: string;
@@ -168,32 +168,22 @@ export const PEER_NETWORK = [
 ];
 
 /**
- * Awards and recognitions.
- */
-export const AWARDS = CV.awards.map(([award, year]) => ({ award, year }));
-
-/**
- * Quick stats for validation bar.
- */
-export const VALIDATION_STATS = {
-  museumCount: MUSEUM_COLLECTIONS.length,
-  notableMuseums: MUSEUM_COLLECTIONS.filter((m) => m.notable).map((m) => m.shortName),
-  majorCritics: CRITICS.filter((c) => c.major).length,
-  groupExhibitionCount: CV.groupExhibitions.length,
-  soloExhibitionCount: CV.oneManExhibitions.length,
-};
-
-/**
- * The re-rating thesis - why this artist matters now.
+ * The two lines the homepage opens with.
+ *
+ * `headline` is Ivan Karp's phrase, not ours — he calls the work "a surprisingly
+ * private vision" and "a very private vision" in MS-VI-00001. Using a quotation as
+ * the banner is deliberate: the first characterisation a visitor reads should come
+ * from someone who was there.
+ *
+ * `subhead` states what is on the record and stops. The counts are the CV's own
+ * (14 one-man shows, 30 group exhibitions, 13 museum collections); the last clause
+ * is the observable fact that follows from them. No adjective is asked to carry an
+ * argument that the numbers already carry.
  */
 export const THESIS = {
   headline: 'A Private Vision',
-  subhead: 'Maurice Sievan maintained imagery when abstraction was everything. The same independence that limited his commercial success makes him a compelling discovery today.',
-  points: [
-    'MoMA acquisition plus 12 other museum collections',
-    'Praised by Clement Greenberg, Dore Ashton, Ivan Karp',
-    'Peer network included Rothko, Avery, The Ten',
-    'Yet almost entirely unknown to today\'s market',
-    'Estate intact with nearly complete body of work',
-  ],
+  subhead:
+    'He kept the figure when New York gave it up. Fourteen one-man shows, thirty group '
+    + 'exhibitions, thirteen museum collections — and then the histories of the period '
+    + 'were written without him.',
 };

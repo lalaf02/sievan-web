@@ -9,9 +9,9 @@ import styles from './home.module.css';
 export const metadata: Metadata = {
   title: 'Maurice Sievan (1898–1981) — Archive',
   description:
-    'American painter praised by Clement Greenberg, collected by MoMA and the Hirshhorn, and '
-    + 'almost entirely forgotten. Press notices, oral-history interviews, exhibition records '
-    + 'and the catalogue of works.',
+    'American painter (1898–1981). Work in thirteen museum collections including the Museum '
+    + 'of Modern Art and the Hirshhorn. Press notices, oral-history interviews, exhibition '
+    + 'records and the catalogue of works.',
 };
 
 export default function Home() {
@@ -32,7 +32,12 @@ export default function Home() {
 
         {/* The endorsement, given the weight of a wall text rather than a footnote. */}
         <section className={`${styles.tile} ${styles.creed}`}>
-          <p className={styles.tileLabel}>The verdict</p>
+          {/*
+            Not "the verdict" — that tells a reader the question is settled. Greenberg
+            said this to Ivan Karp, and what the archive actually holds is Karp's
+            account of it. Naming that chain is both less pushy and more accurate.
+          */}
+          <p className={styles.tileLabel}>Recorded in the Ivan Karp interview</p>
           <PullQuote quote={getQuote('greenberg-best')} size="large" showSource />
         </section>
 
@@ -55,11 +60,20 @@ export default function Home() {
           </figcaption>
         </figure>
 
+        {/*
+          This panel used to be a bulleted argument under the heading "Why he matters
+          now". Naming the institutions that hold the work does the same job without
+          asking anyone to take a characterisation on trust — and it rehouses the
+          museum evidence that left with the stat strip.
+        */}
         <section className={`${styles.tile} ${styles.case}`}>
-          <p className={styles.tileLabel}>Why he matters now</p>
+          <p className={styles.tileLabel}>In these collections</p>
           <ul className={styles.points}>
-            {THESIS.points.map((point) => (
-              <li key={point}>{point}</li>
+            {MUSEUM_COLLECTIONS.map((m) => (
+              <li key={m.name} className={m.notable ? styles.pointNotable : undefined}>
+                <span>{m.name}</span>
+                <span className={styles.pointWhere}>{m.location}</span>
+              </li>
             ))}
           </ul>
         </section>
@@ -73,39 +87,13 @@ export default function Home() {
           </figcaption>
         </figure>
 
-        {/* ----------------------------------------------------------- evidence */}
-        <section className={`${styles.tile} ${styles.stats}`}>
-          <dl className={styles.statList}>
-            <div className={styles.stat}>
-              <dt>Museum collections</dt>
-              <dd>{MUSEUM_COLLECTIONS.length}</dd>
-              <p>MoMA, the Hirshhorn, Brooklyn, Baltimore and nine more.</p>
-            </div>
-            <div className={styles.stat}>
-              <dt>Press notices</dt>
-              <dd>{counts.newsArticles}</dd>
-              <p>1940–1983, across {counts.publications} publications.</p>
-            </div>
-            <div className={styles.stat}>
-              <dt>Exhibitions</dt>
-              <dd>{counts.exhibitions}</dd>
-              <p>Documented in the archive, {span}.</p>
-            </div>
-            <div className={styles.stat}>
-              <dt>Words of testimony</dt>
-              <dd>{counts.transcriptWords.toLocaleString()}</dd>
-              <p>From {counts.transcribedInterviews} filmed interviews with those who knew him.</p>
-            </div>
-          </dl>
-        </section>
-
         {/* --------------------------------------------------------- the voices */}
         <section className={`${styles.tile} ${styles.quoteA}`}>
           <PullQuote quote={getQuote('karp-mystical')} showSource />
         </section>
 
         <section className={`${styles.tile} ${styles.quoteB}`}>
-          <PullQuote quote={getQuote('solman-suburbs')} showSource />
+          <PullQuote quote={getQuote('barnet-someday')} showSource />
         </section>
 
         <figure className={`${styles.tile} ${styles.clipSmall}`}>
@@ -143,36 +131,42 @@ export default function Home() {
           <ul className={styles.doorList}>
             <li>
               <Link href="/life/" className={styles.door}>
+                <span className={styles.doorNum}>{counts.exhibitions}</span>
                 <span className={styles.doorTitle}>Life and Work</span>
                 <span className={styles.doorText}>
-                  A painter placed in his time — the chronology, the exhibitions, the people,
-                  and the five phases of the work.
+                  Exhibitions between {span}, the people who knew him, and{' '}
+                  {counts.transcriptWords.toLocaleString()} words of recorded testimony,
+                  placed on one timeline.
                 </span>
               </Link>
             </li>
             <li>
               <Link href="/works/" className={styles.door}>
+                <span className={styles.doorNum}>5</span>
                 <span className={styles.doorTitle}>Catalogue Raisonné</span>
                 <span className={styles.doorText}>
-                  The body of work, being catalogued now. Five decades from the early
-                  landscapes to the late abstractions.
+                  Five periods, from the Greenwich Village rooftops of the 1930s to the
+                  late miniatures. Being catalogued now.
                 </span>
               </Link>
             </li>
             <li>
               <Link href="/archive/" className={styles.door}>
+                <span className={styles.doorNum}>{counts.newsArticles}</span>
                 <span className={styles.doorTitle}>Archives</span>
                 <span className={styles.doorText}>
-                  All {counts.archiveObjects} objects that survive on paper: clippings, catalogues,
-                  posters and the interviews — searchable, and honest about its gaps.
+                  Press notices from 1940 to 1983 and the {counts.archiveObjects} objects
+                  they were cut from — searchable, and explicit about what is missing.
                 </span>
               </Link>
             </li>
             <li>
               <Link href="/research/" className={styles.door}>
+                <span className={styles.doorNum}>{counts.publications}</span>
                 <span className={styles.doorTitle}>Research</span>
                 <span className={styles.doorText}>
-                  Access, rights and citation, the bibliography, and how this archive was
+                  Every notice formatted as a citation, across {counts.publications}{' '}
+                  publications — with access, reproduction rights, and how the archive was
                   assembled.
                 </span>
               </Link>

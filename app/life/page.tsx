@@ -105,8 +105,7 @@ export default function LifePage() {
         <p>
           Ivan Karp, the dealer who discovered Warhol and Lichtenstein, explained it as a
           problem of category: his work did not connect up to prevailing trends, and was
-          always singular. In the postwar market, singularity was a liability. What
-          prevented commercial success then is precisely what makes the work legible now.
+          always singular. In the postwar market, singularity was a liability.
         </p>
         <p className="ui muted">
           Quotations here come from the retrospective catalogue and the interview

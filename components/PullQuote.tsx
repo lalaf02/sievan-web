@@ -39,18 +39,3 @@ export function PullQuote({ quote, size = 'default', showSource = false }: PullQ
     </figure>
   );
 }
-
-interface QuoteGridProps {
-  quotes: Quote[];
-  columns?: 1 | 2 | 3;
-}
-
-export function QuoteGrid({ quotes, columns = 2 }: QuoteGridProps) {
-  return (
-    <div className={styles.grid} data-columns={columns}>
-      {quotes.map((quote) => (
-        <PullQuote key={quote.id} quote={quote} showSource />
-      ))}
-    </div>
-  );
-}
