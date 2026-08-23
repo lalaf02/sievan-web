@@ -10,8 +10,15 @@
  * accent. The asymmetry and the imagery do the work that colour would do elsewhere.
  */
 
-.top { margin-bottom: var(--s-6); }
-.middle { margin-bottom: var(--s-6); }
+/*
+ * The name gets room. It had been squeezed between the header and a wall of tiles,
+ * so the page opened on the tiles rather than on the artist.
+ */
+.top {
+  padding: var(--s-6) 0 var(--s-7);
+}
+
+.middle { margin-bottom: var(--s-7); }
 
 .tileLabel {
   font-family: var(--sans);
@@ -25,7 +32,7 @@
 /* ------------------------------------------------------------------- the name */
 
 .hero {
-  padding: var(--s-5) var(--s-6) var(--s-5) 0;
+  padding: 0 var(--s-7) 0 0;
   justify-content: center;
 }
 
@@ -52,9 +59,10 @@
  */
 .lede {
   font-size: var(--t-md);
-  line-height: 1.5;
+  line-height: 1.55;
   color: var(--ink-muted);
   margin: 0;
+  max-width: 46ch;
 }
 
 .creed {
@@ -66,13 +74,28 @@
 /* ------------------------------------------------------------- media bands */
 
 /*
- * Full-bleed. The archive's imagery is its argument, and boxing the only moving
- * picture of Sievan inside a text measure was most of why the page read as paper.
+ * A section of the page. A hairline above it and space around it — nothing more.
+ *
+ * This used to paint every section with --paper-deep and rule it top and bottom, and
+ * three sections carried it, so the page came out as four alternating stripes with
+ * nothing dominant in them. Tint is now spent on exactly one band (.bandLead), which
+ * is what lets that band read as the focal point rather than as one stripe of four.
  */
 .band {
+  padding-top: var(--s-7);
+  margin-bottom: var(--s-7);
+  border-top: 1px solid var(--rule);
+}
+
+/*
+ * The one exception: the footage. The only moving picture of Sievan that exists is
+ * the most persuasive thing the archive holds, so it gets the full width and the
+ * tint, and everything below it is quieter than it is.
+ */
+.bandLead {
   padding-top: var(--s-6);
   padding-bottom: var(--s-6);
-  margin-bottom: var(--s-6);
+  margin-bottom: var(--s-7);
   background: var(--paper-deep);
   border-top: 1px solid var(--rule);
   border-bottom: 1px solid var(--rule);
@@ -88,6 +111,25 @@
   gap: var(--s-2) var(--s-4);
 }
 
+/*
+ * The quiet sections announce themselves the way the rest of the site does — a small
+ * uppercase label, not a second headline competing with the lead band's.
+ */
+.bandTitleQuiet {
+  /* Same flex layout as .bandTitle — only the label's own type changes. */
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--s-2) var(--s-4);
+  margin: 0 0 var(--s-5);
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  font-weight: normal;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
 .bandNote {
   font-family: var(--sans);
   font-size: var(--t-xs);
@@ -95,6 +137,9 @@
   line-height: 1.5;
   color: var(--ink-muted);
   max-width: 62ch;
+  /* The quiet label uppercases itself; its note is a sentence and must not inherit that. */
+  text-transform: none;
+  letter-spacing: normal;
 }
 
 /* ------------------------------------------------------------- collections */

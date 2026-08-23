@@ -28,7 +28,7 @@ export default function Home() {
   const plate = pageOf('MS-AR-00029', 3);
 
   return (
-    <div className="page" style={{ paddingTop: 'var(--s-6)' }}>
+    <div className="page">
 
       {/* ------------------------------------------------------------ the name */}
       <Mosaic className={styles.top}>
@@ -53,11 +53,11 @@ export default function Home() {
 
       {/* --------------------------------------------------------- him, working */}
       {/*
-        Nine minutes of home-movie footage is the only moving picture of Sievan that
-        exists, and until now the site showed twenty-two seconds of it. Six loops run
-        edge to edge because this is the most persuasive thing the archive holds.
+        The page's focal point, and the only tinted band on it. Four frames, of which
+        two move: six simultaneous loops made the whole page restless and gave the eye
+        nowhere to settle.
       */}
-      <section className={`bleed ${styles.band}`} aria-labelledby="footage">
+      <section className={`bleed ${styles.bandLead}`} aria-labelledby="footage">
         <h2 id="footage" className={styles.bandTitle}>
           The only moving picture of him
           <span className={styles.bandNote}>
@@ -76,6 +76,9 @@ export default function Home() {
                     key={f.id}
                     clip={clip}
                     aspect={f.aspect}
+                    still={f.motion === 'still'}
+                    // Only the lead frame is worth fetching eagerly; the other moving
+                    // clip loads on its own and the stills are just posters.
                     priority={c === 0 && i === 0}
                     caption={f.caption}
                   />
@@ -133,8 +136,8 @@ export default function Home() {
       </Mosaic>
 
       {/* ------------------------------------------------------------ the box */}
-      <section className={`bleed ${styles.band}`} aria-labelledby="sheets">
-        <h2 id="sheets" className={styles.bandTitle}>
+      <section className={styles.band} aria-labelledby="sheets">
+        <h2 id="sheets" className={styles.bandTitleQuiet}>
           What the box holds
           <span className={styles.bandNote}>
             Fifty catalogued objects — clippings, catalogues, posters. {counts.objectsWithImagery}{' '}
@@ -158,7 +161,6 @@ export default function Home() {
                     alt={`${object.raw_title_description.split('\n')[0]} — ${f.id}`}
                     href={`/archive/objects/${f.id}/`}
                     caption={f.caption}
-                    meta={`${f.id} · ${object.date_text ?? 'undated'}`}
                   />
                 );
               })}
@@ -172,8 +174,8 @@ export default function Home() {
       </section>
 
       {/* ---------------------------------------------------- who spoke for him */}
-      <section className={`bleed ${styles.band}`} aria-labelledby="voices">
-        <h2 id="voices" className={styles.bandTitle}>
+      <section className={styles.band} aria-labelledby="voices">
+        <h2 id="voices" className={styles.bandTitleQuiet}>
           The people who knew him
           <span className={styles.bandNote}>
             Six interviews and a reel of studio footage, recorded on tape by the estate.
@@ -266,48 +268,39 @@ export default function Home() {
 }
 
 /**
- * The footage band, as three columns of stacked loops: 4 + 5 + 3 across.
+ * The footage band: two columns, four frames, and only two of them move.
  *
- * Heights follow from the aspects, not from a row count, so the columns end at
- * different depths on purpose and none of them can strand a hole. The wide column
- * carries the two closest shots; the narrow one carries the two most distant.
+ * `motion` is explicit per frame because the mix is the whole point. Six concurrent
+ * loops of grainy 16mm read as static — the eye cannot settle anywhere and the page
+ * feels frantic. Two moving against two still gives the band a rhythm and leaves the
+ * lead frame something to be the lead of.
+ *
+ * Aspects stay near the footage's own 3:2; a portrait crop on a landscape frame
+ * throws away most of the shot.
  */
-const PROCESS_COLUMNS: { id: string; col: number; aspect: string; caption: string }[][] = [
+const PROCESS_COLUMNS: {
+  id: string; col: number; aspect: string; motion: 'play' | 'still'; caption: string;
+}[][] = [
   [
-    { id: 'painting-portrait', col: 4, aspect: '4 / 3', caption: 'At the easel, working a brush across a portrait.' },
-    { id: 'drawing-portrait', col: 4, aspect: '16 / 9', caption: 'A portrait drawn in charcoal line.' },
+    { id: 'painting-portrait', col: 7, aspect: '4 / 3', motion: 'play', caption: 'At the easel, working a brush across a portrait.' },
+    { id: 'easel-demonstration', col: 7, aspect: '16 / 9', motion: 'still', caption: 'A plein-air demonstration, in a hat, at the easel.' },
   ],
   [
-    { id: 'mixing-palette', col: 5, aspect: '16 / 9', caption: 'Colour drawn across a loaded palette.' },
-    { id: 'painting-landscape', col: 5, aspect: '4 / 3', caption: 'A landscape canvas going down in real time.' },
-  ],
-  [
-    { id: 'painting-outdoors', col: 3, aspect: '4 / 3', caption: 'Painting outdoors, a crowd gathered behind him.' },
-    { id: 'easel-demonstration', col: 3, aspect: '4 / 3', caption: 'A plein-air demonstration, in a hat, at the easel.' },
+    { id: 'mixing-palette', col: 5, aspect: '16 / 9', motion: 'still', caption: 'Colour drawn across a loaded palette.' },
+    { id: 'painting-landscape', col: 5, aspect: '4 / 3', motion: 'play', caption: 'A landscape canvas going down in real time.' },
   ],
 ];
 
 /**
- * Eight sheets from the box, in four columns of two. Portrait sheets and landscape
- * sheets are mixed down each column so no two columns end level.
+ * Four sheets from the box, one row of four. Supporting evidence, not a second focal
+ * point — at half the page each they competed with the footage band above them.
+ * Aspects alternate so the row does not close level.
  */
 const SHEET_COLUMNS: { id: string; aspect: string; caption: string }[][] = [
-  [
-    { id: 'MS-AR-00027', aspect: '4 / 3', caption: 'Albert Landry Gallery, 1963.' },
-    { id: 'MS-AR-00025', aspect: '3 / 4', caption: 'Harry Salpeter Gallery, 1948.' },
-  ],
-  [
-    { id: 'MS-AR-00001', aspect: '3 / 4', caption: 'Four notices photocopied onto one sheet, 1951.' },
-    { id: 'MS-AR-00028', aspect: '3 / 4', caption: 'Passedoit Gallery, 1955.' },
-  ],
-  [
-    { id: 'MS-AR-00029', aspect: '3 / 4', caption: 'Vanderwoude Tananbaum — the paintings in colour.' },
-    { id: 'MS-AR-00019', aspect: '3 / 4', caption: 'Four notices on one sheet, 1945.' },
-  ],
-  [
-    { id: 'MS-AR-00023', aspect: '4 / 3', caption: 'Salpeter Gallery, Provincetown Harbor.' },
-    { id: 'MS-AR-00021', aspect: '3 / 4', caption: 'Contemporary Arts, 1939 — the first one-man show.' },
-  ],
+  [{ id: 'MS-AR-00027', aspect: '4 / 3', caption: 'Albert Landry Gallery, 1963.' }],
+  [{ id: 'MS-AR-00001', aspect: '3 / 4', caption: 'Four notices on one sheet, 1951.' }],
+  [{ id: 'MS-AR-00023', aspect: '4 / 3', caption: 'Salpeter Gallery, Provincetown Harbor.' }],
+  [{ id: 'MS-AR-00025', aspect: '3 / 4', caption: 'Harry Salpeter Gallery, 1948.' }],
 ];
 
 const FACE_NAMES: Record<string, string> = {

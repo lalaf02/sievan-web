@@ -496,10 +496,13 @@ for (const o of data.archiveObjects) {
 /**
  * Hang each timeline event off the sheet that evidences it.
  *
- * The chronology is 125 one-line rows, and every one of them is backed by something
- * physical in the box — the notice itself, the catalogue, the object. Carrying the
- * thumbnail here means the timeline can show what it is describing rather than
- * listing it, and the lookup happens once at build time rather than per row.
+ * NOTHING RENDERS THIS TODAY. The chronology tried it and the thumbnails were
+ * removed: at the size a 125-row timeline allows, a photocopied clipping is an
+ * illegible grey rectangle, and only 82 of the 125 events have one, so the rows that
+ * did carry a sheet left the rest looking broken.
+ *
+ * The index is kept because it is correct, costs one pass at build time, and is the
+ * obvious raw material for any view that shows evidence at a size worth looking at.
  */
 const objectIdForArticle = Object.fromEntries(
   data.newsArticles.map((a) => [a.id, a.archive_object_id]),

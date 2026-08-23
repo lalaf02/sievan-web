@@ -138,27 +138,10 @@ export function Chronology({
                               e.uncertain ? styles.uncertain : ''
                             } ${e.precision === 'year' ? styles.vague : ''}`}
                           >
-                            {/*
-                              The sheet that evidences the entry. Two thirds of the
-                              timeline has one, and showing it turns a list of 125
-                              one-line rows into a run of things you can look at.
-                            */}
-                            {e.thumb && (
-                              // eslint-disable-next-line @next/next/no-img-element
-                              <img
-                                className={styles.entryThumb}
-                                src={e.thumb}
-                                alt=""
-                                loading="lazy"
-                                decoding="async"
-                              />
+                            <span className={styles.entryTitle}>{e.title}</span>
+                            {e.subtitle && (
+                              <span className={styles.entrySub}>{e.subtitle}</span>
                             )}
-                            <span className={styles.entryBody}>
-                              <span className={styles.entryTitle}>{e.title}</span>
-                              {e.subtitle && (
-                                <span className={styles.entrySub}>{e.subtitle}</span>
-                              )}
-                            </span>
                           </Link>
                         </li>
                       ))}

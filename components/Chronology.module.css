@@ -76,9 +76,9 @@
 }
 
 /*
- * Two across. A year holds up to eight entries and each is now a sheet plus two
- * lines, so a single column of them ran down the left of a 1350px page and left the
- * right half empty for the whole length of the chronology.
+ * Two across. A year holds up to eight entries, and at 1400px a single column of
+ * short title/publication pairs leaves most of the width empty for the whole length
+ * of the chronology. Entries are two lines of text, so the columns stay shallow.
  */
 .entries {
   list-style: none;
@@ -95,9 +95,7 @@
 }
 
 .entry {
-  display: flex;
-  gap: var(--s-3);
-  align-items: flex-start;
+  display: block;
   padding: var(--s-2) 0 var(--s-2) var(--s-4);
   border-left: 3px solid var(--rule-strong);
   margin-bottom: var(--s-2);
@@ -120,22 +118,6 @@
 /* A year-only date is a soft band; a hedged date is dashed. */
 .vague { border-left-style: solid; opacity: 0.92; }
 .uncertain { border-left-style: dashed; }
-
-.entryBody { min-width: 0; }
-
-/*
- * Small, and letterboxed rather than cropped — at this size a crop of a clipping is
- * an unreadable grey rectangle, whereas the whole sheet still reads as a shape: a
- * masthead, a catalogue cover, a poster.
- */
-.entryThumb {
-  flex: none;
-  width: 3rem;
-  height: 4rem;
-  object-fit: contain;
-  background: var(--paper-deep);
-  border: 1px solid var(--rule);
-}
 
 .entryTitle {
   display: block;

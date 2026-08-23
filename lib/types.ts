@@ -265,6 +265,9 @@ export interface TimelineEvent {
   /**
    * The sheet that evidences this event, where the archive holds one — 82 of the 125
    * events have been digitised. Resolved in build-data.mjs, not here.
+   *
+   * Currently unrendered; see the note in build-data.mjs for why the chronology does
+   * not use it.
    */
   thumb?: string;
   thumbObjectId?: string;
