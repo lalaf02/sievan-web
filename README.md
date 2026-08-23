@@ -13,8 +13,10 @@ npm run dev      # http://localhost:3000
 npm run build    # -> out/
 ```
 
-Live at [the-sievan-experience.vercel.app](https://the-sievan-experience.vercel.app),
-auto-deployed on push to `main`.
+Live at [web-three-olive-55.vercel.app](https://web-three-olive-55.vercel.app) —
+the production URL of the linked Vercel project (`web`), which auto-deploys on push to
+`main`. Note `the-sievan-experience.vercel.app` is **not** this project and still serves
+the pre-revamp site; no custom domain is attached here yet.
 
 ---
 
