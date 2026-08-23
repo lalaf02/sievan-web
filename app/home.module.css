@@ -1,124 +1,257 @@
-.hero {
+/*
+ * The landing zone.
+ *
+ * A twelve-column mosaic with deliberately unequal spans — 7+5, 5+4+3, 12, 5+4+3 —
+ * so the eye moves diagonally instead of scanning even rows. Everything is explicit
+ * grid placement, no masonry script: the page has to render fully without JavaScript.
+ *
+ * The register stays archival on purpose. Paper, ink, hairline rules and one oxide
+ * accent. The asymmetry does the work that colour would do elsewhere.
+ */
+
+.mosaic {
   display: grid;
-  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
-  gap: var(--s-7);
+  grid-template-columns: repeat(12, 1fr);
+  gap: var(--s-4);
   align-items: start;
-  margin-bottom: var(--s-6);
 }
 
-@media (max-width: 860px) {
-  .hero { grid-template-columns: 1fr; gap: var(--s-5); }
+.tile {
+  min-width: 0; /* grid children default to min-content and would refuse to shrink */
+}
+
+.tileLabel {
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin: 0 0 var(--s-3);
+}
+
+/* ------------------------------------------------------------------ row one */
+
+.hero {
+  grid-column: span 7;
+  padding: var(--s-5) var(--s-6) var(--s-6) 0;
 }
 
 .name {
   font-size: var(--t-2xl);
-  line-height: 1.05;
-  margin-bottom: var(--s-3);
+  line-height: 1.02;
+  letter-spacing: -0.03em;
+  margin: 0 0 var(--s-4);
 }
 
 .tagline {
+  font-family: var(--serif);
   font-size: var(--t-lg);
   font-style: italic;
   color: var(--oxide);
-  margin-bottom: var(--s-4);
+  margin: 0 0 var(--s-4);
+  line-height: 1.15;
 }
 
 .lede {
   font-size: var(--t-md);
-  max-width: 46ch;
-  margin-bottom: 0;
-}
-
-.sub {
+  line-height: 1.5;
   color: var(--ink-muted);
-  max-width: 46ch;
-  margin-bottom: 0;
+  max-width: 34ch;
+  margin: 0;
 }
 
-.portrait { margin: 0; }
+.creed {
+  grid-column: span 5;
+  background: var(--paper-sunk);
+  padding: var(--s-5);
+  align-self: stretch;
+}
 
-.portrait img {
+/* ------------------------------------------------------------------ row two */
+
+.clip {
+  grid-column: span 5;
+  margin: 0;
+}
+
+.case {
+  grid-column: span 4;
+  background: var(--paper-deep);
+  padding: var(--s-5);
+  align-self: stretch;
+}
+
+.points {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.points li {
+  font-family: var(--serif);
+  font-size: var(--t-sm);
+  line-height: 1.45;
+  color: var(--ink);
+  padding: var(--s-3) 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+.points li:last-child { border-bottom: none; padding-bottom: 0; }
+.points li:first-child { padding-top: 0; }
+
+.plate {
+  grid-column: span 3;
+  margin: 0;
+}
+
+.plate img {
+  display: block;
   width: 100%;
   height: auto;
-  border: 1px solid var(--rule-strong);
-  display: block;
+  border: 1px solid var(--rule);
 }
 
-.portrait figcaption {
+/* --------------------------------------------------------------- media bits */
+
+.video {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: var(--ink);
+  border: 1px solid var(--rule);
+}
+
+.caption {
   font-family: var(--sans);
   font-size: var(--t-xs);
+  line-height: 1.5;
   color: var(--ink-faint);
   margin-top: var(--s-2);
 }
 
-/* Greenberg endorsement - prominent placement */
-.endorsement {
-  margin: var(--s-6) 0;
-}
+/* ---------------------------------------------------------------- row three */
 
-/* Thesis section */
-.thesis {
-  margin: var(--s-7) 0;
-  padding-top: var(--s-6);
-  border-top: 1px solid var(--rule);
-}
-
-.thesis h2 {
-  font-size: var(--t-lg);
-  margin-bottom: var(--s-5);
-}
-
-.thesisContent {
-  display: grid;
-  grid-template-columns: 1.2fr 0.8fr;
-  gap: var(--s-6);
-  align-items: start;
-}
-
-@media (max-width: 860px) {
-  .thesisContent { grid-template-columns: 1fr; }
-}
-
-.thesisText {
-  max-width: 58ch;
-}
-
-.thesisText p {
-  margin-bottom: var(--s-4);
-}
-
-.thesisPoints {
-  margin: var(--s-4) 0;
-  padding-left: 1.2em;
-}
-
-.thesisPoints li {
-  margin-bottom: var(--s-2);
-}
-
-.thesisLink {
-  font-family: var(--sans);
-  font-size: var(--t-sm);
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.thesisQuote {
-  position: sticky;
-  top: var(--s-5);
-}
-
-/* Entry point cards */
-.doors {
-  list-style: none;
-  margin: var(--s-6) 0;
-  padding: 0;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
-  gap: var(--s-5);
+.stats {
+  grid-column: span 12;
   border-top: 1px solid var(--rule-strong);
-  padding-top: var(--s-5);
+  border-bottom: 1px solid var(--rule-strong);
+  padding: var(--s-5) 0;
+}
+
+.statList {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--s-5);
+  margin: 0;
+}
+
+.stat dt {
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+
+.stat dd {
+  font-family: var(--serif);
+  font-size: var(--t-xl);
+  line-height: 1;
+  color: var(--oxide);
+  font-variant-numeric: tabular-nums;
+  margin: var(--s-2) 0;
+}
+
+.stat p {
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  line-height: 1.5;
+  color: var(--ink-faint);
+  margin: 0;
+}
+
+/* ----------------------------------------------------------------- row four */
+
+.quoteA { grid-column: span 5; }
+.quoteB { grid-column: span 4; }
+
+/* The clip beside them is taller than either quote, and letting the quote panels
+   sit short leaves a dead band under the row. Stretching makes the panel a block
+   of colour that squares the row off. */
+.quoteA,
+.quoteB {
+  align-self: stretch;
+}
+
+.quoteA > figure,
+.quoteB > figure {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.clipSmall {
+  grid-column: span 3;
+  margin: 0;
+}
+
+/* ----------------------------------------------------------------- row five */
+
+.peers {
+  grid-column: span 12;
+  padding-top: var(--s-3);
+}
+
+.peerList {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: var(--s-4);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.peerList li {
+  border-top: 2px solid var(--rule-strong);
+  padding-top: var(--s-3);
+}
+
+.peerName {
+  display: block;
+  font-family: var(--serif);
+  font-size: var(--t-body);
+  color: var(--ink);
+}
+
+.peerNote {
+  display: block;
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  line-height: 1.45;
+  color: var(--ink-faint);
+  margin-top: var(--s-1);
+}
+
+/* ------------------------------------------------------------------ the doors */
+
+.doors {
+  grid-column: span 12;
+  margin-top: var(--s-4);
+}
+
+.doorList {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--rule-strong);
+}
+
+.doorList li + li .door {
+  border-left: 1px solid var(--rule);
 }
 
 .door {
@@ -126,41 +259,65 @@
   flex-direction: column;
   gap: var(--s-2);
   height: 100%;
+  padding: var(--s-5) var(--s-4);
   text-decoration: none;
   color: inherit;
+  transition: background 120ms ease;
 }
 
-.doorNum {
-  font-family: var(--serif);
-  font-size: var(--t-xl);
-  line-height: 1;
-  font-variant-numeric: tabular-nums;
-  color: var(--ink);
-  transition: color 150ms;
+.door:hover {
+  background: var(--paper-deep);
 }
 
-.door:hover .doorNum,
-.door:hover .doorTitle { color: var(--oxide); }
+.door:hover .doorTitle {
+  color: var(--oxide);
+}
 
 .doorTitle {
-  font-family: var(--sans);
-  font-size: var(--t-xs);
-  text-transform: uppercase;
-  letter-spacing: 0.09em;
-  color: var(--ink-faint);
-  transition: color 150ms;
+  font-family: var(--serif);
+  font-size: var(--t-md);
+  color: var(--ink);
 }
 
 .doorText {
-  font-size: var(--t-base);
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  line-height: 1.55;
   color: var(--ink-muted);
-  max-width: 34ch;
 }
 
-.footLinks {
-  font-family: var(--sans);
-  font-size: var(--t-sm);
-  color: var(--ink-muted);
-  border-top: 1px solid var(--rule);
-  padding-top: var(--s-4);
+@media (prefers-reduced-motion: reduce) {
+  .door { transition: none; }
+}
+
+/* ------------------------------------------------------------- narrow screens */
+
+@media (max-width: 1020px) {
+  .hero { grid-column: span 12; padding-right: 0; }
+  .creed { grid-column: span 12; }
+  .clip { grid-column: span 7; }
+  .case { grid-column: span 5; }
+  .plate { grid-column: span 5; }
+  .quoteA { grid-column: span 7; }
+  .quoteB { grid-column: span 5; }
+  .clipSmall { grid-column: span 5; }
+  .peerList { grid-template-columns: repeat(3, 1fr); }
+  .doorList { grid-template-columns: repeat(2, 1fr); }
+  .doorList li:nth-child(odd) .door { border-left: none; }
+  .doorList li:nth-child(n + 3) .door { border-top: 1px solid var(--rule); }
+}
+
+@media (max-width: 860px) {
+  .mosaic { gap: var(--s-5); }
+  .tile,
+  .hero, .creed, .clip, .case, .plate,
+  .quoteA, .quoteB, .clipSmall, .stats, .peers, .doors {
+    grid-column: span 12;
+  }
+  .name { font-size: var(--t-xl); }
+  .statList { grid-template-columns: repeat(2, 1fr); }
+  .peerList { grid-template-columns: repeat(2, 1fr); }
+  .doorList { grid-template-columns: 1fr; }
+  .doorList li .door { border-left: none; }
+  .doorList li + li .door { border-top: 1px solid var(--rule); }
 }

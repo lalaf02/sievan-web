@@ -72,3 +72,50 @@
   left: var(--s-4);
   top: var(--s-2);
 }
+
+.search {
+  display: flex;
+  align-items: center;
+}
+
+.searchInput {
+  font-family: var(--sans);
+  font-size: var(--t-sm);
+  color: var(--ink);
+  background: var(--paper-deep);
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  padding: var(--s-2) var(--s-3);
+  width: 9rem;
+  transition: width 120ms ease, background 120ms ease;
+}
+
+.searchInput:focus {
+  outline: 2px solid var(--oxide);
+  outline-offset: 1px;
+  background: var(--paper);
+  width: 13rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .searchInput { transition: none; }
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Below the wrap point the search box takes its own line rather than crushing the nav. */
+@media (max-width: 860px) {
+  .search { width: 100%; }
+  .searchInput { width: 100%; }
+  .searchInput:focus { width: 100%; }
+}

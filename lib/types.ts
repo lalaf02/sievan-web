@@ -27,8 +27,15 @@ export interface ScanFile {
   filename: string;
   /** "I" / "II" for the one object (MS-AR-00003) split across two files. */
   part_label: string | null;
-  /** Added at build time from the file on disk. */
+  /**
+   * Added at build time from the file on disk.
+   * Null only if build-data.mjs fails to read the file (shouldn't happen in normal operation).
+   */
   sizeBytes: number | null;
+  /**
+   * Added at build time. For PDFs, extracted from the file; for images, always 1.
+   * Null only if PDF parsing fails (fallback is 1 in build script).
+   */
   pageCount: number | null;
 }
 
@@ -269,6 +276,7 @@ export interface Counts {
   exhibitions: number;
   videoAssets: number;
   paintings: number;
+  scholarship: number;
   objectsWithScans: number;
   scanFiles: number;
   transcribedInterviews: number;
@@ -287,6 +295,13 @@ export interface Derived {
   articlesByPublication: Record<string, string[]>;
   articlesByAuthor: Record<string, string[]>;
   exhibitionsByObject: Record<string, string[]>;
+  /**
+   * Inferred, not asserted: which press notices appear to review which exhibition.
+   * `matchedAs` records the venue token that produced the match so the claim can be
+   * checked. See scripts/build-data.mjs for the rule and why it is strict.
+   */
+  articlesByExhibition: Record<string, { articleId: string; matchedAs: string }[]>;
+  exhibitionsByArticle: Record<string, { exhibitionId: string; matchedAs: string }[]>;
   personMentions: Record<string, PersonMention[]>;
   publicationMergeGroups: string[][];
   timeline: TimelineEvent[];
@@ -294,8 +309,31 @@ export interface Derived {
   counts: Counts;
 }
 
+/**
+ * Secondary literature — published writing *about* Sievan.
+ *
+ * Deliberately separate from NewsArticle: those are the contemporaneous notices
+ * physically held in the archive box, catalogued as objects. This is scholarship,
+ * which the archive cites but does not hold.
+ */
+export interface Scholarship {
+  id: string;
+  citation: string;
+  kind: 'book' | 'chapter' | 'journal_article' | 'thesis' | 'catalogue_essay' | 'review' | 'web' | 'other';
+  authors?: string[];
+  title?: string | null;
+  container?: string | null;
+  year?: number | null;
+  url?: string | null;
+  doi?: string | null;
+  /** Person ids the work is principally about. */
+  about?: string[];
+  notes?: string | null;
+}
+
 export interface Archive {
   collections: Collection[];
+  scholarship: Scholarship[];
   publications: Publication[];
   persons: Person[];
   exhibitions: Exhibition[];

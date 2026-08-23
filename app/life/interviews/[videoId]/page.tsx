@@ -4,6 +4,8 @@ import { notFound } from 'next/navigation';
 import { allVideos, getPerson, getVideo, loadTranscript } from '@/lib/data';
 import { EditorialNote, Fact, Facts, RecordHeader } from '@/components/Record';
 import { TranscriptReader } from '@/components/TranscriptReader';
+import { formatDuration } from '@/lib/dates';
+import { PendingLine } from '@/components/Pending';
 
 /** Only the transcribed interviews get a reader page. */
 export function generateStaticParams() {
@@ -17,7 +19,12 @@ type Props = { params: Promise<{ videoId: string }> };
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { videoId } = await params;
   const video = getVideo(videoId);
-  return video ? { title: video.title } : {};
+  if (!video) return { title: 'Interview not found' };
+  const subject = video.subject_person_ids.map((id) => getPerson(id)?.name).filter(Boolean).join(', ');
+  return {
+    title: video.title,
+    description: `Oral history interview${subject ? ` with ${subject}` : ''} about Maurice Sievan.`,
+  };
 }
 
 export default async function InterviewPage({ params }: Props) {
@@ -56,7 +63,19 @@ export default async function InterviewPage({ params }: Props) {
             {video.transcript_word_count?.toLocaleString()} words across{' '}
             {video.transcript_page_count} pages
           </Fact>
-          <Fact label="Recorded">{video.interview_date ?? 'Date unknown'}</Fact>
+          <Fact label="Runtime">{formatDuration(video.duration_seconds)}</Fact>
+          {/*
+            Not one of the seven recordings carries a date, which is why none of them
+            appear on the chronology. Naming the consequence is more useful than the
+            bare words "Date unknown".
+          */}
+          <Fact label="Recorded">
+            {video.interview_date ?? (
+              <PendingLine>
+                Undated — so this cannot be placed on the chronology
+              </PendingLine>
+            )}
+          </Fact>
           {/*
             No video player: the masters are 25 GB and not yet hosted. Stating the
             provenance is more useful than an empty "coming soon" frame.

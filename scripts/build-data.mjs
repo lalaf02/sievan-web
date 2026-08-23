@@ -11,7 +11,7 @@ import {
   readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync, statSync, copyFileSync,
   rmSync,
 } from 'node:fs';
-import { join, dirname } from 'node:path';
+import { join, dirname, basename, normalize } from 'node:path';
 import { fileURLToPath } from 'node:url';
 // The schema is draft 2020-12; ajv's default export is draft-07.
 import Ajv from 'ajv/dist/2020.js';
@@ -19,7 +19,8 @@ import addFormats from 'ajv-formats';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const WEB = join(HERE, '..');
-const ROOT = join(WEB, '..');
+// DataModel/, MS-CS-001/ and Video Archive/ live inside the repo, not beside it.
+const ROOT = WEB;
 const DM = join(ROOT, 'DataModel');
 const SEED = join(DM, 'seed');
 const OUT = join(WEB, 'data');
@@ -43,12 +44,20 @@ const SEEDS = {
   'seed_painting_historical_context.json': ['PaintingHistoricalContext', 'paintingHistoricalContext'],
   'seed_painting_exhibitions.json': ['PaintingExhibition', 'paintingExhibitions'],
   'seed_historical_events.json': ['HistoricalEvent', 'historicalEvents'],
+  'seed_scholarship.json': ['Scholarship', 'scholarship'],
 };
 
-const read = (p) => JSON.parse(readFileSync(p, 'utf8'));
 const fail = (msg) => {
   console.error(`\n  build-data: ${msg}\n`);
   process.exit(1);
+};
+
+const read = (p) => {
+  try {
+    return JSON.parse(readFileSync(p, 'utf8'));
+  } catch (e) {
+    fail(`failed to parse ${p}: ${e.message}`);
+  }
 };
 
 // ---------------------------------------------------------------- validation
@@ -139,6 +148,27 @@ function parseTranscript(text) {
   return pages;
 }
 
+/*
+ * Real runtimes, measured off the masters by DataModel/work/timecode/. Every
+ * VideoAsset ships duration_seconds: null, and the interviews are the one part of
+ * the archive with no sense of scale attached — "4,769 words" tells a reader
+ * nothing about whether that is ten minutes or an hour.
+ *
+ * The edited cut is the canonical one; the subtitled variant is the same film and
+ * differs by hundredths of a second.
+ */
+const durationsPath = join(DM, 'work', 'durations.json');
+if (existsSync(durationsPath)) {
+  const durations = read(durationsPath);
+  for (const v of data.videoAssets) {
+    if (v.duration_seconds != null) continue;
+    for (const variant of ['edited', 'subtitled', 'raw']) {
+      const d = durations[`${v.id}:${variant}`];
+      if (d != null) { v.duration_seconds = Math.round(d); break; }
+    }
+  }
+}
+
 const transcripts = {};
 for (const v of data.videoAssets) {
   if (!v.transcript_text_file) continue;
@@ -178,6 +208,60 @@ for (const person of data.persons) {
     if (matched) hits.push({ objectId: obj.id, matchedAs: matched });
   }
   if (hits.length) personMentions[person.id] = hits;
+}
+
+/**
+ * Press notices and exhibitions are two disjoint graphs in the source data:
+ * `NewsArticle.exhibition_id` is set on none of the 60 articles, and every
+ * exhibition's `source_archive_object_ids` points at a catalogue or poster, never
+ * at a clipping bundle. So nothing in the archive says which show a review reviews,
+ * even where it is obvious to a reader.
+ *
+ * This infers the link, and is deliberately strict about it. A pair is only made
+ * when BOTH hold:
+ *   - the notice is dated within the exhibition's year (or the year after, since
+ *     reviews trail the opening), and
+ *   - a distinctive token of the venue name appears in the clipping's own text or
+ *     in the description of the sheet it was photocopied onto.
+ *
+ * Generic words are excluded from matching, which is why "Contemporary Arts" and
+ * "National Arts Club" produce no links at all: every token in them is a word that
+ * appears in half the archive. An empty result is the correct answer there — a
+ * date-only match would connect a 1941 review to a show it has nothing to do with.
+ *
+ * These edges are inferred, never asserted, and the UI labels them as such.
+ */
+const VENUE_STOPWORDS = new Set([
+  'gallery', 'galleries', 'museum', 'museums', 'art', 'arts', 'fine', 'the', 'of',
+  'and', 'inc', 'association', 'institute', 'center', 'centre', 'club', 'national',
+  'american', 'contemporary', 'city', 'new', 'york', 'company', 'ltd', 'studio',
+  'studios',
+]);
+const normText = (s) => (s ?? '').toLowerCase().replace(/[^a-z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim();
+
+const objectsById = new Map(data.archiveObjects.map((o) => [o.id, o]));
+const articlesByExhibition = {};
+const exhibitionsByArticle = {};
+for (const e of data.exhibitions) {
+  if (e.date_earliest == null) continue;
+  const keys = normText(e.gallery_or_venue)
+    .split(' ')
+    .filter((t) => t.length >= 4 && !VENUE_STOPWORDS.has(t));
+  if (!keys.length) continue;
+
+  const lo = e.date_earliest;
+  const hi = (e.date_latest ?? e.date_earliest) + 1;
+  const hits = [];
+  for (const a of data.newsArticles) {
+    if (a.date_earliest == null || a.date_earliest < lo || a.date_earliest > hi) continue;
+    const sheet = objectsById.get(a.archive_object_id)?.raw_title_description ?? '';
+    const hay = normText(`${a.raw_source_text} ${sheet}`);
+    const matched = keys.find((k) => hay.includes(k));
+    if (!matched) continue;
+    hits.push({ articleId: a.id, matchedAs: matched });
+    (exhibitionsByArticle[a.id] ??= []).push({ exhibitionId: e.id, matchedAs: matched });
+  }
+  if (hits.length) articlesByExhibition[e.id] = hits;
 }
 
 const decadeOf = (y) => (y == null ? null : Math.floor(y / 10) * 10);
@@ -297,14 +381,32 @@ mkdirSync(publicScans, { recursive: true });
 
 /** Page count without a PDF library: count the page objects in the raw bytes. */
 function pdfPageCount(buf) {
+  // Verify this looks like a PDF before attempting regex
+  const header = buf.slice(0, 8).toString('latin1');
+  if (!header.startsWith('%PDF-')) {
+    console.warn('  warning: file does not appear to be a valid PDF');
+    return 1; // Fallback to 1 page
+  }
   const matches = buf.toString('latin1').match(/\/Type\s*\/Page[^s]/g);
-  return matches ? matches.length : null;
+  return matches ? matches.length : 1; // Fallback to 1 if count fails
+}
+
+// Validate filename to prevent path traversal attacks
+function isValidFilename(filename) {
+  if (!filename || typeof filename !== 'string') return false;
+  // Reject path separators and traversal patterns
+  if (filename.includes('/') || filename.includes('\\') || filename.includes('..')) return false;
+  // Normalize and check it resolves to the same basename
+  return normalize(filename) === basename(filename);
 }
 
 const missingScans = [];
 let copied = 0;
 for (const o of data.archiveObjects) {
   for (const s of o.scan_files ?? []) {
+    if (!isValidFilename(s.filename)) {
+      fail(`invalid scan filename in ${o.id}: ${s.filename}`);
+    }
     if (!scansOnDisk.has(s.filename)) {
       missingScans.push(`${o.id} -> ${s.filename}`);
       continue;
@@ -334,6 +436,8 @@ const bundle = {
     articlesByPublication,
     articlesByAuthor,
     exhibitionsByObject,
+    articlesByExhibition,
+    exhibitionsByArticle,
     personMentions,
     publicationMergeGroups,
     timeline,
@@ -346,6 +450,7 @@ const bundle = {
       exhibitions: data.exhibitions.length,
       videoAssets: data.videoAssets.length,
       paintings: data.paintings.length,
+      scholarship: data.scholarship.length,
       objectsWithScans: data.archiveObjects.filter((o) => (o.scan_files ?? []).length > 0).length,
       scanFiles: data.archiveObjects.reduce((n, o) => n + (o.scan_files ?? []).length, 0),
       transcribedInterviews: Object.keys(transcripts).length,
@@ -368,8 +473,13 @@ if (data.paintings.length > 0) {
   mkdirSync(worksRouteDir, { recursive: true });
   writeFileSync(
     worksRouteFile,
-    '// Generated by scripts/build-data.mjs when seed_paintings.json has rows.\n' +
-    "export { default, generateStaticParams, dynamicParams } from '@/components/PaintingDetail';\n",
+    '// Generated by scripts/build-data.mjs when seed_paintings.json has rows.\n'
+    // Route segment config has to be statically analysable in the route file
+    // itself — Next 16 rejects a re-exported `dynamicParams` ("It mustn't be
+    // reexported"), so it is declared here and only the component and its params
+    // come from PaintingDetail.
+    + "export { default, generateStaticParams } from '@/components/PaintingDetail';\n"
+    + 'export const dynamicParams = false;\n',
   );
 } else if (existsSync(worksRouteFile)) {
   rmSync(worksRouteDir, { recursive: true, force: true });

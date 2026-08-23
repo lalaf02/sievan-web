@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "data": "node scripts/build-data.mjs && node scripts/check-data.mjs",
+    "data": "node scripts/build-data.mjs && node scripts/check-data.mjs && node --no-warnings=MODULE_TYPELESS_PACKAGE_JSON scripts/check-quotes.mjs",
     "predev": "npm run data",
     "dev": "next dev",
     "prebuild": "npm run data",

@@ -1,69 +1,172 @@
-.pendingLayout {
-  display: grid;
-  grid-template-columns: var(--rail) minmax(0, 1fr);
-  gap: var(--s-7);
-  align-items: start;
+.lede {
+  font-size: var(--t-md);
+  line-height: 1.5;
+  color: var(--ink-muted);
 }
 
-@media (max-width: 860px) {
-  .pendingLayout { grid-template-columns: 1fr; }
-  .ghostRail { display: none; }
+.section {
+  margin-bottom: var(--s-7);
 }
 
-/* The filter chrome, present but inert — a preview of the working page. */
-.ghostRail { opacity: 0.4; pointer-events: none; user-select: none; }
-
-.ghostLabel {
-  font-family: var(--sans);
-  font-size: var(--t-xs);
-  text-transform: uppercase;
-  letter-spacing: 0.09em;
-  color: var(--ink-faint);
-  margin: 0 0 var(--s-2);
-}
-
-.ghostInput {
-  height: 2.1rem;
-  border: 1px solid var(--rule-strong);
-  border-radius: 2px;
+.section > h2 {
+  border-bottom: 1px solid var(--rule-strong);
+  padding-bottom: var(--s-2);
   margin-bottom: var(--s-5);
 }
 
-.ghostChips { display: flex; gap: var(--s-2); margin-bottom: var(--s-5); }
-
-.ghostChip {
-  width: 3.5rem;
-  height: 1.4rem;
-  border: 1px solid var(--rule-strong);
-  border-radius: 999px;
+.note {
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  line-height: 1.6;
+  color: var(--ink-faint);
+  max-width: var(--measure);
+  margin-top: var(--s-5);
+  border-left: 2px solid var(--rule);
+  padding-left: var(--s-4);
 }
 
-.ghostLine {
-  height: 0.7rem;
-  background: var(--rule);
-  border-radius: 2px;
-  margin-bottom: var(--s-2);
-  width: 80%;
-}
-.ghostLine:nth-child(even) { width: 62%; }
+/* ------------------------------------------------------------------- periods */
 
-.pending {
-  border: 1px solid var(--rule-strong);
+.periods {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  /* Exactly five, and the point is that there are five — auto-fit stranded the
+     last one on its own row and lost the shape of the career. */
+  grid-template-columns: repeat(5, 1fr);
+  gap: var(--s-4);
+}
+
+.period {
+  display: flex;
+  flex-direction: column;
+}
+
+.periodMedia {
+  display: block;
   background: var(--paper-deep);
-  padding: var(--s-7) var(--s-6);
-  max-width: 46rem;
+  border: 1px solid var(--rule);
 }
 
-.pendingTitle {
-  font-size: var(--t-lg);
-  margin: 0 0 var(--s-4);
-  max-width: 22ch;
+.periodMedia img {
+  display: block;
+  width: 100%;
+  height: auto;
 }
 
-.pendingBody {
-  max-width: 58ch;
+.periodMedia:hover {
+  border-color: var(--oxide);
+}
+
+.periodBody {
+  padding-top: var(--s-3);
+}
+
+.periodTitle {
+  font-family: var(--serif);
+  font-size: var(--t-body);
+  margin: 0 0 var(--s-2);
+}
+
+.plateYears {
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--oxide);
+  margin: 0 0 var(--s-3);
+}
+
+.periodText {
+  font-size: var(--t-sm);
+  line-height: 1.55;
   color: var(--ink-muted);
-  margin-bottom: var(--s-4);
+  margin: 0 0 var(--s-2);
 }
 
-.pendingBody:last-child { margin-bottom: 0; }
+.periodCaption {
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  line-height: 1.5;
+  color: var(--ink-faint);
+  margin: 0;
+}
+
+/* ------------------------------------------------------------------------ CV */
+
+.cvGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--s-6);
+  align-items: start;
+}
+
+.subhead {
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  font-weight: 500;
+  display: flex;
+  align-items: baseline;
+  gap: var(--s-3);
+  margin: 0 0 var(--s-3);
+}
+
+.subheadCount {
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-faint);
+}
+
+.cvList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--rule);
+}
+
+.cvList li {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--s-4);
+  font-size: var(--t-sm);
+  padding: var(--s-2) 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+.cvYears {
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  color: var(--ink-faint);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* ---------------------------------------------------------------- what next */
+
+.meanwhile {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: var(--s-6);
+  align-items: start;
+  margin-top: var(--s-5);
+}
+
+@media (max-width: 1020px) {
+  .periods { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (max-width: 860px) {
+  .periods { grid-template-columns: repeat(2, 1fr); }
+  .cvGrid,
+  .meanwhile {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .periods { grid-template-columns: 1fr; }
+}

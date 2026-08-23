@@ -114,7 +114,7 @@ export default function MethodPage() {
           <li>
             <strong>None of the recordings carry a date</strong>, which is why the
             interviews cannot be placed on the{' '}
-            <Link href="/life/chronology/">chronology</Link>.
+            <Link href="/life/#chronology">chronology</Link>.
           </li>
           <li>
             <strong>One interviewee is unidentified</strong> — named only “Greenberg” by a

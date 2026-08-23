@@ -17,7 +17,12 @@ type Props = { params: Promise<{ personId: string }> };
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { personId } = await params;
   const person = getPerson(personId);
-  return person ? { title: person.name } : {};
+  if (!person) return { title: 'Person not found' };
+  const roles = person.roles.map((r) => ROLE_LABELS[r]).join(', ');
+  return {
+    title: person.name,
+    description: `${person.name}${roles ? ` — ${roles}` : ''} in the Maurice Sievan archive.`,
+  };
 }
 
 export default async function PersonPage({ params }: Props) {

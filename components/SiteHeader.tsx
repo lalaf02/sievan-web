@@ -5,17 +5,18 @@ import { usePathname } from 'next/navigation';
 import styles from './SiteHeader.module.css';
 
 /**
- * Works is listed but marked "in preparation" rather than hidden: the paintings
- * are being photographed now, and stating that is more useful than a missing nav
- * item that appears one day without explanation.
+ * Five destinations, ordered by depth: the case, the life, the work, the evidence,
+ * the apparatus. Exhibitions, people, the chronology and the retrospective are
+ * reached from within Life and Work rather than competing at the top level.
+ *
+ * Works keeps its "in preparation" badge until seed_paintings.json has rows —
+ * naming the gap is more useful than a nav item that changes meaning silently.
  */
 const NAV = [
-  { href: '/why/', label: 'Why Sievan' },
   { href: '/life/', label: 'Life and Work' },
-  { href: '/archive/', label: 'The Archive' },
-  { href: '/exhibitions/', label: 'Exhibitions' },
-  { href: '/works/', label: 'Works', pending: true },
-  { href: '/about/', label: 'About' },
+  { href: '/works/', label: 'Catalogue Raisonné', pending: true },
+  { href: '/archive/', label: 'Archives' },
+  { href: '/research/', label: 'Research' },
 ];
 
 export function SiteHeader() {
@@ -28,6 +29,7 @@ export function SiteHeader() {
         <Link href="/" className={styles.wordmark}>
           Maurice Sievan
         </Link>
+
         <nav aria-label="Main">
           <ul className={styles.nav}>
             {NAV.map((item) => {
@@ -50,6 +52,23 @@ export function SiteHeader() {
             })}
           </ul>
         </nav>
+
+        {/*
+          A plain GET form, not a JS handler: without JavaScript this still navigates
+          to the search page, which prerenders the complete index. With JavaScript the
+          ?q= is picked up on hydration and narrows the list.
+        */}
+        <form className={styles.search} action="/archive/search/" method="get" role="search">
+          <label htmlFor="nav-q" className={styles.srOnly}>Search the archive</label>
+          <input
+            id="nav-q"
+            type="search"
+            name="q"
+            className={styles.searchInput}
+            placeholder="Search"
+            autoComplete="off"
+          />
+        </form>
       </div>
     </header>
   );

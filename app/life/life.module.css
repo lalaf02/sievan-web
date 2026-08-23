@@ -1,65 +1,201 @@
-/* Archive resource cards - reuses homepage door card pattern */
-.archiveGrid {
-  margin-top: var(--s-7);
+.lede {
+  font-size: var(--t-md);
+  line-height: 1.5;
+  color: var(--ink-muted);
 }
 
-.archiveGrid h2 {
-  margin-bottom: var(--s-5);
+.section {
+  margin-bottom: var(--s-7);
+  scroll-margin-top: var(--s-4);
 }
 
-.cards {
+.section > h2 {
+  border-bottom: 1px solid var(--rule-strong);
+  padding-bottom: var(--s-2);
+  margin-bottom: var(--s-4);
+}
+
+.subhead {
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  font-weight: 500;
+  display: flex;
+  align-items: baseline;
+  gap: var(--s-3);
+  margin: 0 0 var(--s-3);
+}
+
+.subheadCount {
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-faint);
+}
+
+.railNote {
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  line-height: 1.55;
+  color: var(--ink-faint);
+  margin-top: var(--s-3);
+  max-width: 44ch;
+}
+
+/* The biography reads at measure width with testimony alongside it, so the voices
+   sit next to the claims they support rather than after them — and the column the
+   measure leaves empty gets used instead of sitting blank. */
+.bio {
+  display: grid;
+  grid-template-columns: minmax(0, var(--measure)) minmax(16rem, 1fr);
+  gap: var(--s-6);
+  align-items: start;
+}
+
+.bioProse {
+  min-width: 0;
+}
+
+.bioProse > h2 {
+  border-bottom: 1px solid var(--rule-strong);
+  padding-bottom: var(--s-2);
+  margin-top: 0;
+}
+
+.quoteRail {
+  display: grid;
+  gap: var(--s-4);
+  align-content: start;
+  /* Drop past the section heading so the first quote lines up with the prose. */
+  padding-top: var(--s-6);
+}
+
+.twoUp {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--s-6);
+  margin-top: var(--s-5);
+  align-items: start;
+}
+
+/* ------------------------------------------------------------------ venues */
+
+.venueList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--rule);
+}
+
+.venueList li {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--s-4);
+  padding: var(--s-3) 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+.venueName {
+  font-family: var(--serif);
+  font-size: var(--t-sm);
+  color: var(--ink);
+  text-decoration: none;
+}
+
+a.venueName:hover { color: var(--oxide); }
+
+.venueYears {
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  color: var(--ink-faint);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* -------------------------------------------------------------- collections */
+
+.museumList {
   list-style: none;
   margin: 0;
   padding: 0;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
-  gap: var(--s-5);
-  border-top: 1px solid var(--rule-strong);
-  padding-top: var(--s-5);
+  grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
+  gap: var(--s-4);
 }
 
-.card {
-  display: flex;
-  flex-direction: column;
-  gap: var(--s-2);
-  height: 100%;
-  text-decoration: none;
-  color: inherit;
+.museumList li {
+  border-top: 1px solid var(--rule);
+  padding-top: var(--s-3);
 }
 
-.cardNum {
+/* MoMA, the Hirshhorn and Brooklyn carry more weight than a university gallery,
+   and flattening them into one list would overstate the smaller holdings. */
+.museumNotable {
+  border-top: 2px solid var(--oxide);
+}
+
+.museumName {
+  display: block;
   font-family: var(--serif);
-  font-size: var(--t-xl);
-  line-height: 1;
-  font-variant-numeric: tabular-nums;
+  font-size: var(--t-sm);
   color: var(--ink);
-  transition: color 150ms;
 }
 
-.cardIcon {
-  font-size: var(--t-xl);
-  line-height: 1;
-  color: var(--ink);
-  transition: color 150ms;
-}
-
-.card:hover .cardNum,
-.card:hover .cardIcon,
-.card:hover .cardTitle {
-  color: var(--oxide);
-}
-
-.cardTitle {
+.museumWhere {
+  display: block;
   font-family: var(--sans);
   font-size: var(--t-xs);
-  text-transform: uppercase;
-  letter-spacing: 0.09em;
   color: var(--ink-faint);
-  transition: color 150ms;
+  margin-top: var(--s-1);
 }
 
-.cardText {
-  font-size: var(--t-base);
-  color: var(--ink-muted);
-  max-width: 34ch;
+/* ---------------------------------------------------------------- witnesses */
+
+.witnessList {
+  list-style: none;
+  margin: var(--s-5) 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  gap: var(--s-4);
+}
+
+.witnessList li {
+  border-top: 2px solid var(--rule-strong);
+  padding-top: var(--s-3);
+}
+
+.witnessName {
+  display: block;
+  font-family: var(--serif);
+  font-size: var(--t-body);
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.witnessName:hover { color: var(--oxide); }
+
+.witnessNote {
+  display: block;
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  line-height: 1.5;
+  color: var(--ink-faint);
+  margin-top: var(--s-1);
+}
+
+@media (max-width: 1020px) {
+  .bio { grid-template-columns: 1fr; }
+  .quoteRail {
+    grid-template-columns: repeat(2, 1fr);
+    padding-top: 0;
+  }
+}
+
+@media (max-width: 860px) {
+  .quoteRail,
+  .twoUp {
+    grid-template-columns: 1fr;
+  }
 }

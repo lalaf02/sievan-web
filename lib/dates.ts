@@ -15,7 +15,12 @@ const MONTHS = [
 
 /** How many components a partial ISO date carries: 3 = day, 2 = month, 1 = year. */
 export function componentsOf(iso: PartialDate): number {
-  return iso ? iso.split('-').length : 0;
+  if (!iso) return 0;
+  // Validate basic ISO date format
+  const parts = iso.split('-');
+  // Ensure each part is numeric (allows for proper date validation)
+  if (parts.some((p) => p && isNaN(Number(p)))) return 0;
+  return Math.min(parts.length, 3); // Cap at 3 components
 }
 
 export function precisionOf(iso: PartialDate): DatePrecision {
@@ -30,9 +35,16 @@ export function precisionOf(iso: PartialDate): DatePrecision {
 /** "1951-04-15" -> "April 15, 1951"; "1951-04" -> "April 1951"; "1951" -> "1951". */
 export function formatPartial(iso: PartialDate): string | null {
   if (!iso) return null;
-  const [y, m, d] = iso.split('-');
+  const parts = iso.split('-');
+  const [y, m, d] = parts;
   if (!m) return y;
-  const month = MONTHS[Number(m) - 1] ?? m;
+  const monthNum = Number(m);
+  // Validate month is in range 1-12
+  if (isNaN(monthNum) || monthNum < 1 || monthNum > 12) {
+    console.warn(`Invalid month in date: ${iso}`);
+    return iso; // Return raw string for invalid dates
+  }
+  const month = MONTHS[monthNum - 1];
   return d ? `${month} ${Number(d)}, ${y}` : `${month} ${y}`;
 }
 
@@ -50,11 +62,15 @@ export function formatRange(start: PartialDate, end: PartialDate): string | null
   if (!end || componentsOf(end) <= componentsOf(start)) return from;
 
   // Same month and year: "February 7–28, 1963" rather than repeating the month.
-  const [sy, sm] = start!.split('-');
-  const [ey, em, ed] = end.split('-');
-  if (sy === ey && sm === em && ed) {
-    const sd = start!.split('-')[2];
-    const month = MONTHS[Number(sm) - 1] ?? sm;
+  const startParts = start!.split('-');
+  const endParts = end.split('-');
+  const [sy, sm, sd] = startParts;
+  const [ey, em, ed] = endParts;
+
+  // Only collapse to range format if both dates have all required parts
+  if (sy && sm && sd && ey && em && ed && sy === ey && sm === em) {
+    const monthNum = Number(sm);
+    const month = (monthNum >= 1 && monthNum <= 12) ? MONTHS[monthNum - 1] : sm;
     return `${month} ${Number(sd)}–${Number(ed)}, ${sy}`;
   }
   return `${from} – ${formatPartial(end)}`;
@@ -89,4 +105,14 @@ export function yearExtent(items: { year: number; yearEnd: number }[]): [number,
     if (it.yearEnd > hi) hi = it.yearEnd;
   }
   return [lo, hi];
+}
+
+/** Runtime as "45 min" / "1 hr 12 min" — precision below the minute is noise here. */
+export function formatDuration(seconds: number | null): string | null {
+  if (seconds == null || seconds <= 0) return null;
+  const mins = Math.round(seconds / 60);
+  if (mins < 60) return `${mins} min`;
+  const h = Math.floor(mins / 60);
+  const m = mins % 60;
+  return m ? `${h} hr ${m} min` : `${h} hr`;
 }

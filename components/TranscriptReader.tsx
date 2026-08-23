@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react';
 import { useUrlState } from '@/lib/useUrlState';
 import { Highlight } from './Highlight';
-import { tokenize } from '@/lib/search';
+import { highlightNeedles, needleRegex, normalize } from '@/lib/search';
 import type { TranscriptPage } from '@/lib/types';
 import styles from './TranscriptReader.module.css';
 
@@ -26,27 +26,31 @@ export function TranscriptReader({ pages }: { pages: TranscriptPage[] }) {
   const [typed, setTyped] = useState<string | null>(null);
   const query = typed ?? params.get('q') ?? '';
 
-  const tokens = useMemo(() => tokenize(query), [query]);
+  // Phrase, not token bag — see highlightNeedles in lib/search.ts.
+  const tokens = useMemo(() => highlightNeedles(query), [query]);
+
+  // Pre-normalize all paragraphs once (not on every keystroke)
+  const normalizedPages = useMemo(
+    () => pages.map((page) => page.paragraphs.map((p) => normalize(p))),
+    [pages]
+  );
 
   const matches = useMemo(() => {
     if (!tokens.length) return 0;
     let n = 0;
-    for (const page of pages) {
-      for (const para of page.paragraphs) {
-        const hay = para.toLowerCase();
+    for (const normalized of normalizedPages) {
+      for (const hay of normalized) {
         for (const t of tokens) {
-          let from = 0;
-          for (;;) {
-            const at = hay.indexOf(t, from);
-            if (at === -1) break;
+          const re = needleRegex(t);
+          for (let m = re.exec(hay); m; m = re.exec(hay)) {
+            if (m[0].length === 0) break;
             n++;
-            from = at + t.length;
           }
         }
       }
     }
     return n;
-  }, [pages, tokens]);
+  }, [normalizedPages, tokens]);
 
   return (
     <div className="railLayout">
@@ -88,7 +92,7 @@ export function TranscriptReader({ pages }: { pages: TranscriptPage[] }) {
             </span>
 
             {page.paragraphs.map((para, i) => (
-              <p key={i} className={styles.para}>
+              <p key={`p${page.page}-para${i}`} className={styles.para}>
                 <Highlight text={para} tokens={tokens} />
               </p>
             ))}
@@ -111,7 +115,7 @@ export function TranscriptReader({ pages }: { pages: TranscriptPage[] }) {
                 </p>
                 <ol className={styles.speakerList}>
                   {page.speakers.map((s, i) => (
-                    <li key={i}>{s}</li>
+                    <li key={`p${page.page}-speaker${i}`}>{s}</li>
                   ))}
                 </ol>
               </details>

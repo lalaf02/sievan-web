@@ -1,15 +1,18 @@
 import Link from 'next/link';
 import styles from './Prose.module.css';
 
-export function RecordHeader({
-  eyebrow, title, backHref, backLabel, children,
-}: {
+/** Props for RecordHeader component */
+export interface RecordHeaderProps {
   eyebrow?: string;
   title: string;
   backHref: string;
   backLabel: string;
   children?: React.ReactNode;
-}) {
+}
+
+export function RecordHeader({
+  eyebrow, title, backHref, backLabel, children,
+}: RecordHeaderProps) {
   return (
     <header className={styles.header}>
       <Link href={backHref} className={styles.back}>← {backLabel}</Link>

@@ -16,7 +16,12 @@ type Props = { params: Promise<{ pubId: string }> };
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { pubId } = await params;
   const pub = getPublication(pubId);
-  return pub ? { title: pub.name } : {};
+  if (!pub) return { title: 'Publication not found' };
+  const articles = articlesForPublication(pub.id);
+  return {
+    title: pub.name,
+    description: `${articles.length} article${articles.length !== 1 ? 's' : ''} about Maurice Sievan from ${pub.name}.`,
+  };
 }
 
 export default async function PublicationPage({ params }: Props) {

@@ -49,6 +49,42 @@ export function scoreFields(fields: Field[], queryTokens: string[]): number {
   return total;
 }
 
+/**
+ * What to light up for a query.
+ *
+ * Scoring splits a query into tokens and requires all of them (AND). Highlighting
+ * must NOT do the same: a reader who follows a link for the phrase "the best
+ * american artist in the" wants that phrase, not every "the" and "in" in 4,769
+ * words. Token-wise highlighting on a common word marks most of the page and tells
+ * them nothing.
+ *
+ * So a multi-word query is treated as one contiguous needle. Single words behave
+ * exactly as before.
+ *
+ * Note the needle is normalised but not whitespace-collapsed: `normalize` maps each
+ * character to exactly one character, which is what lets `highlightSegments` index
+ * back into the original string with offsets found in the normalised one.
+ */
+export function highlightNeedles(query: string): string[] {
+  const needle = normalize(query).trim();
+  return needle ? [needle] : [];
+}
+
+/**
+ * Match a needle allowing extra whitespace between its words.
+ *
+ * `normalize` maps each punctuation character to a single space rather than
+ * deleting it, so "individual, original" becomes "individual  original" — two
+ * spaces. A plain `indexOf` for "individual original" then finds nothing. Since
+ * every character still maps 1:1, matching with `\s+` between words keeps the
+ * offsets usable for slicing the original text.
+ */
+export function needleRegex(needle: string): RegExp {
+  const words = needle.trim().split(/\s+/)
+    .map((w) => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+  return new RegExp(words.join('\\s+'), 'g');
+}
+
 /** Split text into segments so matches can be wrapped in <mark>. */
 export function highlightSegments(
   text: string,
@@ -59,12 +95,10 @@ export function highlightSegments(
   const hay = normalize(text);
   const ranges: [number, number][] = [];
   for (const token of queryTokens) {
-    let from = 0;
-    for (;;) {
-      const at = hay.indexOf(token, from);
-      if (at === -1) break;
-      ranges.push([at, at + token.length]);
-      from = at + token.length;
+    const re = needleRegex(token);
+    for (let m = re.exec(hay); m; m = re.exec(hay)) {
+      if (m[0].length === 0) break;
+      ranges.push([m.index, m.index + m[0].length]);
     }
   }
   if (!ranges.length) return [{ text, hit: false }];

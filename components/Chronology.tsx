@@ -1,8 +1,9 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import Link from 'next/link';
 import type { TimelineEvent, TimelineKind } from '@/lib/types';
+import { useUrlState } from '@/lib/useUrlState';
 import styles from './Chronology.module.css';
 
 const KIND_LABELS: Record<TimelineKind, string> = {
@@ -32,9 +33,20 @@ export function Chronology({
     return (Object.keys(KIND_LABELS) as TimelineKind[]).filter((k) => present.has(k));
   }, [events]);
 
-  const [on, setOn] = useState<Set<TimelineKind>>(
-    () => new Set(kinds.filter((k) => !DEFAULT_OFF.includes(k))),
-  );
+  /**
+   * Which kinds are showing lives in the URL, so a filtered timeline is a citable
+   * link rather than a state a reader has to reconstruct. The server snapshot is
+   * empty, so the default set is what prerenders.
+   *
+   * Semantics: no `kind` param at all means the default set. Once the param exists
+   * it is the complete, explicit list — including the empty case, which is why
+   * deselecting everything writes an empty value rather than dropping the key.
+   */
+  const { params, update } = useUrlState();
+  const on = useMemo<Set<TimelineKind>>(() => {
+    if (!params.has('kind')) return new Set(kinds.filter((k) => !DEFAULT_OFF.includes(k)));
+    return new Set(params.getAll('kind').filter(Boolean) as TimelineKind[]);
+  }, [params, kinds]);
 
   const shown = useMemo(() => events.filter((e) => on.has(e.kind)), [events, on]);
 
@@ -60,10 +72,12 @@ export function Chronology({
   }, [events]);
 
   const toggle = (k: TimelineKind) =>
-    setOn((prev) => {
-      const next = new Set(prev);
+    update((p) => {
+      const next = new Set(on);
       if (next.has(k)) next.delete(k); else next.add(k);
-      return next;
+      p.delete('kind');
+      if (next.size === 0) p.append('kind', '');
+      else for (const kind of kinds) if (next.has(kind)) p.append('kind', kind);
     });
 
   return (
@@ -105,12 +119,12 @@ export function Chronology({
                 </p>
               )}
               <section className={styles.decade}>
-                <h2 className={styles.decadeTitle}>
+                <h3 className={styles.decadeTitle}>
                   <span className="tnum">{decade}s</span>
                   <span className={styles.decadeCount}>
                     {items.length} item{items.length === 1 ? '' : 's'}
                   </span>
-                </h2>
+                </h3>
 
                 {[...byYear.entries()].sort((a, b) => a[0] - b[0]).map(([year, list]) => (
                   <div key={year} className={styles.year}>
@@ -147,9 +161,9 @@ export function Chronology({
       */}
       {undatedTestimony.length > 0 && (
         <section className={styles.testimony}>
-          <h2 className={styles.decadeTitle}>
+          <h3 className={styles.decadeTitle}>
             <span>Testimony, undated</span>
-          </h2>
+          </h3>
           <p className={styles.testimonyNote}>
             None of the recordings carry a date, so they cannot be placed on the timeline.
             They were made after Sievan’s death in 1981 — Ivan Karp mentions not having

@@ -12,7 +12,8 @@ import { fileURLToPath } from 'node:url';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const WEB = join(HERE, '..');
-const ROOT = join(WEB, '..');
+// DataModel/, MS-CS-001/ and Video Archive/ live inside the repo, not beside it.
+const ROOT = WEB;
 const DM = join(ROOT, 'DataModel');
 
 // On Vercel (no DataModel), skip file existence checks - scans are in public/scans/
@@ -23,11 +24,20 @@ if (!existsSync(bundlePath)) {
   console.error('\n  check-data: run build-data.mjs first\n');
   process.exit(1);
 }
-const d = JSON.parse(readFileSync(bundlePath, 'utf8'));
+
+let d;
+try {
+  d = JSON.parse(readFileSync(bundlePath, 'utf8'));
+} catch (e) {
+  console.error(`\n  check-data: failed to parse ${bundlePath}: ${e.message}\n`);
+  process.exit(1);
+}
 
 const ids = (rows) => new Set(rows.map((r) => r.id));
+const toMap = (rows) => new Map(rows.map((r) => [r.id, r]));
 const O = ids(d.archiveObjects);
 const P = ids(d.publications);
+const articlesById = toMap(d.newsArticles); // Pre-compute for O(1) lookup
 const PE = ids(d.persons);
 const C = ids(d.collections);
 const E = ids(d.exhibitions);
@@ -50,7 +60,7 @@ for (const o of d.archiveObjects) {
   need(C.has(o.collection_id), `${o.id}: collection_id ${o.collection_id} not found`);
   for (const aid of o.article_ids ?? []) {
     need(A.has(aid), `${o.id}: article_ids -> ${aid} not found`);
-    const art = d.newsArticles.find((x) => x.id === aid);
+    const art = articlesById.get(aid); // O(1) lookup instead of O(n) find
     need(!art || art.archive_object_id === o.id, `${o.id}: ${aid} does not back-reference it`);
   }
   for (const s of o.scan_files ?? []) {
@@ -83,7 +93,9 @@ for (const e of d.exhibitions) {
 // The painting-centred layer is empty today; these loops are the gate that keeps
 // it honest the moment it fills.
 const V = ids(d.videoAssets);
+const VALID_SOURCE_TYPES = ['news_article', 'video_asset'];
 for (const c of d.commentary) {
+  need(VALID_SOURCE_TYPES.includes(c.source_type), `${c.id}: unknown source_type ${c.source_type}`);
   const pool = c.source_type === 'news_article' ? A : V;
   need(pool.has(c.source_id), `${c.id}: source_id ${c.source_id} not found for source_type ${c.source_type}`);
   need(!c.commentator_person_id || PE.has(c.commentator_person_id), `${c.id}: commentator not found`);

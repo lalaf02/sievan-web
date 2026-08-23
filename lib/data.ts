@@ -8,7 +8,22 @@ import type {
   Publication, TranscriptPage, VideoAsset,
 } from './types';
 
-export const archive = bundle as unknown as Archive;
+// Runtime validation to catch corrupted bundles early
+function validateBundle(data: unknown): asserts data is Archive {
+  if (!data || typeof data !== 'object') {
+    throw new Error('Archive bundle is invalid: expected object');
+  }
+  const d = data as Record<string, unknown>;
+  const required = ['archiveObjects', 'newsArticles', 'publications', 'persons', 'exhibitions', 'videoAssets', 'paintings', 'derived'];
+  for (const key of required) {
+    if (!Array.isArray(d[key]) && (key !== 'derived' && typeof d[key] !== 'object')) {
+      throw new Error(`Archive bundle missing or invalid: ${key}`);
+    }
+  }
+}
+
+validateBundle(bundle);
+export const archive = bundle as Archive;
 export const counts = archive.derived.counts;
 
 const index = <T extends { id: string }>(rows: T[]): Map<string, T> =>
@@ -39,6 +54,7 @@ export const allPersons = archive.persons;
 export const allExhibitions = archive.exhibitions;
 export const allVideos = archive.videoAssets;
 export const allPaintings = archive.paintings;
+export const allScholarship = archive.scholarship;
 
 export const articlesForObject = (objectId: string): NewsArticle[] =>
   (archive.derived.articlesByObject[objectId] ?? [])
@@ -79,19 +95,23 @@ export const mentionsForPerson = (personId: string) =>
  * with a computed path is unreliable under static export.
  */
 export async function loadTranscript(videoId: string): Promise<TranscriptPage[] | null> {
+  // Validate videoId to prevent path traversal attacks
+  if (!/^[a-zA-Z0-9_-]+$/.test(videoId)) {
+    console.error(`Invalid videoId: ${videoId}`);
+    return null;
+  }
+
   const { readFileSync, existsSync } = await import('node:fs');
   const { join } = await import('node:path');
   const file = join(process.cwd(), 'data', 'transcripts', `${videoId}.json`);
   if (!existsSync(file)) return null;
-  return JSON.parse(readFileSync(file, 'utf8')) as TranscriptPage[];
-}
 
-/** Public label for a byline that may be absent or initials-only. */
-export function bylineLabel(article: NewsArticle): string | null {
-  if (article.author_person_id) {
-    return getPerson(article.author_person_id)?.name ?? article.author_raw;
+  try {
+    return JSON.parse(readFileSync(file, 'utf8')) as TranscriptPage[];
+  } catch (e) {
+    console.error(`Failed to parse transcript ${videoId}:`, e);
+    return null;
   }
-  return article.author_raw;
 }
 
 /** The heading for a record that may have no headline (27 of 60 articles). */

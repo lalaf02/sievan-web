@@ -11,6 +11,7 @@
  */
 import Link from 'next/link';
 import { archive, getArticle, getExhibition, getPerson, getVideo, articleTitle } from '@/lib/data';
+import type { HistoricalEvent } from '@/lib/types';
 import { RecordList, Section } from './Record';
 
 export function ShownInSection({ paintingId }: { paintingId: string }) {
@@ -82,7 +83,9 @@ export function HistoricalContextSection({ paintingId }: { paintingId: string })
 
   const shaped = rows.filter((r) => r.direction === 'event_shaped_painting');
   const changed = rows.filter((r) => r.direction === 'painting_shaped_event_or_society');
-  const events = Object.fromEntries(archive.historicalEvents.map((e) => [e.id, e]));
+  const events: Record<string, HistoricalEvent> = Object.fromEntries(
+    archive.historicalEvents.map((e) => [e.id, e] as const)
+  );
 
   return (
     <>

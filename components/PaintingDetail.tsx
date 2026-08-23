@@ -39,7 +39,11 @@ export default async function PaintingDetail({ params }: Props) {
         // eslint-disable-next-line @next/next/no-img-element
         <img
           src={painting.image_ref}
-          alt={painting.title ?? 'Untitled'}
+          alt={[
+            painting.title ?? 'Untitled work',
+            painting.date_text,
+            painting.medium,
+          ].filter(Boolean).join(', ') + ' by Maurice Sievan'}
           style={{ width: '100%', height: 'auto', marginBottom: 'var(--s-5)' }}
         />
       )}

@@ -1,33 +1,38 @@
 import Link from 'next/link';
-import type { Quote } from '@/lib/quotes';
+import { quoteHref, type Quote } from '@/lib/quotes';
 import styles from './PullQuote.module.css';
 
 interface PullQuoteProps {
   quote: Quote;
   /** Use larger styling for hero placement */
   size?: 'default' | 'large';
-  /** Show the source link */
+  /** Show the link back into the transcript */
   showSource?: boolean;
 }
 
 /**
- * Displays a testimonial quote prominently.
+ * A piece of testimony, presented as a door rather than an ornament.
  *
- * Used on the homepage for rotating endorsements and on the "Why Sievan"
- * page to present curated evidence.
+ * The whole figure is a link into the transcript at the page the words were
+ * spoken on, with the passage highlighted — see `quoteHref`. A quote that cannot
+ * be checked against its source is just an assertion, and this archive's argument
+ * rests on being checkable.
  */
 export function PullQuote({ quote, size = 'default', showSource = false }: PullQuoteProps) {
+  const href = quoteHref(quote);
   return (
     <figure className={`${styles.quote} ${size === 'large' ? styles.large : ''}`}>
       <blockquote className={styles.text}>
-        "{quote.text}"
+        <Link href={href} className={styles.textLink}>
+          “{quote.text}”
+        </Link>
       </blockquote>
       <figcaption className={styles.attribution}>
         <span className={styles.speaker}>{quote.speaker}</span>
         <span className={styles.role}>{quote.role}</span>
-        {showSource && quote.source && (
-          <Link href={quote.source} className={styles.source}>
-            Source
+        {showSource && (
+          <Link href={href} className={styles.source}>
+            Hear it in context
           </Link>
         )}
       </figcaption>
@@ -40,14 +45,11 @@ interface QuoteGridProps {
   columns?: 1 | 2 | 3;
 }
 
-/**
- * Grid of quotes for presenting multiple testimonials.
- */
 export function QuoteGrid({ quotes, columns = 2 }: QuoteGridProps) {
   return (
     <div className={styles.grid} data-columns={columns}>
-      {quotes.map((quote, i) => (
-        <PullQuote key={i} quote={quote} showSource />
+      {quotes.map((quote) => (
+        <PullQuote key={quote.id} quote={quote} showSource />
       ))}
     </div>
   );

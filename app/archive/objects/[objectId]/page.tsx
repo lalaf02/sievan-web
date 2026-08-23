@@ -8,6 +8,7 @@ import {
 import { formatArticleDate } from '@/lib/dates';
 import { Fact, Facts, RecordHeader, RecordList, Section, Verbatim } from '@/components/Record';
 import { ScanViewer, type ScanInfo } from '@/components/ScanViewer';
+import { SameYearSection } from '@/components/RelatedSection';
 
 export function generateStaticParams() {
   return allObjects.map((o) => ({ objectId: o.id }));
@@ -18,8 +19,12 @@ type Props = { params: Promise<{ objectId: string }> };
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { objectId } = await params;
   const object = getObject(objectId);
-  if (!object) return {};
-  return { title: `${object.id} · ${OBJECT_TYPE_LABELS[object.object_type]}` };
+  if (!object) return { title: 'Object not found' };
+  const typeLabel = OBJECT_TYPE_LABELS[object.object_type];
+  return {
+    title: `${object.id} · ${typeLabel}`,
+    description: `${typeLabel}${object.date_text ? ` (${object.date_text})` : ''} from the Maurice Sievan archive.`,
+  };
 }
 
 export default async function ObjectPage({ params }: Props) {
@@ -107,6 +112,8 @@ export default async function ObjectPage({ params }: Props) {
           </RecordList>
         </Section>
       )}
+
+      <SameYearSection year={object.date_earliest} exclude={[object.id, ...object.article_ids]} />
     </div>
   );
 }

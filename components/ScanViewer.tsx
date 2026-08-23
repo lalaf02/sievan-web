@@ -56,7 +56,18 @@ export function ScanViewer({ scans, objectId }: { scans: ScanInfo[]; objectId: s
             ) : isImage(scan.filename) ? (
               // MSAR00025 is the one JPG among the PDFs.
               // eslint-disable-next-line @next/next/no-img-element
-              <img className={styles.image} src={src} alt={`Scan of ${objectId}`} loading="lazy" />
+              <img
+                className={styles.image}
+                src={src}
+                alt={
+                  label
+                    ? `${label} of archival document ${objectId}`
+                    : scans.length > 1
+                      ? `Page ${i + 1} of ${scans.length} from archival document ${objectId}`
+                      : `Scan of archival document ${objectId}`
+                }
+                loading="lazy"
+              />
             ) : (
               <object className={styles.pdf} data={src} type="application/pdf">
                 <div className={styles.fallback}>

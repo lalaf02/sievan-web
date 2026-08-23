@@ -134,6 +134,7 @@ export function PressBrowser({
                 type="button"
                 className={`${styles.chip} ${selDecades.includes(d.id) ? styles.chipOn : ''}`}
                 aria-pressed={selDecades.includes(d.id)}
+                aria-label={`Filter by ${d.label} (${d.count} articles)`}
                 onClick={() => toggle('decade', d.id)}
               >
                 {d.label}<span className={styles.chipCount}>{d.count}</span>

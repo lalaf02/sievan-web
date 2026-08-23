@@ -51,18 +51,22 @@ export function useUrlState() {
   const toggle = useCallback(
     (key: string, value: string) =>
       update((p) => {
+        // Build new values list without mutating during iteration
         const have = p.getAll(key);
-        p.delete(key);
         const next = have.includes(value)
           ? have.filter((v) => v !== value)
           : [...have, value];
+        // Clear and rebuild atomically
+        p.delete(key);
         for (const v of next) p.append(key, v);
       }),
     [update],
   );
 
   const clear = useCallback(() => update((p) => {
-    for (const key of [...p.keys()]) p.delete(key);
+    // Collect keys first to avoid mutation during iteration
+    const keys = [...p.keys()];
+    for (const key of keys) p.delete(key);
   }), [update]);
 
   return { params, update, toggle, clear };

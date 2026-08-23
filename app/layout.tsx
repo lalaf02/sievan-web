@@ -16,14 +16,28 @@ const sans = Inter({
   display: 'swap',
 });
 
+const siteDescription =
+  'The archive of Maurice Sievan (1898–1981): press coverage, oral-history interviews, ' +
+  'exhibition history and works.';
+
 export const metadata: Metadata = {
   title: {
     default: 'Maurice Sievan',
     template: '%s · Maurice Sievan',
   },
-  description:
-    'The archive of Maurice Sievan (1898–1981): press coverage, oral-history interviews, ' +
-    'exhibition history and works.',
+  description: siteDescription,
+  openGraph: {
+    type: 'website',
+    locale: 'en_US',
+    siteName: 'Maurice Sievan Archive',
+    title: 'Maurice Sievan',
+    description: siteDescription,
+  },
+  twitter: {
+    card: 'summary',
+    title: 'Maurice Sievan',
+    description: siteDescription,
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

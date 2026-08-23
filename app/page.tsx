@@ -1,122 +1,185 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { counts, allExhibitions } from '@/lib/data';
-import { FEATURED_QUOTES, GREENBERG_QUOTE } from '@/lib/quotes';
-import { THESIS } from '@/lib/validation';
+import { getQuote } from '@/lib/quotes';
+import { THESIS, MUSEUM_COLLECTIONS, PEER_NETWORK } from '@/lib/validation';
 import { PullQuote } from '@/components/PullQuote';
-import { ValidationBar } from '@/components/ValidationBar';
 import styles from './home.module.css';
+
+export const metadata: Metadata = {
+  title: 'Maurice Sievan (1898–1981) — Archive',
+  description:
+    'American painter praised by Clement Greenberg, collected by MoMA and the Hirshhorn, and '
+    + 'almost entirely forgotten. Press notices, oral-history interviews, exhibition records '
+    + 'and the catalogue of works.',
+};
 
 export default function Home() {
   const years = allExhibitions.map((e) => e.date_earliest ?? 0).filter(Boolean);
   const span = `${Math.min(...years)}–${Math.max(...years)}`;
 
   return (
-    <div className="page" style={{ paddingTop: 'var(--s-7)' }}>
-      <div className={styles.hero}>
-        <div>
+    <div className="page" style={{ paddingTop: 'var(--s-6)' }}>
+      <div className={styles.mosaic}>
+
+        {/* ---------------------------------------------------------- the name */}
+        <section className={`${styles.tile} ${styles.hero}`}>
           <p className="eyebrow">1898–1981</p>
           <h1 className={styles.name}>Maurice Sievan</h1>
           <p className={styles.tagline}>{THESIS.headline}</p>
           <p className={styles.lede}>{THESIS.subhead}</p>
-        </div>
+        </section>
 
-        <figure className={styles.portrait}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/retrospective/p01.jpg" alt="Maurice Sievan in his studio" />
-          <figcaption>
-            Cover of the retrospective catalogue held in the archive.{' '}
-            <Link href="/life/retrospective/">See the catalogue</Link>
+        {/* The endorsement, given the weight of a wall text rather than a footnote. */}
+        <section className={`${styles.tile} ${styles.creed}`}>
+          <p className={styles.tileLabel}>The verdict</p>
+          <PullQuote quote={getQuote('greenberg-best')} size="large" showSource />
+        </section>
+
+        {/* ------------------------------------------------------- him, working */}
+        <figure className={`${styles.tile} ${styles.clip}`}>
+          <video
+            className={styles.video}
+            src="/clips/painting-portrait.mp4"
+            poster="/clips/painting-portrait.jpg"
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="metadata"
+            aria-label="Maurice Sievan at the easel, working a brush across a portrait in progress."
+          />
+          <figcaption className={styles.caption}>
+            The only moving picture of Sievan at work — home-movie footage held in the video
+            archive, silent, undated.
           </figcaption>
         </figure>
-      </div>
 
-      {/* The Greenberg endorsement - visible within 30 seconds */}
-      <div className={styles.endorsement}>
-        <PullQuote quote={GREENBERG_QUOTE} size="large" showSource />
-      </div>
+        <section className={`${styles.tile} ${styles.case}`}>
+          <p className={styles.tileLabel}>Why he matters now</p>
+          <ul className={styles.points}>
+            {THESIS.points.map((point) => (
+              <li key={point}>{point}</li>
+            ))}
+          </ul>
+        </section>
 
-      {/* Validation bar - quick credibility hits */}
-      <ValidationBar />
+        <figure className={`${styles.tile} ${styles.plate}`}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/retrospective/p01.jpg" alt="Cover of the Maurice Sievan retrospective catalogue." />
+          <figcaption className={styles.caption}>
+            The retrospective catalogue.{' '}
+            <Link href="/life/retrospective/">Read it page by page</Link>
+          </figcaption>
+        </figure>
 
-      {/* The case for Sievan */}
-      <section className={styles.thesis}>
-        <h2>Why Sievan Matters Now</h2>
-        <div className={styles.thesisContent}>
-          <div className={styles.thesisText}>
-            <p>
-              Maurice Sievan was excluded from the Abstract Expressionist canon because he
-              maintained imagery when pure abstraction was the only path to recognition.
-              The same quality that prevented his commercial success — his refusal to
-              conform — now makes him a compelling discovery:
-            </p>
-            <ul className={styles.thesisPoints}>
-              {THESIS.points.map((point, i) => (
-                <li key={i}>{point}</li>
-              ))}
-            </ul>
-            <p>
-              <Link href="/why/" className={styles.thesisLink}>
-                Read the full case for Sievan
+        {/* ----------------------------------------------------------- evidence */}
+        <section className={`${styles.tile} ${styles.stats}`}>
+          <dl className={styles.statList}>
+            <div className={styles.stat}>
+              <dt>Museum collections</dt>
+              <dd>{MUSEUM_COLLECTIONS.length}</dd>
+              <p>MoMA, the Hirshhorn, Brooklyn, Baltimore and nine more.</p>
+            </div>
+            <div className={styles.stat}>
+              <dt>Press notices</dt>
+              <dd>{counts.newsArticles}</dd>
+              <p>1940–1983, across {counts.publications} publications.</p>
+            </div>
+            <div className={styles.stat}>
+              <dt>Exhibitions</dt>
+              <dd>{counts.exhibitions}</dd>
+              <p>Documented in the archive, {span}.</p>
+            </div>
+            <div className={styles.stat}>
+              <dt>Words of testimony</dt>
+              <dd>{counts.transcriptWords.toLocaleString()}</dd>
+              <p>From {counts.transcribedInterviews} filmed interviews with those who knew him.</p>
+            </div>
+          </dl>
+        </section>
+
+        {/* --------------------------------------------------------- the voices */}
+        <section className={`${styles.tile} ${styles.quoteA}`}>
+          <PullQuote quote={getQuote('karp-mystical')} showSource />
+        </section>
+
+        <section className={`${styles.tile} ${styles.quoteB}`}>
+          <PullQuote quote={getQuote('solman-suburbs')} showSource />
+        </section>
+
+        <figure className={`${styles.tile} ${styles.clipSmall}`}>
+          <video
+            className={styles.video}
+            src="/clips/painting-landscape.mp4"
+            poster="/clips/painting-landscape.jpg"
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="none"
+            aria-label="Sievan painting outdoors at an easel, working a blue-grey landscape canvas."
+          />
+          <figcaption className={styles.caption}>
+            Outdoors, at the easel. A canvas going down in real time.
+          </figcaption>
+        </figure>
+
+        {/* ------------------------------------------------------- the company */}
+        <section className={`${styles.tile} ${styles.peers}`}>
+          <p className={styles.tileLabel}>The company he kept</p>
+          <ul className={styles.peerList}>
+            {PEER_NETWORK.map((p) => (
+              <li key={p.name}>
+                <span className={styles.peerName}>{p.name}</span>
+                <span className={styles.peerNote}>{p.note}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        {/* ------------------------------------------------------------- doors */}
+        <nav className={`${styles.tile} ${styles.doors}`} aria-label="Explore the archive">
+          <ul className={styles.doorList}>
+            <li>
+              <Link href="/life/" className={styles.door}>
+                <span className={styles.doorTitle}>Life and Work</span>
+                <span className={styles.doorText}>
+                  A painter placed in his time — the chronology, the exhibitions, the people,
+                  and the five phases of the work.
+                </span>
               </Link>
-            </p>
-          </div>
-          <div className={styles.thesisQuote}>
-            <PullQuote quote={FEATURED_QUOTES[1]} />
-          </div>
-        </div>
-      </section>
-
-      {/* Entry points - reframed door cards */}
-      <ul className={styles.doors}>
-        <li>
-          <Link href="/why/" className={styles.door}>
-            <span className={styles.doorTitle}>Why Sievan</span>
-            <span className={styles.doorText}>
-              The evidence for recognition: critical endorsements, museum holdings,
-              and an independent vision that anticipated later developments.
-            </span>
-          </Link>
-        </li>
-        <li>
-          <Link href="/archive/press/" className={styles.door}>
-            <span className={styles.doorNum}>{counts.newsArticles}</span>
-            <span className={styles.doorTitle}>Press Notices</span>
-            <span className={styles.doorText}>
-              What the critics said: Dore Ashton, Hilton Kramer, Emily Genauer, and
-              {counts.publications} other publications, 1940–1983.
-            </span>
-          </Link>
-        </li>
-        <li>
-          <Link href="/life/interviews/" className={styles.door}>
-            <span className={styles.doorNum}>{counts.transcribedInterviews}</span>
-            <span className={styles.doorTitle}>Interviews</span>
-            <span className={styles.doorText}>
-              Firsthand testimony from Ivan Karp, Joseph Solman, Will Barnet, and others
-              who knew the man and his work.
-            </span>
-          </Link>
-        </li>
-        <li>
-          <Link href="/exhibitions/" className={styles.door}>
-            <span className={styles.doorNum}>{counts.exhibitions}</span>
-            <span className={styles.doorTitle}>Exhibitions</span>
-            <span className={styles.doorText}>
-              MoMA, Whitney, Metropolitan, and {counts.exhibitions - 3} other institutions, {span}.
-            </span>
-          </Link>
-        </li>
-      </ul>
-
-      <p className={styles.footLinks}>
-        <Link href="/life/">Life and Work</Link>
-        {' · '}
-        <Link href="/life/chronology/">Chronology</Link>
-        {' · '}
-        <Link href="/life/retrospective/">The retrospective catalogue</Link>
-        {' · '}
-        <Link href="/about/method/">How this archive was made</Link>
-      </p>
+            </li>
+            <li>
+              <Link href="/works/" className={styles.door}>
+                <span className={styles.doorTitle}>Catalogue Raisonné</span>
+                <span className={styles.doorText}>
+                  The body of work, being catalogued now. Five decades from the early
+                  landscapes to the late abstractions.
+                </span>
+              </Link>
+            </li>
+            <li>
+              <Link href="/archive/" className={styles.door}>
+                <span className={styles.doorTitle}>Archives</span>
+                <span className={styles.doorText}>
+                  All {counts.archiveObjects} objects that survive on paper: clippings, catalogues,
+                  posters and the interviews — searchable, and honest about its gaps.
+                </span>
+              </Link>
+            </li>
+            <li>
+              <Link href="/research/" className={styles.door}>
+                <span className={styles.doorTitle}>Research</span>
+                <span className={styles.doorText}>
+                  Access, rights and citation, the bibliography, and how this archive was
+                  assembled.
+                </span>
+              </Link>
+            </li>
+          </ul>
+        </nav>
+      </div>
     </div>
   );
 }

@@ -9,6 +9,7 @@ import { formatArticleDate } from '@/lib/dates';
 import {
   EditorialNote, Fact, Facts, RecordHeader, RecordList, Section, Verbatim,
 } from '@/components/Record';
+import { LikelyReviewsSection, SameYearSection } from '@/components/RelatedSection';
 
 export function generateStaticParams() {
   return allArticles.map((a) => ({ articleId: a.id }));
@@ -20,11 +21,11 @@ type Props = { params: Promise<{ articleId: string }> };
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { articleId } = await params;
   const article = getArticle(articleId);
-  if (!article) return {};
+  if (!article) return { title: 'Article not found' };
   const pub = getPublication(article.publication_id)?.name ?? article.publication_raw;
   return {
     title: articleTitle(article),
-    description: [pub, article.date_text].filter(Boolean).join(', '),
+    description: `Press notice about Maurice Sievan${pub ? ` from ${pub}` : ''}${article.date_text ? `, ${article.date_text}` : ''}.`,
   };
 }
 
@@ -117,6 +118,12 @@ export default async function ArticlePage({ params }: Props) {
           </RecordList>
         </Section>
       )}
+
+      <LikelyReviewsSection articleId={article.id} />
+      <SameYearSection
+        year={article.date_earliest}
+        exclude={[article.id, article.archive_object_id, ...siblings.map((s) => s.id)]}
+      />
     </div>
   );
 }

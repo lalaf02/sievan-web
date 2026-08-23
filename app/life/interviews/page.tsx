@@ -2,6 +2,9 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { allVideos, counts, getPerson } from '@/lib/data';
 import styles from './interviews.module.css';
+import { formatDuration } from '@/lib/dates';
+import { CONTACT, mailtoHref } from '@/lib/contact';
+import { Pending } from '@/components/Pending';
 
 export const metadata: Metadata = {
   title: 'Interviews',
@@ -29,6 +32,29 @@ export default function InterviewsPage() {
         </p>
       </header>
 
+      <Pending
+        eyebrow="A gap in the record"
+        title="None of the seven recordings is dated."
+        footer={
+          <>
+            Were you there, or do you know when these were filmed?{' '}
+            <a href={mailtoHref('Sievan archive: interview dates')}>{CONTACT.email}</a>
+          </>
+        }
+      >
+        <p>
+          Because no recording carries a date, none of them can be placed on the{' '}
+          <Link href="/life/#chronology">chronology</Link> — the most human material in the
+          archive sits outside its timeline, in a band of its own. Internal evidence puts
+          them after Sievan’s death in 1981: Ivan Karp mentions not having seen him “for
+          over 12, 14 years”.
+        </p>
+        <p>
+          A date on the tape label, a letter arranging the interview, or a recollection
+          from anyone present would close this.
+        </p>
+      </Pending>
+
       <ul className={styles.grid}>
         {[...interviews, ...other].map((v) => {
           const person = v.subject_person_ids.map((id) => getPerson(id)).find(Boolean);
@@ -45,11 +71,14 @@ export default function InterviewsPage() {
 
               {readable ? (
                 <p className={styles.cardMeta}>
+                  {formatDuration(v.duration_seconds) ?? 'Runtime unknown'} ·{' '}
                   {v.transcript_word_count?.toLocaleString()} words ·{' '}
                   {v.transcript_page_count} pages
                 </p>
               ) : (
-                <p className={styles.cardMeta}>No transcript</p>
+                <p className={styles.cardMeta}>
+                  {formatDuration(v.duration_seconds) ?? 'Runtime unknown'} · No transcript
+                </p>
               )}
 
               {/*
@@ -77,7 +106,7 @@ export default function InterviewsPage() {
                 <div className={`${styles.card} ${styles.cardMuted}`}>
                   {card}
                   {v.id === 'MS-VI-00006' && (
-                    <a className={styles.help} href="mailto:?subject=Sievan%20archive%3A%20tape%20%23010">
+                    <a className={styles.help} href={mailtoHref('Sievan archive: tape #010')}>
                       Can you help identify this interview?
                     </a>
                   )}
