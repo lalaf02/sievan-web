@@ -21,8 +21,28 @@ const WEB = join(HERE, '..');
 const normalize = (s) =>
   s.toLowerCase().normalize('NFKD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9\s]/g, ' ');
 
-const { ALL_QUOTES } = await import('../lib/quotes.ts');
-const { needleRegex } = await import('../lib/search.ts');
+/*
+ * These are .ts imports from a .mjs script, which relies on Node's TypeScript
+ * stripping (unflagged from 22.18 / 23.6). package.json pins `engines.node`
+ * accordingly. If that pin is ever lost the raw failure is an opaque
+ * ERR_UNKNOWN_FILE_EXTENSION during `prebuild`, which on a CI host means the
+ * build never runs and the previous deployment quietly stays live — so say
+ * plainly what is wrong rather than letting the stack trace speak.
+ */
+let ALL_QUOTES, needleRegex;
+try {
+  ({ ALL_QUOTES } = await import('../lib/quotes.ts'));
+  ({ needleRegex } = await import('../lib/search.ts'));
+} catch (err) {
+  if (err?.code === 'ERR_UNKNOWN_FILE_EXTENSION') {
+    console.error(
+      `\n  check-quotes: this Node (${process.version}) cannot import TypeScript.\n`
+      + '  Needs Node >= 22.18 (see engines.node in package.json).\n',
+    );
+    process.exit(1);
+  }
+  throw err;
+}
 
 const errors = [];
 const seen = new Set();
