@@ -1,0 +1,80 @@
+.lede {
+  font-size: var(--t-md);
+  line-height: 1.45;
+  color: var(--ink-muted);
+  margin: var(--s-3) 0 0;
+}
+
+/*
+ * The four grades, up front. This block is the page's argument: the rail below it
+ * offers "Evidence" as its first facet, and a reader meets the distinction here
+ * rather than inferring it from a checkbox.
+ */
+.grades {
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+  padding: var(--s-5) 0;
+  margin-bottom: var(--s-6);
+}
+
+.gradesTitle {
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--ink-faint);
+  margin: 0 0 var(--s-4);
+}
+
+.gradeList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--s-5);
+}
+
+.gradeItem { min-width: 0; }
+
+.gradeCount {
+  display: block;
+  font-family: var(--serif);
+  font-size: var(--t-xl);
+  line-height: 1;
+  color: var(--oxide);
+}
+
+.gradeLabel {
+  display: block;
+  font-family: var(--sans);
+  font-size: var(--t-sm);
+  font-weight: 600;
+  color: var(--ink);
+  margin-top: var(--s-2);
+}
+
+.gradeNote {
+  display: block;
+  font-size: var(--t-sm);
+  line-height: 1.45;
+  color: var(--ink-muted);
+  margin-top: var(--s-1);
+}
+
+.gradesNote {
+  font-size: var(--t-sm);
+  line-height: 1.5;
+  color: var(--ink-muted);
+  max-width: 68ch;
+  margin: var(--s-5) 0 0;
+}
+
+@media (max-width: 1020px) {
+  .gradeList { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 620px) {
+  .gradeList { grid-template-columns: 1fr; gap: var(--s-4); }
+}

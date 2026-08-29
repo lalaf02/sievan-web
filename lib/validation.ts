@@ -135,12 +135,52 @@ export const PEER_NETWORK = [
 ];
 
 /**
- * The two lines the homepage opens with.
+ * The museum group exhibitions, pulled out of the CV's thirty.
  *
- * `headline` is Ivan Karp's phrase, not ours — he calls the work "a surprisingly
- * private vision" and "a very private vision" in MS-VI-00001. Using a quotation as
- * the banner is deliberate: the first characterisation a visitor reads should come
- * from someone who was there.
+ * DERIVED from CV.groupExhibitions and keyed on each venue string verbatim, on exactly
+ * the discipline MUSEUM_COLLECTIONS uses: it throws at module scope on a miss, so
+ * correcting a transcription in lib/retrospective.ts can never leave this list quietly
+ * pointing at a venue the CV no longer names.
+ *
+ * The selection is stated wherever it renders — these are the museum shows among the
+ * thirty, not a ranking and not the whole list. Galleries, colleges and the overseas
+ * salons are left in the full CV on /life/ rather than being silently dropped.
+ */
+const MARQUEE_VENUES = [
+  'Metropolitan Museum of Art',
+  'Whitney Museum',
+  'Museum of Modern Art',
+  'Brooklyn Museum',
+  'Art Institute of Chicago',
+  'Carnegie Institute of Fine Arts, Pittsburgh, Pa.',
+  'Corcoran Gallery, Washington, DC',
+  'Wadsworth Atheneum, Hartford, Conn.',
+];
+
+export const MARQUEE_EXHIBITIONS: { venue: string; years: string }[] =
+  MARQUEE_VENUES.map((venue) => {
+    const row = CV.groupExhibitions.find(([name]) => name === venue);
+    if (!row) {
+      throw new Error(
+        `lib/validation.ts: MARQUEE_EXHIBITIONS names ${JSON.stringify(venue)}, which no `
+        + 'longer appears verbatim in CV.groupExhibitions. The CV transcription in '
+        + 'lib/retrospective.ts is the source; fix the name here to match it rather than '
+        + 'the other way round.',
+      );
+    }
+    return { venue, years: row[1] };
+  });
+
+/**
+ * The line the homepage opens with.
+ *
+ * There used to be a `headline` above this reading "A Private Vision". It was Ivan
+ * Karp's phrase — he says "a surprisingly private vision", "it was a private vision"
+ * and "a very private vision" in MS-VI-00001 — but it ran as an unattributed banner,
+ * with no speaker and no link to the transcript, which is exactly what made it read
+ * as a slogan the project had written about itself rather than as testimony. It is
+ * gone. The three Karp quotes remain in lib/quotes.ts and are used where a quotation
+ * belongs: attributed, and linked to the page it was said on.
  *
  * `subhead` states what is on the record and stops. The counts are the CV's own
  * (14 one-man shows, 30 group exhibitions, 13 museum collections); the last clause
@@ -148,7 +188,6 @@ export const PEER_NETWORK = [
  * argument that the numbers already carry.
  */
 export const THESIS = {
-  headline: 'A Private Vision',
   subhead:
     'He kept the figure when New York gave it up. Fourteen one-man shows, thirty group '
     + 'exhibitions, thirteen museum collections — and then the histories of the period '

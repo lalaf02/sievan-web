@@ -25,6 +25,41 @@ interface Mark {
 }
 
 /**
+ * Several works sharing a year, drawn as one mark.
+ *
+ * Five of the attested works are dated 1970 and were being drawn as five 3px marks at
+ * exactly the same x — indistinguishable from one, and four of them unreachable. They
+ * are now one wider mark that names everything at that year.
+ */
+interface YearMark {
+  year: number;
+  href: string;
+  count: number;
+  label: string;
+}
+
+function groupByYear(marks: Mark[], fallbackHref: string): YearMark[] {
+  const byYear = new Map<number, Mark[]>();
+  for (const m of marks) {
+    if (!byYear.has(m.year)) byYear.set(m.year, []);
+    byYear.get(m.year)!.push(m);
+  }
+  return [...byYear.entries()]
+    .sort((a, b) => a[0] - b[0])
+    .map(([year, ms]) => {
+      // One destination only where every work at this year shares it; otherwise the
+      // period page, which lists them all. Never an arbitrary pick among them.
+      const hrefs = new Set(ms.map((m) => m.href));
+      return {
+        year,
+        href: hrefs.size === 1 ? ms[0].href : fallbackHref,
+        count: ms.length,
+        label: ms.length === 1 ? ms[0].label : `${year} · ${ms.map((m) => m.label.replace(/^[^·]*·\s*/, '')).join('; ')}`,
+      };
+    });
+}
+
+/**
  * Everything dated inside one period, as marks.
  *
  * The catalogue's own plates carry a year but no title, medium or dimensions — the
@@ -67,7 +102,9 @@ export function PeriodSpine({ current }: { current?: PeriodId }) {
       <ol className={styles.track}>
         {PERIODS.map((period) => {
           const span = period.to - period.from + 1;
-          const marks = marksFor(period);
+          const href = `/works/periods/${period.id}/`;
+          const marks = groupByYear(marksFor(period), href);
+          const dated = marks.reduce((n, m) => n + m.count, 0);
           const isCurrent = period.id === current;
           return (
             <li
@@ -77,20 +114,24 @@ export function PeriodSpine({ current }: { current?: PeriodId }) {
               style={{ flexGrow: span, flexBasis: `${(span / careerYears) * 100}%` }}
             >
               <Link
-                href={`/works/periods/${period.id}/`}
+                href={href}
                 className={styles.bandLink}
                 aria-current={isCurrent ? 'page' : undefined}
               >
                 <span className={styles.bandName}>{period.name}</span>
-                <span className={`${styles.bandSpan} tnum`}>{formatSpan(period)}</span>
+                {/* Span and count share one line: the rail was three stacked lines
+                    tall and dominated the work it was meant to introduce. */}
+                <span className={`${styles.bandMeta} tnum`}>
+                  {formatSpan(period)} · {dated} dated
+                </span>
               </Link>
 
               <div className={styles.plot}>
-                {marks.map((m, i) => (
+                {marks.map((m) => (
                   <Link
-                    key={`${m.year}-${i}`}
+                    key={m.year}
                     href={m.href}
-                    className={styles.mark}
+                    className={m.count > 1 ? `${styles.mark} ${styles.markMany}` : styles.mark}
                     style={{ left: `${((m.year - period.from) / span) * 100}%` }}
                     title={m.label}
                     aria-label={m.label}
@@ -99,10 +140,6 @@ export function PeriodSpine({ current }: { current?: PeriodId }) {
                   </Link>
                 ))}
               </div>
-
-              <p className={`${styles.bandCount} tnum`}>
-                {marks.length} dated
-              </p>
             </li>
           );
         })}

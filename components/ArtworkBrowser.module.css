@@ -1,0 +1,159 @@
+/*
+ * The catalogue browser: results as a grid of cards, one per artwork record.
+ *
+ * A grid rather than a table because the archive HAS images for most of these and a
+ * researcher recognises a sheet faster than they read an id. The rows that have no
+ * separable image say so in the space where the image would be, rather than being
+ * dropped or padded out.
+ */
+.head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--s-4);
+  border-bottom: 1px solid var(--rule-strong);
+  padding-bottom: var(--s-2);
+  margin-bottom: var(--s-5);
+  flex-wrap: wrap;
+}
+
+.resultCount {
+  font-family: var(--sans);
+  font-size: var(--t-sm);
+  color: var(--ink-muted);
+  margin: 0;
+}
+
+.sortLabel { display: block; }
+
+.sort {
+  font-family: var(--sans);
+  font-size: var(--t-sm);
+  padding: 0.2em 0.4em;
+  border: 1px solid var(--rule-strong);
+  border-radius: 2px;
+  background: var(--paper);
+  color: var(--ink);
+}
+
+.empty {
+  font-size: var(--t-base);
+  color: var(--ink-muted);
+  max-width: 44ch;
+  margin: var(--s-6) 0;
+}
+
+.grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
+  gap: var(--s-5) var(--s-4);
+}
+
+.card { min-width: 0; }
+
+.cardLink {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+  text-decoration: none;
+  color: inherit;
+  height: 100%;
+}
+
+.cardMedia {
+  display: block;
+  background: var(--paper-deep);
+  border: 1px solid var(--rule);
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+}
+
+.cardMedia img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.cardLink:hover .cardMedia { border-color: var(--rule-strong); }
+
+/* A stated absence, styled as one: quiet, centred, and explaining itself. */
+.noImage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: var(--s-3);
+  text-align: center;
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  line-height: 1.4;
+  color: var(--ink-faint);
+  font-style: italic;
+}
+
+.cardBody { display: block; min-width: 0; }
+
+/*
+ * The grade badge. Every card carries one, because a card that did not would be
+ * asking the reader to assume all four grades are the same kind of thing.
+ */
+.badge {
+  display: inline-block;
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 0.1em 0.4em;
+  margin-bottom: var(--s-2);
+  border: 1px solid var(--rule-strong);
+  color: var(--ink-muted);
+}
+
+/* Only what the estate physically holds gets the accent. */
+.held { border-color: var(--oxide); color: var(--oxide); }
+.reproduced { border-color: var(--rule-strong); }
+.printed { border-color: var(--rule); color: var(--ink-faint); }
+.named { border-color: var(--rule); color: var(--ink-faint); }
+
+.cardTitle,
+.cardTitleQuiet {
+  display: block;
+  font-family: var(--serif);
+  font-size: var(--t-base);
+  line-height: 1.25;
+  color: var(--ink);
+}
+
+/*
+ * A description the archive wrote, not a title anyone gave the work. Set apart so a
+ * reader can tell at a glance which is which — most of these sheets were never titled.
+ */
+.cardTitleQuiet { font-style: italic; color: var(--ink-muted); }
+
+.cardLink:hover .cardTitle,
+.cardLink:hover .cardTitleQuiet { text-decoration: underline; }
+
+.cardFacts {
+  display: block;
+  font-family: var(--sans);
+  font-size: var(--t-sm);
+  color: var(--ink-muted);
+  margin-top: var(--s-1);
+}
+
+.cardMeta {
+  display: block;
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  line-height: 1.4;
+  color: var(--ink-faint);
+  margin-top: var(--s-1);
+}
+
+@media (max-width: 860px) {
+  .grid { grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr)); }
+}

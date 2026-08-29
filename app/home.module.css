@@ -1,162 +1,170 @@
 /*
- * The landing zone.
+ * The front page: four movements, each a full-width band separated by a hairline.
  *
- * Structure comes from components/Mosaic — a twelve-column grid over fixed rows, so
- * tiles of unequal height tile together instead of stranding paper. What lives here
- * is only what is particular to this page: the name, the two full-bleed media bands,
- * the collections panel, the peers strip and the doors.
- *
- * The register stays archival on purpose. Paper, ink, hairline rules and one oxide
- * accent. The asymmetry and the imagery do the work that colour would do elsewhere.
+ * One accent colour (--oxide), no tinted panels, and no block that is only a shape.
+ * The page was a twelve-column mosaic of six independent tiles; the trouble with it
+ * was not the grid but that each tile argued its own case, so the quotes sat at full
+ * width between the pictures and read as punctuation rather than as evidence. Here a
+ * quote is always next to the thing it bears on.
  */
 
-/*
- * The name gets room. It had been squeezed between the header and a wall of tiles,
- * so the page opened on the tiles rather than on the artist.
- */
-.top {
-  padding: var(--s-6) 0 var(--s-7);
-}
-
-.middle { margin-bottom: var(--s-7); }
-
-.tileLabel {
-  font-family: var(--sans);
-  font-size: var(--t-xs);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--ink-faint);
-  margin: 0 0 var(--s-3);
-}
-
-/* ------------------------------------------------------------------- the name */
+/* ════════════════════════════════════════════════════════════════════════ hero */
 
 .hero {
-  padding: 0 var(--s-7) 0 0;
-  justify-content: center;
+  display: grid;
+  /* Footage left, words right — the brief's arrangement, and the right one: the one
+     moving image of the man is the strongest thing the archive owns. */
+  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+  gap: var(--s-7);
+  align-items: center;
+  padding: var(--s-7) 0 var(--s-8);
 }
+
+.heroMedia { min-width: 0; }
+.heroText { min-width: 0; }
 
 .name {
   font-size: var(--t-2xl);
-  line-height: 1.02;
   letter-spacing: -0.03em;
-  margin: 0 0 var(--s-4);
+  line-height: 1.05;
+  margin: var(--s-2) 0 var(--s-4);
 }
 
-.tagline {
-  font-family: var(--serif);
-  font-size: var(--t-lg);
-  font-style: italic;
-  color: var(--oxide);
-  margin: 0 0 var(--s-4);
-  line-height: 1.15;
-}
-
-/*
- * No max-width here. It used to be 34ch inside a 620px column, which stranded white
- * space to the right of the lede and forced the row tall at the same time — the
- * single clearest instance of the problem this page had.
- */
 .lede {
   font-size: var(--t-md);
-  line-height: 1.55;
-  color: var(--ink-muted);
-  margin: 0;
+  line-height: 1.4;
+  color: var(--ink);
   max-width: 46ch;
+  margin: 0 0 var(--s-4);
 }
 
-.creed {
-  background: var(--paper-sunk);
-  padding: var(--s-5);
-  justify-content: center;
+.heroBody {
+  font-size: var(--t-base);
+  line-height: 1.6;
+  color: var(--ink-muted);
+  max-width: 50ch;
+  margin: 0 0 var(--s-5);
 }
 
-/* ------------------------------------------------------------- media bands */
+.heroLinks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-5);
+  font-family: var(--sans);
+  font-size: var(--t-sm);
+  margin: 0;
+}
 
-/*
- * A section of the page. A hairline above it and space around it — nothing more.
- *
- * This used to paint every section with --paper-deep and rule it top and bottom, and
- * three sections carried it, so the page came out as four alternating stripes with
- * nothing dominant in them. Tint is now spent on exactly one band (.bandLead), which
- * is what lets that band read as the focal point rather than as one stripe of four.
- */
+.heroLinks a {
+  color: var(--oxide);
+  text-decoration: none;
+  border-bottom: 1px solid currentColor;
+  padding-bottom: 0.1em;
+}
+
+.heroLinks a:hover { color: var(--ink); }
+
+/* ═══════════════════════════════════════════════════════════════════════ bands */
+
 .band {
-  padding-top: var(--s-7);
-  margin-bottom: var(--s-7);
   border-top: 1px solid var(--rule);
+  padding: var(--s-7) 0;
 }
 
-/*
- * The one exception: the footage. The only moving picture of Sievan that exists is
- * the most persuasive thing the archive holds, so it gets the full width and the
- * tint, and everything below it is quieter than it is.
- */
-.bandLead {
-  padding-top: var(--s-6);
-  padding-bottom: var(--s-6);
-  margin-bottom: var(--s-7);
-  background: var(--paper-deep);
-  border-top: 1px solid var(--rule);
-  border-bottom: 1px solid var(--rule);
+.bandHead {
+  max-width: 60ch;
+  margin-bottom: var(--s-6);
 }
 
 .bandTitle {
-  font-family: var(--serif);
-  font-size: var(--t-md);
-  margin: 0 0 var(--s-5);
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: var(--s-2) var(--s-4);
-}
-
-/*
- * The quiet sections announce themselves the way the rest of the site does — a small
- * uppercase label, not a second headline competing with the lead band's.
- */
-.bandTitleQuiet {
-  /* Same flex layout as .bandTitle — only the label's own type changes. */
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: var(--s-2) var(--s-4);
-  margin: 0 0 var(--s-5);
-  font-family: var(--sans);
-  font-size: var(--t-xs);
-  font-weight: normal;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--ink-faint);
+  font-size: var(--t-lg);
+  margin: 0;
 }
 
 .bandNote {
   font-family: var(--sans);
-  font-size: var(--t-xs);
-  font-weight: normal;
+  font-size: var(--t-sm);
   line-height: 1.5;
   color: var(--ink-muted);
-  max-width: 62ch;
-  /* The quiet label uppercases itself; its note is a sentence and must not inherit that. */
-  text-transform: none;
-  letter-spacing: normal;
+  margin: var(--s-2) 0 0;
 }
 
-/* ------------------------------------------------------------- collections */
-
-.case {
-  background: var(--paper-deep);
-  padding: var(--s-5);
+.bandFoot {
+  font-family: var(--sans);
+  font-size: var(--t-sm);
+  line-height: 1.5;
+  color: var(--ink-faint);
+  max-width: 72ch;
+  margin: var(--s-6) 0 0;
 }
+
+.bandFoot a { color: var(--oxide); white-space: nowrap; }
+
+/* ════════════════════════════════════════════════════ 1. Sievan as a person */
+
+.personGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--s-5);
+  align-items: start;
+}
+
+/*
+ * Five frames and the quotes, six cells in two rows. Even columns on purpose: the
+ * clips are all 720x486 and none is more important than the others — the frame that
+ * matters most is in the hero. A two-column feature tile here stood six hundred
+ * pixels tall and made the other four look like contact prints.
+ */
+.personQuote {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-4);
+  justify-content: center;
+}
+
+/* ══════════════════════════════════════════════════════════════ 2. the work */
+
+.workGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--s-6);
+}
+
+.work { margin: 0; min-width: 0; }
+
+/* The quote sits under its own painting, not between two of them. */
+.workQuote { margin-top: var(--s-4); }
+
+/* ═══════════════════════════════════════════════════ 3. recognition and legacy */
+
+.recordGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--s-6);
+  align-items: start;
+}
+
+.recordCol { min-width: 0; }
+
+.recordTitle {
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--ink-faint);
+  margin: 0 0 var(--s-3);
+}
+
+.recordCol .recordTitle + * { margin-top: 0; }
+.recordCol > * + .recordTitle { margin-top: var(--s-6); }
 
 .points {
   list-style: none;
   margin: 0;
   padding: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  flex: 1;
+  font-family: var(--sans);
+  font-size: var(--t-sm);
 }
 
 .points li {
@@ -164,53 +172,68 @@
   justify-content: space-between;
   align-items: baseline;
   gap: var(--s-3);
-  font-family: var(--serif);
-  font-size: var(--t-sm);
-  line-height: 1.3;
-  color: var(--ink);
-  padding: 0.3rem 0;
+  padding: 0.3em 0;
   border-bottom: 1px solid var(--rule);
+  color: var(--ink);
 }
 
-/* MoMA, the Hirshhorn and Brooklyn carry more weight than a university gallery;
-   flattening them into one list would overstate the smaller holdings. */
-.pointNotable {
-  font-size: var(--t-body);
-}
+/* MoMA, the Hirshhorn and Brooklyn. Marked, not reordered — the list keeps the CV's
+   own order, and the mark is the only thing the site adds to it. Specificity rather
+   than !important: `.points li` already sets the border. */
+.points .pointNotable { border-bottom-color: var(--oxide); }
 
 .pointWhere {
-  font-family: var(--sans);
-  font-size: var(--t-xs);
   color: var(--ink-faint);
   text-align: right;
-  white-space: nowrap;
+  flex-shrink: 0;
 }
 
-.points li:last-child { border-bottom: none; padding-bottom: 0; }
-.points li:first-child { padding-top: 0; }
+.recordAside {
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  line-height: 1.5;
+  color: var(--ink-faint);
+  margin: var(--s-3) 0 0;
+}
 
-/* ------------------------------------------------------------------ the company */
+.recordAside a { color: var(--oxide); }
 
-.peers { padding-top: var(--s-3); }
+/* The witnesses, small, beneath the words they said. */
+.faces {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--s-3);
+  margin-top: var(--s-5);
+}
+
+.peers {
+  border-top: 1px solid var(--rule);
+  margin-top: var(--s-7);
+  padding-top: var(--s-5);
+}
+
+.tileLabel {
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--ink-faint);
+  margin: 0 0 var(--s-4);
+}
 
 .peerList {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: var(--s-4);
   list-style: none;
   margin: 0;
   padding: 0;
-}
-
-.peerList li {
-  border-top: 2px solid var(--rule-strong);
-  padding-top: var(--s-3);
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: var(--s-4);
 }
 
 .peerName {
   display: block;
   font-family: var(--serif);
-  font-size: var(--t-body);
+  font-size: var(--t-base);
   color: var(--ink);
 }
 
@@ -218,103 +241,106 @@
   display: block;
   font-family: var(--sans);
   font-size: var(--t-xs);
-  line-height: 1.45;
+  line-height: 1.4;
   color: var(--ink-faint);
   margin-top: var(--s-1);
 }
 
-/* ------------------------------------------------------------------ the doors */
+/* ═════════════════════════════════════════════════════ 4. what this site is */
 
-.doors { margin-top: var(--s-4); }
+.aboutGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  gap: var(--s-7);
+  align-items: start;
+}
+
+.aboutText p {
+  font-size: var(--t-body);
+  line-height: 1.6;
+  color: var(--ink-muted);
+  max-width: 52ch;
+  margin: 0 0 var(--s-4);
+}
+
+.aboutMore {
+  font-family: var(--sans);
+  font-size: var(--t-sm) !important;
+}
+
+.aboutMore a {
+  color: var(--oxide);
+  text-decoration: none;
+  border-bottom: 1px solid currentColor;
+}
+
+.aboutMore a:hover { color: var(--ink); }
+
+.doors { min-width: 0; }
 
 .doorList {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 0;
   list-style: none;
   margin: 0;
   padding: 0;
-  border-top: 1px solid var(--rule-strong);
-}
-
-.doorList li + li .door {
-  border-left: 1px solid var(--rule);
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--s-5);
 }
 
 .door {
-  display: flex;
-  flex-direction: column;
-  gap: var(--s-2);
-  height: 100%;
-  padding: var(--s-5) var(--s-4);
+  display: block;
   text-decoration: none;
   color: inherit;
-  transition: background 120ms ease;
+  border-top: 2px solid var(--rule-strong);
+  padding-top: var(--s-3);
+  height: 100%;
 }
 
-.door:hover {
-  background: var(--paper-deep);
-}
-
-.door:hover .doorTitle {
-  color: var(--oxide);
-}
-
-.doorNum {
-  font-family: var(--serif);
-  font-size: var(--t-lg);
-  line-height: 1;
-  color: var(--ink-faint);
-  font-variant-numeric: tabular-nums;
-}
+.door:hover { border-top-color: var(--oxide); }
 
 .doorTitle {
+  display: block;
   font-family: var(--serif);
   font-size: var(--t-md);
   color: var(--ink);
 }
 
+.door:hover .doorTitle { color: var(--oxide); }
+
 .doorText {
+  display: block;
   font-family: var(--sans);
-  font-size: var(--t-xs);
-  line-height: 1.55;
+  font-size: var(--t-sm);
+  line-height: 1.5;
   color: var(--ink-muted);
+  margin-top: var(--s-2);
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .door { transition: none; }
-}
-
-/* ------------------------------------------------------------- narrow screens */
+/* ═════════════════════════════════════════════════════════════════ narrower */
 
 @media (max-width: 1020px) {
-  .hero { padding-right: 0; }
+  .personGrid { grid-template-columns: repeat(2, 1fr); }
+  .recordGrid { grid-template-columns: repeat(2, 1fr); }
   .peerList { grid-template-columns: repeat(3, 1fr); }
-  .doorList { grid-template-columns: repeat(2, 1fr); }
-  .doorList li:nth-child(odd) .door { border-left: none; }
-  .doorList li:nth-child(n + 3) .door { border-top: 1px solid var(--rule); }
 }
 
 @media (max-width: 860px) {
+  .hero {
+    grid-template-columns: 1fr;
+    gap: var(--s-5);
+    padding: var(--s-5) 0 var(--s-6);
+  }
+
   .name { font-size: var(--t-xl); }
-  .hero { padding: 0 0 var(--s-3); }
+
+  .personGrid,
+  .workGrid,
+  .recordGrid,
+  .aboutGrid,
+  .doorList {
+    grid-template-columns: 1fr;
+  }
+
   .peerList { grid-template-columns: repeat(2, 1fr); }
-  .doorList { grid-template-columns: 1fr; }
-  .doorList li .door { border-left: none; }
-  .doorList li + li .door { border-top: 1px solid var(--rule); }
-}
-
-.bandMore {
-  font-family: var(--sans);
-  font-size: var(--t-sm);
-  margin: var(--s-5) 0 0;
-}
-
-/* Provenance for the collections list — it is the CV's claim, not the site's. */
-.tileSource {
-  margin: var(--s-3) 0 0;
-  font-family: var(--sans);
-  font-size: var(--t-xs);
-  color: var(--ink-faint);
-  line-height: 1.45;
+  .band { padding: var(--s-6) 0; }
 }

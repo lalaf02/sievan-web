@@ -1,41 +1,7 @@
-.label {
-  font-family: var(--sans);
-  font-size: var(--t-xs);
-  text-transform: uppercase;
-  letter-spacing: 0.09em;
-  color: var(--ink-faint);
-  margin: 0 0 var(--s-2);
-  display: block;
-}
-
-.search {
-  width: 100%;
-  font-family: var(--sans);
-  font-size: var(--t-base);
-  padding: var(--s-2) var(--s-3);
-  border: 1px solid var(--rule-strong);
-  border-radius: 2px;
-  background: var(--paper);
-  color: var(--ink);
-  margin-bottom: var(--s-5);
-}
-
-.checkList { list-style: none; margin: 0 0 var(--s-5); padding: 0; }
-
-.check {
-  display: flex;
-  align-items: baseline;
-  gap: var(--s-2);
-  font-family: var(--sans);
-  font-size: var(--t-sm);
-  color: var(--ink-muted);
-  cursor: pointer;
-  padding: 0.1em 0;
-}
-
-.check input { accent-color: var(--oxide); margin: 0; }
-.count { margin-left: auto; color: var(--ink-faint); font-variant-numeric: tabular-nums; }
-
+/*
+ * Results styles only. The filter rail — search box, check lists, clear button —
+ * lives in FacetRail.module.css, shared with the catalogue browser.
+ */
 .head {
   display: flex;
   justify-content: space-between;
@@ -143,19 +109,6 @@
   font-family: var(--sans);
   font-size: var(--t-xs);
   color: var(--ink-faint);
-}
-
-.clear {
-  display: block;
-  margin-top: var(--s-4);
-  font-family: var(--sans);
-  font-size: var(--t-xs);
-  color: var(--oxide);
-  background: none;
-  border: none;
-  border-bottom: 1px solid currentColor;
-  padding: 0;
-  cursor: pointer;
 }
 
 .sortLabel {

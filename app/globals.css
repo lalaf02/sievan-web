@@ -49,6 +49,17 @@
 
   --measure: 68ch;
   --page: 1400px;
+  /*
+   * Wider than --page, for the one layout that is two real columns of content rather
+   * than a prose measure with a rail beside it. /life/ sets a biography against the
+   * record it rests on, and at 1400px the two columns crowd each other.
+   *
+   * Sized to what actually goes in it, not to the monitor: a ~64rem narrative column
+   * (a measure of prose plus room for a floated aside beside it), a 22rem rail, and
+   * the gutter between them. At 1680px the two tracks could not fill the width and
+   * left a 600px hole down the middle of the page.
+   */
+  --page-wide: 1500px;
   --rail: 250px;
   /*
    * Record pages — one width for one class of page. They previously hardcoded
@@ -178,6 +189,17 @@ hr {
 .page {
   width: 100%;
   max-width: var(--page);
+  margin: 0 auto;
+  padding: 0 var(--s-5);
+}
+
+/*
+ * A page whose content is genuinely two columns wide. Used by /life/, where the
+ * biography and the record it rests on run side by side.
+ */
+.pageWide {
+  width: 100%;
+  max-width: var(--page-wide);
   margin: 0 auto;
   padding: 0 var(--s-5);
 }

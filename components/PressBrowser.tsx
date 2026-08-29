@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useUrlState } from '@/lib/useUrlState';
 import { Highlight } from './Highlight';
-import { scoreFields, tokenize } from '@/lib/search';
+import { NO_TEXT_LAYER, scoreFields, tokenize } from '@/lib/search';
 import { formatArticleDate } from '@/lib/dates';
 import styles from './PressBrowser.module.css';
 
@@ -120,9 +120,7 @@ export function PressBrowser({
               if (v) p.set('q', v); else p.delete('q');
             })}
           />
-          <p className={styles.searchCaveat}>
-            Searches the catalogue record, not the text of the clippings themselves.
-          </p>
+          <p className={styles.searchCaveat}>{NO_TEXT_LAYER}</p>
         </div>
 
         <div className={styles.group}>
