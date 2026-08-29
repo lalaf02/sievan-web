@@ -4,11 +4,21 @@ import styles from './PullQuote.module.css';
 
 interface PullQuoteProps {
   quote: Quote;
-  /** Use larger styling for hero placement */
-  size?: 'default' | 'large';
+  /**
+   * `small` is the homepage's default: quotes there sit beside and between the
+   * pictures rather than interrupting them, which is what "large" was doing — a
+   * standalone slab of italic between two images reads as a pause, not as evidence.
+   */
+  size?: 'small' | 'default' | 'large';
   /** Show the link back into the transcript */
   showSource?: boolean;
 }
+
+const SIZE_CLASS: Record<'small' | 'default' | 'large', string> = {
+  small: styles.small,
+  default: '',
+  large: styles.large,
+};
 
 /**
  * A piece of testimony, presented as a door rather than an ornament.
@@ -21,7 +31,7 @@ interface PullQuoteProps {
 export function PullQuote({ quote, size = 'default', showSource = false }: PullQuoteProps) {
   const href = quoteHref(quote);
   return (
-    <figure className={`${styles.quote} ${size === 'large' ? styles.large : ''}`}>
+    <figure className={`${styles.quote} ${SIZE_CLASS[size]}`}>
       <blockquote className={styles.text}>
         <Link href={href} className={styles.textLink}>
           “{quote.text}”

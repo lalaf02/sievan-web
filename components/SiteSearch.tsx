@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useMemo } from 'react';
-import { highlightNeedles, normalize, scoreFields, tokenize } from '@/lib/search';
+import { highlightNeedles, NO_TEXT_LAYER, normalize, scoreFields, tokenize } from '@/lib/search';
 import { Highlight } from './Highlight';
 import { useUrlState } from '@/lib/useUrlState';
 import styles from './SiteSearch.module.css';
@@ -114,10 +114,7 @@ export function SiteSearch({ rows }: { rows: SearchRow[] }) {
             else p.delete('q');
           })}
         />
-        <p className={styles.caveat}>
-          Searches catalogue records and interview transcripts. The scanned clippings
-          have no text layer, so the words printed inside them are not searchable.
-        </p>
+        <p className={styles.caveat}>{NO_TEXT_LAYER}</p>
       </div>
 
       <p className={styles.count}>

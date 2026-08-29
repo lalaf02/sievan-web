@@ -42,45 +42,137 @@
   max-width: 44ch;
 }
 
-/* The biography reads at measure width with testimony alongside it, so the voices
-   sit next to the claims they support rather than after them — and the column the
-   measure leaves empty gets used instead of sitting blank. */
-.bio {
+/*
+ * The page's spine: narrative left, the record right.
+ *
+ * This replaced a per-section `.bio` grid that put a quote rail beside each block of
+ * prose. The trouble was that every section re-made the same two-column decision, so
+ * the page had no single shape and the right-hand column started and stopped four
+ * times down the page. Now there is one split, the rail runs the whole height of the
+ * narrative, and the witnesses moved INTO the prose where their testimony belongs.
+ *
+ * The rail is capped rather than 1fr: at --page-wide a 1fr rail is ~700px, and a list
+ * of thirteen museums does not want to be that wide.
+ */
+.split {
   display: grid;
-  /*
-   * The rail is capped rather than 1fr. At the wider page a 1fr rail was ~700px, and
-   * a portrait photograph in it stood taller than the prose it accompanies.
-   */
-  grid-template-columns: minmax(0, var(--measure)) minmax(16rem, 26rem);
-  gap: var(--s-6);
+  grid-template-columns: minmax(0, 1fr) minmax(17rem, 22rem);
+  gap: var(--s-8);
   align-items: start;
+  margin-bottom: var(--s-8);
 }
 
-.bioProse {
+/*
+ * The narrative fills its track; the PARAGRAPHS keep the measure.
+ *
+ * Capping the column itself at 72ch was wrong twice over: it left a wide hole between
+ * the prose and the rail, and it gave the floated witnesses nowhere to go but on top
+ * of the text — one paragraph rendered seven words wide. The column is now the full
+ * track, the line length is set on the paragraph, and a float sits in the space to the
+ * right of the measure rather than eating into it.
+ */
+.narrative { min-width: 0; }
+
+/*
+ * Each section starts below whatever floated beside the last one. Without this a
+ * witness placed near the end of a section hangs down past the next <h2>, and the
+ * heading's underline stops short where the float pushes it.
+ */
+.narrative > section { clear: both; }
+
+.narrative p {
+  font-size: var(--t-body);
+  line-height: 1.65;
+  margin: 0 0 var(--s-4);
+  max-width: 62ch;
+}
+
+/* A photograph of the man, set into the prose rather than parked in a rail. */
+.plate {
+  margin: var(--s-5) 0;
+  max-width: 26rem;
+}
+
+.sourceLine {
+  font-family: var(--sans);
+  font-size: var(--t-sm) !important;
+  line-height: 1.6 !important;
+  color: var(--ink-faint);
+  border-top: 1px solid var(--rule);
+  padding-top: var(--s-3);
+  margin-top: var(--s-5) !important;
+}
+
+/*
+ * A witness, beside the claim they support.
+ *
+ * Floated so the prose closes around them rather than being interrupted: five
+ * full-width breaks down a biography turn the argument into a slideshow. At narrow
+ * widths the float is dropped and they stack.
+ */
+.witness {
+  float: right;
+  width: 16rem;
+  margin: var(--s-2) 0 var(--s-4) var(--s-6);
+  border-top: 2px solid var(--rule-strong);
+  padding-top: var(--s-3);
+}
+
+.witness figure { margin: 0 0 var(--s-3); }
+.witnessBody { min-width: 0; }
+.witnessPlain { margin: 0; display: flex; flex-direction: column; gap: var(--s-1); }
+
+.witnessLink {
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--oxide);
+}
+
+/* The rail: the record the narrative rests on. */
+.rail {
   min-width: 0;
+  position: sticky;
+  top: var(--s-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-6);
 }
 
-.bioProse > h2 {
+.railTitle {
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--ink-faint);
   border-bottom: 1px solid var(--rule-strong);
   padding-bottom: var(--s-2);
-  margin-top: 0;
+  margin: 0 0 var(--s-3);
+  display: flex;
+  align-items: baseline;
+  gap: var(--s-3);
 }
 
-.quoteRail {
+/* The names Sievan's CV lists, as a plain run rather than a two-column table. */
+.privateList {
+  list-style: none;
+  margin: var(--s-4) 0 0;
+  padding: 0;
   display: grid;
-  gap: var(--s-4);
-  align-content: start;
-  /* Drop past the section heading so the first quote lines up with the prose. */
-  padding-top: var(--s-6);
+  grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+  gap: var(--s-2) var(--s-5);
 }
 
 .twoUp {
   display: grid;
   /*
-   * The CV lists eight venues; the archive documents fifteen. An even split left the
-   * shorter column ending seven rows early, so the wider track goes to the longer list.
+   * The CV's own two lists: 14 one-man shows against 30 group shows. Even tracks —
+   * the columns cannot end level at that ratio however they are weighted, so the
+   * width is set for reading rather than for a tidy bottom edge.
    */
-  grid-template-columns: minmax(0, 4fr) minmax(0, 5fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--s-6);
   margin-top: var(--s-5);
   align-items: start;
@@ -128,13 +220,13 @@ a.venueName:hover { color: var(--oxide); }
   margin: var(--s-5) 0 0;
   padding: 0;
   /*
-   * Thirteen is prime, so no column count divides it. Two columns of rows reads as a
-   * list rather than as a grid with two holes punched in the last row, which is what
-   * auto-fill at five columns produced.
+   * One column. This was two, from when the list sat in a half-width block; in the
+   * ~20rem rail it now occupies, two columns are two slivers and "Butler Institute of
+   * American Art" wraps to four lines.
    */
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0 var(--s-6);
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
 }
 
 .museumList li {
@@ -165,24 +257,6 @@ a.venueName:hover { color: var(--oxide); }
 
 /* ---------------------------------------------------------------- witnesses */
 
-.witnessList {
-  list-style: none;
-  margin: var(--s-5) 0 0;
-  padding: 0;
-  /*
-   * Exactly five, because there are exactly five people who spoke on the record.
-   * auto-fill resolved to four columns and left the fifth stranded on its own row.
-   */
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: var(--s-4);
-}
-
-.witnessList li {
-  border-top: 2px solid var(--rule-strong);
-  padding-top: var(--s-3);
-}
-
 .witnessName {
   display: block;
   font-family: var(--serif);
@@ -202,54 +276,35 @@ a.venueName:hover { color: var(--oxide); }
   margin-top: var(--s-1);
 }
 
-@media (max-width: 1020px) {
-  .bio { grid-template-columns: 1fr; }
-  .quoteRail {
-    grid-template-columns: repeat(2, 1fr);
-    padding-top: 0;
+@media (max-width: 1180px) {
+  /* The rail drops under the narrative before the prose column gets too narrow. */
+  .split { grid-template-columns: 1fr; gap: var(--s-6); }
+  .rail { position: static; }
+}
+
+@media (max-width: 860px) {
+  .twoUp { grid-template-columns: 1fr; }
+
+  /*
+   * Floated asides stack: 16rem beside a phone column is a sliver. Capped rather than
+   * `width: auto`, which handed a talking head the full 800px column and made a face
+   * the largest thing on the page.
+   */
+  .witness {
+    float: none;
+    width: auto;
+    max-width: 22rem;
+    margin: var(--s-5) 0;
   }
 }
 
 @media (max-width: 860px) {
-  .quoteRail,
-  .twoUp {
-    grid-template-columns: 1fr;
-  }
-}
-
-.witnessList li {
-  display: flex;
-  flex-direction: column;
-  gap: var(--s-1);
-}
-
-.witnessList figure { margin: 0 0 var(--s-2); }
-
-@media (max-width: 1020px) {
-  .witnessList { grid-template-columns: repeat(3, 1fr); }
-}
-
-@media (max-width: 860px) {
-  .witnessList { grid-template-columns: repeat(2, 1fr); }
   .museumList { grid-template-columns: 1fr; }
 }
 
 /*
- * The CV at full length: one-man, group, and what the archive can actually
- * document. Three columns because the section's argument is a comparison, and a
- * comparison you have to scroll between is not one.
+ * The CV's two lists, side by side, because the section's argument is a comparison
+ * and a comparison you have to scroll between is not one. The third column — what the
+ * archive can actually document — moved into the rail beside the biography, where a
+ * reader meets it while reading rather than after.
  */
-.threeUp {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--s-6);
-  margin-top: var(--s-4);
-}
-
-@media (max-width: 1020px) {
-  .threeUp { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-}
-
-@media (max-width: 860px) {
-  .threeUp { grid-template-columns: minmax(0, 1fr); }
-}

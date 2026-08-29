@@ -1,12 +1,17 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import {
-  counts, allExhibitions, allClips, getClip, coverFor, getObject, pageOf,
+  allExhibitions, counts, getClip, pageOf,
 } from '@/lib/data';
 import { getQuote } from '@/lib/quotes';
-import { THESIS, MUSEUM_COLLECTIONS, PEER_NETWORK } from '@/lib/validation';
+import {
+  THESIS, MUSEUM_COLLECTIONS, MARQUEE_EXHIBITIONS, PEER_NETWORK,
+} from '@/lib/validation';
+import { CV } from '@/lib/retrospective';
+import { PLATES } from '@/lib/plates';
+import { PLATE_CREDIT } from '@/lib/provenance';
 import { PullQuote } from '@/components/PullQuote';
-import { Mosaic, Tile } from '@/components/Mosaic';
+import { CVSource } from '@/components/CVSource';
 import { ClipTile, SheetTile } from '@/components/MediaTile';
 import styles from './home.module.css';
 
@@ -18,196 +23,231 @@ export const metadata: Metadata = {
     + 'records and the catalogue of works.',
 };
 
+/**
+ * The front page, in four movements: the man, the work, the record, and what this
+ * site is.
+ *
+ * It was six blocks of a twelve-column mosaic that each argued their own case — a
+ * banner reading "A Private Vision" with no speaker attached, a tinted band of
+ * footage, a panel of museums, a row of sheets, a row of faces, a row of peers. The
+ * quotes stood alone at full width between them, so testimony read as punctuation.
+ * Now the quotes sit beside the pictures they bear on, and each section has one job.
+ */
 export default function Home() {
   const years = allExhibitions.map((e) => e.date_earliest ?? 0).filter(Boolean);
   const span = `${Math.min(...years)}–${Math.max(...years)}`;
 
-  const faces = allClips.filter((c) => c.id.startsWith('interview-'));
-  // A painting, not another loop: every process clip is already used in the band
-  // above, and the page otherwise never shows the work itself.
-  const plate = pageOf('MS-AR-00029', 3);
+  // The one moving image of Sievan himself, and the page's opening frame.
+  const atTheEasel = getClip('painting-portrait');
+  const plates = PLATES
+    .map((p) => ({ ...p, sheet: pageOf(p.objectId, p.page) }))
+    .filter((p): p is typeof p & { sheet: NonNullable<typeof p.sheet> } => !!p.sheet);
 
   return (
     <div className="page">
 
-      {/* ------------------------------------------------------------ the name */}
-      <Mosaic className={styles.top}>
-        <Tile col={7} as="section" className={styles.hero}>
+      {/* ═══════════════════════════════════════════════ hero: the man, painting */}
+      <section className={styles.hero} aria-labelledby="name">
+        <div className={styles.heroMedia}>
+          {atTheEasel && (
+            <ClipTile
+              clip={atTheEasel}
+              aspect="4 / 3"
+              priority
+              caption="Sievan at the easel, working a brush across a portrait."
+              meta="Silent home-movie footage held by the estate"
+            />
+          )}
+        </div>
+        <div className={styles.heroText}>
           <p className="eyebrow">1898–1981</p>
-          <h1 className={styles.name}>Maurice Sievan</h1>
-          <p className={styles.tagline}>{THESIS.headline}</p>
-          <p className={styles.lede}>{THESIS.subhead}</p>
-        </Tile>
-
-        {/* The endorsement, given the weight of a wall text rather than a footnote. */}
-        <Tile col={5} as="section" className={styles.creed}>
+          <h1 id="name" className={styles.name}>Maurice Sievan</h1>
           {/*
-            Not "the verdict" — that tells a reader the question is settled. Greenberg
-            said this to Ivan Karp, and what the archive actually holds is Karp's
-            account of it. Naming that chain is both less pushy and more accurate.
+            The banner that used to sit here read "A Private Vision" with no speaker
+            and no source. It was Ivan Karp's phrase; unattributed, it read as a slogan
+            the project had written about itself. See the note on THESIS.
           */}
-          <p className={styles.tileLabel}>Recorded in the Ivan Karp interview</p>
-          <PullQuote quote={getQuote('greenberg-best')} size="large" showSource />
-        </Tile>
-      </Mosaic>
+          <p className={styles.lede}>{THESIS.subhead}</p>
+          <p className={styles.heroBody}>
+            Born in Ukraine in 1898 and raised in New York, he studied at the National
+            Academy of Design and the Art Students League, then in Paris under
+            André L’Hôte, exhibiting at the Salon d’Automne in 1931. He painted for
+            another fifty years — the harbour, the suburbs, the studio — and kept the
+            figure through the decades when New York gave it up.
+          </p>
+          <p className={styles.heroLinks}>
+            <Link href="/life/">His life and the record →</Link>
+            <Link href="/works/">The work →</Link>
+          </p>
+        </div>
+      </section>
 
-      {/* --------------------------------------------------------- him, working */}
-      {/*
-        The page's focal point, and the only tinted band on it. Four frames, of which
-        two move: six simultaneous loops made the whole page restless and gave the eye
-        nowhere to settle.
-      */}
-      <section className={`bleed ${styles.bandLead}`} aria-labelledby="footage">
-        <h2 id="footage" className={styles.bandTitle}>
-          The only moving picture of him
-          <span className={styles.bandNote}>
-            Home-movie footage held in the video archive. Silent, and undated.
-          </span>
-        </h2>
+      {/* ═════════════════════════════════════════════════ 1. Sievan as a person */}
+      <section className={styles.band} aria-labelledby="person">
+        <div className={styles.bandHead}>
+          <h2 id="person" className={styles.bandTitle}>The only footage the archive holds</h2>
+          <p className={styles.bandNote}>
+            {/*
+              Scoped to the archive. This heading read "The only moving picture of him",
+              which is a claim about every reel of film in the world and not one the
+              archive can make. What it can say is what it holds: seven tapes, six of
+              them people talking about him, one of him painting.
+            */}
+            Of the seven tapes the estate recorded, six are people talking about Sievan
+            and one is Sievan himself. It is silent, and undated.
+          </p>
+        </div>
 
-        <Mosaic>
-          {PROCESS_COLUMNS.map((column, c) => (
-            <Tile key={column.map((f) => f.id).join()} col={column[0].col}>
-              {column.map((f, i) => {
+        <div className={styles.personGrid}>
+          {PROCESS_FRAMES.map((f) => {
+            const clip = getClip(f.id);
+            if (!clip) return null;
+            return (
+              <ClipTile
+                key={f.id}
+                clip={clip}
+                /* The reel's own 3:2. A tile spanning two columns at 4:3 stood six
+                   hundred pixels tall and made the other four look like thumbnails. */
+                aspect="3 / 2"
+                still={f.motion === 'still'}
+                caption={f.caption}
+              />
+            );
+          })}
+          <div className={styles.personQuote}>
+            <PullQuote quote={getQuote('barnet-passion')} size="small" showSource />
+            <PullQuote quote={getQuote('solman-resourceful')} size="small" showSource />
+          </div>
+        </div>
+      </section>
+
+      {/* ══════════════════════════════════════════ 2. the work, and what was said */}
+      <section className={styles.band} aria-labelledby="work">
+        <div className={styles.bandHead}>
+          <h2 id="work" className={styles.bandTitle}>The paintings that survive in reproduction</h2>
+          <p className={styles.bandNote}>
+            Three canvases, as the galleries that showed them printed them.
+          </p>
+        </div>
+
+        <div className={styles.workGrid}>
+          {plates.map((p, i) => (
+            <figure key={`${p.objectId}-${p.page}`} className={styles.work}>
+              <SheetTile
+                sheet={p.sheet}
+                href={`/archive/objects/${p.objectId}/`}
+                aspect="4 / 5"
+                alt={`${p.title}${p.year ? `, ${p.year}` : ''}, by Maurice Sievan`}
+                caption={<><em>{p.title}</em>{p.year ? `, ${p.year}` : ''}</>}
+                meta={p.detail ?? undefined}
+              />
+              {/* One quote per painting, set beneath it rather than between them. */}
+              <div className={styles.workQuote}>
+                <PullQuote quote={getQuote(WORK_QUOTES[i])} size="small" showSource />
+              </div>
+            </figure>
+          ))}
+        </div>
+
+        <p className={styles.bandFoot}>
+          {PLATE_CREDIT}{' '}
+          <Link href="/works/">Everything the archive holds of the work →</Link>
+        </p>
+      </section>
+
+      {/* ═══════════════════════════════════════════ 3. recognition and legacy */}
+      <section className={styles.band} aria-labelledby="record">
+        <div className={styles.bandHead}>
+          <h2 id="record" className={styles.bandTitle}>What the record shows</h2>
+          <p className={styles.bandNote}>
+            Naming the institutions that hold the work says more, and asks less to be
+            taken on trust, than calling him important.
+          </p>
+        </div>
+
+        <div className={styles.recordGrid}>
+          <div className={styles.recordCol}>
+            <h3 className={styles.recordTitle}>
+              In {MUSEUM_COLLECTIONS.length} museum collections
+            </h3>
+            <ul className={styles.points}>
+              {MUSEUM_COLLECTIONS.map((m) => (
+                <li key={m.name} className={m.notable ? styles.pointNotable : undefined}>
+                  <span>{m.name}</span>
+                  <span className={styles.pointWhere}>{m.location}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className={styles.recordCol}>
+            <h3 className={styles.recordTitle}>Shown in these museums</h3>
+            <ul className={styles.points}>
+              {MARQUEE_EXHIBITIONS.map((e) => (
+                <li key={e.venue}>
+                  <span>{e.venue}</span>
+                  <span className={`${styles.pointWhere} tnum`}>{e.years}</span>
+                </li>
+              ))}
+            </ul>
+            <p className={styles.recordAside}>
+              Eight of the {CV.groupExhibitions.length} group exhibitions his CV lists.
+            </p>
+
+            <h3 className={styles.recordTitle}>Awards</h3>
+            <ul className={styles.points}>
+              {CV.awards.map(([name, when]) => (
+                <li key={name}>
+                  <span>{name}</span>
+                  <span className={`${styles.pointWhere} tnum`}>{when}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/*
+            The witnesses, beside the record rather than in a row of their own. These
+            six faces were a separate band that read as a cast list; here they are the
+            evidence for the claims to their left.
+          */}
+          <div className={styles.recordCol}>
+            <h3 className={styles.recordTitle}>The people who said so</h3>
+            <PullQuote quote={getQuote('greenberg-best')} size="small" showSource />
+            <PullQuote quote={getQuote('karp-national-recognition')} size="small" showSource />
+            <PullQuote quote={getQuote('solman-rehabilitation')} size="small" showSource />
+            <div className={styles.faces}>
+              {FACES.map((f) => {
                 const clip = getClip(f.id);
                 if (!clip) return null;
                 return (
                   <ClipTile
                     key={f.id}
                     clip={clip}
-                    aspect={f.aspect}
-                    still={f.motion === 'still'}
-                    // Only the lead frame is worth fetching eagerly; the other moving
-                    // clip loads on its own and the stills are just posters.
-                    priority={c === 0 && i === 0}
-                    caption={f.caption}
+                    still
+                    href="/life/interviews/"
+                    aspect="4 / 3"
+                    caption={f.name}
+                    meta={f.note}
                   />
                 );
               })}
-            </Tile>
-          ))}
-        </Mosaic>
-      </section>
+            </div>
+            <p className={styles.recordAside}>
+              Five interviews, transcribed in full — {counts.transcriptWords.toLocaleString()}{' '}
+              words. <Link href="/life/interviews/">Read them →</Link>
+            </p>
+          </div>
+        </div>
 
-      {/* ------------------------------------------------- the case, and the box */}
-      <Mosaic className={styles.middle}>
         {/*
-          This panel used to be a bulleted argument under the heading "Why he matters
-          now". Naming the institutions that hold the work does the same job without
-          asking anyone to take a characterisation on trust.
+          The caveat belongs here, closing the three CV-derived columns above it. It
+          was below the peer network, which reads as crediting PEER_NETWORK to page 8
+          of the retrospective — those six names come from lib/validation.ts, not from
+          the CV, and the misattribution is exactly the kind this archive cannot make.
         */}
-        <Tile col={4} as="section" className={styles.case} fill>
-          <p className={styles.tileLabel}>In these collections</p>
-          <ul className={styles.points}>
-            {MUSEUM_COLLECTIONS.map((m) => (
-              <li key={m.name} className={m.notable ? styles.pointNotable : undefined}>
-                <span>{m.name}</span>
-                <span className={styles.pointWhere}>{m.location}</span>
-              </li>
-            ))}
-          </ul>
-          {/* The homepage cited this list without ever saying where it came from. */}
-          <p className={styles.tileSource}>
-            As listed in Sievan’s own retrospective CV.{' '}
-            <Link href="/life/">See the record</Link>.
-          </p>
-        </Tile>
+        <CVSource />
 
-        <Tile col={3}>
-          <SheetTile
-            sheet={{ page: '/retrospective/p01.jpg', thumb: '/retrospective/p01.jpg' }}
-            alt="Cover of the Maurice Sievan retrospective catalogue."
-            href="/life/retrospective/"
-            aspect="1137 / 1500"
-            caption="The retrospective catalogue."
-            meta="Fifteen pages, transcribed"
-          />
-        </Tile>
-
-        <Tile col={5} as="section">
-          <PullQuote quote={getQuote('karp-mystical')} showSource />
-          <PullQuote quote={getQuote('barnet-someday')} showSource />
-          {plate && (
-            <SheetTile
-              sheet={plate}
-              aspect="4 / 3"
-              href="/archive/objects/MS-AR-00029/"
-              alt="Maurice Sievan, Eebak, 1962, oil on canvas."
-              caption={<><em>Eebak</em>, 1962. Oil on canvas, 86″ × 69″.</>}
-              meta="Reproduced in the Vanderwoude Tananbaum catalogue · MS-AR-00029"
-            />
-          )}
-        </Tile>
-      </Mosaic>
-
-      {/* ------------------------------------------------------------ the box */}
-      <section className={styles.band} aria-labelledby="sheets">
-        <h2 id="sheets" className={styles.bandTitleQuiet}>
-          What the box holds
-          <span className={styles.bandNote}>
-            Fifty catalogued objects — clippings, catalogues, posters. {counts.objectsWithImagery}{' '}
-            are scanned and readable here; {counts.archiveObjects - counts.objectsWithImagery} are
-            catalogued and not yet digitised.
-          </span>
-        </h2>
-
-        <Mosaic>
-          {SHEET_COLUMNS.map((column) => (
-            <Tile key={column.map((f) => f.id).join()} col={3}>
-              {column.map((f) => {
-                const object = getObject(f.id);
-                const cover = coverFor(f.id);
-                if (!object || !cover) return null;
-                return (
-                  <SheetTile
-                    key={f.id}
-                    sheet={cover}
-                    aspect={f.aspect}
-                    alt={`${object.raw_title_description.split('\n')[0]} — ${f.id}`}
-                    href={`/archive/objects/${f.id}/`}
-                    caption={f.caption}
-                  />
-                );
-              })}
-            </Tile>
-          ))}
-        </Mosaic>
-
-        <p className={styles.bandMore}>
-          <Link href="/archive/">Every object in the box →</Link>
-        </p>
-      </section>
-
-      {/* ---------------------------------------------------- who spoke for him */}
-      <section className={styles.band} aria-labelledby="voices">
-        <h2 id="voices" className={styles.bandTitleQuiet}>
-          The people who knew him
-          <span className={styles.bandNote}>
-            Six interviews and a reel of studio footage, recorded on tape by the estate.
-            These are silent excerpts — the tapes themselves have sound, and are not
-            online.
-          </span>
-        </h2>
-
-        <Mosaic>
-          {faces.map((clip) => (
-            <Tile key={clip.id} col={2}>
-              <ClipTile
-                clip={clip}
-                still
-                href="/life/interviews/"
-                aspect="4 / 3"
-                caption={FACE_NAMES[clip.id] ?? 'Unidentified'}
-                meta={FACE_NOTES[clip.id]}
-              />
-            </Tile>
-          ))}
-        </Mosaic>
-      </section>
-
-      {/* ------------------------------------------------------------ the company */}
-      <Mosaic className={styles.middle}>
-        <Tile col={12} as="section" className={styles.peers}>
+        <div className={styles.peers}>
           <p className={styles.tileLabel}>The company he kept</p>
           <ul className={styles.peerList}>
             {PEER_NETWORK.map((p) => (
@@ -217,114 +257,115 @@ export default function Home() {
               </li>
             ))}
           </ul>
-        </Tile>
+        </div>
+      </section>
 
-        {/* --------------------------------------------------------------- doors */}
-        <Tile col={12} as="nav" className={styles.doors}>
-          <ul className={styles.doorList} aria-label="Explore the archive">
-            <li>
-              <Link href="/life/" className={styles.door}>
-                <span className={styles.doorNum}>{counts.exhibitions}</span>
-                <span className={styles.doorTitle}>Life and Work</span>
-                <span className={styles.doorText}>
-                  Exhibitions between {span}, the people who knew him, and{' '}
-                  {counts.transcriptWords.toLocaleString()} words of recorded testimony —
-                  the reception of the work, placed on one timeline.
-                </span>
+      {/* ══════════════════════════════════════════════════ 4. what this site is */}
+      <section className={styles.band} aria-labelledby="about">
+        <div className={styles.bandHead}>
+          <h2 id="about" className={styles.bandTitle}>What this archive is</h2>
+        </div>
+
+        <div className={styles.aboutGrid}>
+          <div className={styles.aboutText}>
+            <p>
+              This is the estate’s record of a painter the histories of his period were
+              written without. It exists to be used and checked: the catalogue records
+              are published in full, the scans sit beside them, and where the archive
+              does not know something it says so rather than filling the gap.
+            </p>
+            <p>
+              The whole of it is public and needs no account. Nothing here is behind a
+              login, and every record has a permanent identifier, so a link to a record
+              is a citation.
+            </p>
+            <p className={styles.aboutMore}>
+              <Link href="/research/">
+                How to use the archive, cite it, and ask for what is not online →
               </Link>
-            </li>
-            <li>
-              <Link href="/works/" className={styles.door}>
-                <span className={styles.doorNum}>{counts.worksOnPaperCatalogued}</span>
-                <span className={styles.doorTitle}>Catalogue Raisonné</span>
-                <span className={styles.doorText}>
-                  Works on paper in Sievan’s own hand, catalogued in full and
-                  photographed by the estate; the reproductions his galleries printed;
-                  and {counts.attestedWorks} more canvases he named himself. The
-                  paintings are being photographed now, and the page says where that
-                  stands.
-                </span>
-              </Link>
-            </li>
-            <li>
-              <Link href="/archive/" className={styles.door}>
-                <span className={styles.doorNum}>{counts.newsArticles}</span>
-                <span className={styles.doorTitle}>Archives</span>
-                <span className={styles.doorText}>
-                  Press notices from 1940 to 1983 and the {counts.archiveObjects} objects
-                  they were cut from — {counts.objectsWithImagery} of them readable here,
-                  and explicit about what is missing.
-                </span>
-              </Link>
-            </li>
-            <li>
-              <Link href="/research/" className={styles.door}>
-                <span className={styles.doorNum}>{counts.publications}</span>
-                <span className={styles.doorTitle}>Research</span>
-                <span className={styles.doorText}>
-                  Every notice formatted as a citation, across {counts.publications}{' '}
-                  publications — with access, reproduction rights, and how the archive was
-                  assembled.
-                </span>
-              </Link>
-            </li>
-          </ul>
-        </Tile>
-      </Mosaic>
+            </p>
+          </div>
+
+          <nav className={styles.doors} aria-label="Explore the archive">
+            <ul className={styles.doorList}>
+              <li>
+                <Link href="/life/" className={styles.door}>
+                  <span className={styles.doorTitle}>Life and Work</span>
+                  <span className={styles.doorText}>
+                    The biography, the chronology, the exhibitions between {span}, and the
+                    people who spoke on the record.
+                  </span>
+                </Link>
+              </li>
+              <li>
+                <Link href="/works/" className={styles.door}>
+                  <span className={styles.doorTitle}>Catalogue Raisonné</span>
+                  <span className={styles.doorText}>
+                    The work: {counts.worksOnPaperCatalogued} sheets in Sievan’s own hand,
+                    the reproductions his galleries printed, and{' '}
+                    {counts.attestedWorks} more canvases he named himself.
+                  </span>
+                </Link>
+              </li>
+              <li>
+                <Link href="/archive/" className={styles.door}>
+                  <span className={styles.doorTitle}>Archives</span>
+                  <span className={styles.doorText}>
+                    The documentary record — {counts.newsArticles} press notices from 1940
+                    to 1983, the catalogues and posters, and what is not yet digitised.
+                  </span>
+                </Link>
+              </li>
+              <li>
+                <Link href="/research/" className={styles.door}>
+                  <span className={styles.doorTitle}>Research</span>
+                  <span className={styles.doorText}>
+                    Access, reproduction rights, how to cite a record, and the full
+                    bibliography of what has been written.
+                  </span>
+                </Link>
+              </li>
+            </ul>
+          </nav>
+        </div>
+      </section>
     </div>
   );
 }
 
 /**
- * The footage band: two columns, four frames, and only two of them move.
+ * The rest of the reel.
  *
- * `motion` is explicit per frame because the mix is the whole point. Six concurrent
- * loops of grainy 16mm read as static — the eye cannot settle anywhere and the page
- * feels frantic. Two moving against two still gives the band a rhythm and leaves the
- * lead frame something to be the lead of.
+ * `motion` is explicit per frame because the mix is the point: six concurrent loops of
+ * grainy 16mm read as static, and the eye settles nowhere. The hero frame moves, one
+ * more moves here, and the rest are posters. Aspects stay near the footage's own 3:2 —
+ * a portrait crop on a landscape frame throws away most of the shot.
  *
- * Aspects stay near the footage's own 3:2; a portrait crop on a landscape frame
- * throws away most of the shot.
+ * All five remaining clips are used. Two of them, `drawing-portrait` and
+ * `painting-outdoors`, had been cut and committed and then never put on any page.
  */
-const PROCESS_COLUMNS: {
-  id: string; col: number; aspect: string; motion: 'play' | 'still'; caption: string;
-}[][] = [
-  [
-    { id: 'painting-portrait', col: 7, aspect: '4 / 3', motion: 'play', caption: 'At the easel, working a brush across a portrait.' },
-    { id: 'easel-demonstration', col: 7, aspect: '16 / 9', motion: 'still', caption: 'A plein-air demonstration, in a hat, at the easel.' },
-  ],
-  [
-    { id: 'mixing-palette', col: 5, aspect: '16 / 9', motion: 'still', caption: 'Colour drawn across a loaded palette.' },
-    { id: 'painting-landscape', col: 5, aspect: '4 / 3', motion: 'play', caption: 'A landscape canvas going down in real time.' },
-  ],
+const PROCESS_FRAMES: {
+  id: string; motion: 'play' | 'still'; caption: string;
+}[] = [
+  { id: 'painting-landscape', motion: 'play', caption: 'A landscape canvas going down in real time.' },
+  { id: 'easel-demonstration', motion: 'still', caption: 'A plein-air demonstration, in a hat, at the easel.' },
+  { id: 'painting-outdoors', motion: 'still', caption: 'Painting outdoors while a crowd stands watching behind him.' },
+  { id: 'drawing-portrait', motion: 'still', caption: 'A charcoal portrait on the easel, worked at the mouth.' },
+  { id: 'mixing-palette', motion: 'still', caption: 'Colour drawn across a loaded palette.' },
 ];
 
 /**
- * Four sheets from the box, one row of four. Supporting evidence, not a second focal
- * point — at half the page each they competed with the footage band above them.
- * Aspects alternate so the row does not close level.
+ * One quote per plate, in the order PLATES declares them: Eebak, Oombix, Provincetown
+ * Harbor. Chosen by id, never by index into a speaker's quotes, for the reason
+ * FEATURED_QUOTES is — reordering lib/quotes.ts must not silently change the front page.
  */
-const SHEET_COLUMNS: { id: string; aspect: string; caption: string }[][] = [
-  [{ id: 'MS-AR-00027', aspect: '4 / 3', caption: 'Albert Landry Gallery, 1963.' }],
-  [{ id: 'MS-AR-00001', aspect: '3 / 4', caption: 'Four notices on one sheet, 1951.' }],
-  [{ id: 'MS-AR-00023', aspect: '4 / 3', caption: 'Salpeter Gallery, Provincetown Harbor.' }],
-  [{ id: 'MS-AR-00025', aspect: '3 / 4', caption: 'Harry Salpeter Gallery, 1948.' }],
+const WORK_QUOTES = ['karp-mystical', 'barnet-luminosity', 'solman-gift'];
+
+const FACES: { id: string; name: string; note: string }[] = [
+  { id: 'interview-karp', name: 'Ivan Karp', note: 'Dealer, discovered Warhol' },
+  { id: 'interview-barnet', name: 'Will Barnet', note: 'Painter' },
+  { id: 'interview-solman', name: 'Joseph Solman', note: 'The Ten, peer of Rothko' },
+  { id: 'interview-wolins', name: 'Joseph Wolins', note: 'Painter' },
+  { id: 'interview-dobkin', name: 'John Dobkin', note: 'Director, National Academy' },
+  { id: 'interview-unidentified', name: 'Unidentified', note: 'Who is this?' },
 ];
-
-const FACE_NAMES: Record<string, string> = {
-  'interview-karp': 'Ivan Karp',
-  'interview-barnet': 'Will Barnet',
-  'interview-solman': 'Joseph Solman',
-  'interview-wolins': 'Joseph Wolins',
-  'interview-dobkin': 'John Dobkin',
-  'interview-unidentified': 'Unidentified',
-};
-
-const FACE_NOTES: Record<string, string> = {
-  'interview-karp': 'Dealer, discovered Warhol',
-  'interview-barnet': 'Painter',
-  'interview-solman': 'The Ten, peer of Rothko',
-  'interview-wolins': 'Painter',
-  'interview-dobkin': 'Director, National Academy',
-  'interview-unidentified': 'Tape #010 — who is this?',
-};

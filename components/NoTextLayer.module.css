@@ -1,0 +1,15 @@
+.caveat {
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  line-height: 1.55;
+  color: var(--ink-faint);
+  margin: var(--s-3) 0 0;
+  max-width: 52ch;
+}
+
+/* In running prose, at the weight of the paragraphs around it. */
+.body {
+  font-size: var(--t-body);
+  line-height: 1.6;
+  margin: 0 0 var(--s-4);
+}

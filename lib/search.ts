@@ -9,6 +9,23 @@
  * searches the catalogue record, never the text of the clippings themselves.
  */
 
+/**
+ * The limit, in one wording.
+ *
+ * It had been written out five times in five wordings — /research/, /about/method/,
+ * the site search, the press browser and the two catalogue browsers — which is how the
+ * CV caveat and the plate credit went wrong before them. Same fix: one string, one
+ * component (components/NoTextLayer.tsx), and never retyped. A caveat that drifts is a
+ * caveat nobody trusts.
+ *
+ * It is the most important thing a researcher can be told about a search box here, so
+ * it is stated rather than implied: a query that returns nothing may mean the archive
+ * does not hold the thing, or may mean the words are only inside a scan.
+ */
+export const NO_TEXT_LAYER =
+  'The scans have no text layer. Search reaches the catalogue records and the '
+  + 'interview transcripts, never the words printed inside a clipping.';
+
 export const normalize = (s: string): string =>
   s.toLowerCase().normalize('NFKD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9\s]/g, ' ');
 

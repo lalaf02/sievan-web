@@ -36,26 +36,6 @@ a.stat:hover .statNum { color: var(--oxide); }
   color: var(--ink-faint);
 }
 
-.typeList {
-  list-style: none;
-  padding: 0;
-  margin: 0 0 var(--s-6);
-  columns: 2;
-  column-gap: var(--s-6);
-  max-width: 34rem;
-  font-family: var(--sans);
-  font-size: var(--t-sm);
-  color: var(--ink-muted);
-}
-
-.typeList li { margin-bottom: var(--s-2); break-inside: avoid; }
-
-.typeCount {
-  font-variant-numeric: tabular-nums;
-  color: var(--ink);
-  font-weight: 600;
-}
-
 .objects { list-style: none; padding: 0; margin: 0; }
 
 .objectRow {
@@ -103,39 +83,7 @@ a.stat:hover .statNum { color: var(--oxide); }
 @media (max-width: 620px) {
   .objectRow { grid-template-columns: 3.5rem 1fr; }
   .objectMeta { grid-column: 2; }
-  .typeList { columns: 1; }
-}
-
-.gridHeading { margin-top: var(--s-7); }
-
-.tileLead {
-  color: var(--ink);
-  text-decoration: none;
-  font-family: var(--serif);
-  font-size: var(--t-sm);
-  line-height: 1.35;
-}
-
-.tileLead:hover { color: var(--oxide); }
-
-/*
- * Five columns, so fifty objects come out as ten complete rows with nothing
- * stranded. align-items: start lets each cell keep its own caption height.
- */
-.objectGrid {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: var(--s-5) var(--s-4);
-  align-items: start;
-}
-
-@media (max-width: 1020px) {
-  .objectGrid { grid-template-columns: repeat(3, 1fr); }
 }
 
 @media (max-width: 860px) {
-  .objectGrid { grid-template-columns: repeat(2, 1fr); }
 }

@@ -7,6 +7,26 @@
   border-left: 3px solid var(--oxide);
 }
 
+/*
+ * The homepage size. Quiet enough to sit next to a picture without competing with it:
+ * no panel, no fill, just the rule and the words. The archive's argument is that the
+ * testimony can be checked, not that it is loud.
+ */
+.quote.small {
+  padding: 0 0 0 var(--s-3);
+  background: transparent;
+  border-left: 2px solid var(--oxide);
+}
+
+.small .text {
+  font-size: var(--t-base);
+  line-height: 1.45;
+  margin-bottom: var(--s-1);
+}
+
+.small .attribution { font-size: var(--t-xs); gap: var(--s-1) var(--s-2); }
+.small .source { margin-left: 0; }
+
 .quote.large {
   padding: var(--s-5) 0;
   background: transparent;

@@ -89,6 +89,10 @@ app/                     Five tabs, plus record routes beneath them
     interviews/                         exhibitions, people
     retrospective/
   works/                   /works/ .... Catalogue Raisonné (no paintings yet)
+                                        the CURATED way through the work — see the two
+                                        modes below
+    search/                             the other mode: one filter rail over all 98
+                                        artwork records, faceted by grade of evidence
     attested/                           the 57 paintings box 2 names, each with its quote
     periods/                            the catalogue's five periods + /works/periods/[periodId]/
                                         — COMMITTED, see below
@@ -102,18 +106,20 @@ app/                     Five tabs, plus record routes beneath them
   globals.css              design tokens + layout utilities — the design system
   *.module.css             per-route styles, colocated
 
-components/              19 components; only 7 are client components
+components/              24 components; only 10 are client components
   ── server ──
   SiteFooter  Record  Pending  PullQuote  Highlight  ScanViewer
   Relations  RelatedSection  ValidationBar  PaintingDetail  AttestedWorkList
-  PeriodSpine  PeriodSource  ImageSource  CatalogueEntry
-  ── 'use client' (7) ──
+  PeriodSpine  PeriodSource  ImageSource  CatalogueEntry  NoTextLayer
+  ── 'use client' (10) ──
   SiteHeader  PressBrowser  WorksBrowser  Chronology  TranscriptReader  SiteSearch
+  ArtworkBrowser  ArchiveBrowser  FacetRail    the rail shared by all three browsers
   CatalogueSource                        the only overlay; see the rule below
 
-lib/                     13 modules, no framework code
+lib/                     15 modules, no framework code
   data  types  search  dates  useUrlState  quotes
   citation  contact  validation  retrospective  periods  plates  provenance
+  facets  artworkGrades  artworkIndex
 
 scripts/                 the build pipeline and its gates
   build-data.mjs  check-data.mjs  check-quotes.mjs  check-export.mjs
@@ -350,6 +356,8 @@ Three of these are heuristics, not facts, and the UI says so:
 | `lib/validation.ts` `MUSEUM_COLLECTIONS` | **Derived from `CV.museumCollections`**, not a parallel list — keyed on the exact CV string and throwing at module scope on a miss, so correcting the transcription can never silently drop an institution. |
 | `lib/validation.ts`, `lib/retrospective.ts` | Synthesised evidence (museums, critics, THESIS) and the retrospective catalogue's transcribed pages + CV. |
 | `lib/periods.ts` `PERIODS` | The catalogue's five career periods, **derived from `RETROSPECTIVE_PAGES`** and keyed on each heading verbatim — same discipline as `MUSEUM_COLLECTIONS`, and it throws at module scope on a miss. The **year ranges are the archive's, not the catalogue's**, whose divisions overlap at 1930 and across the '60s; `PERIOD_SOURCE` is the one caveat that must accompany every range, rendered via `components/PeriodSource.tsx` and never retyped. Two more module-scope gates: every plate year must fall inside its own period, and the five ranges must tile the career with no gap and no overlap. |
+| `lib/facets.ts` | The facet machinery both filter rails share: `facetOf` · `facetOfMany` · `parseDims` · `largestDimension` · `normaliseMedium` · `NOT_STATED`. **`parseDims` returns `a`/`b`, not `h`/`w`** — on an attested work nothing records which figure is the height, so only `largestDimension` (orientation-independent) may drive a comparison. `normaliseMedium` folds 17 raw spellings to about 5 media; "on canvas board" names a support and no medium, so it folds to `NOT_STATED` rather than being read as oil. |
+| `lib/artworkIndex.ts` | One `ArtworkRow[]` over all 98 artwork records, built at build time and passed to `ArtworkBrowser` as props — **not** in `derived`, because it is presentation-shaped and `build-data.mjs` exits early on Vercel. `grade` is carried on every row and `countByGrade`/`describeCounts` are what the UI prints. **There is deliberately no `total`.** |
 | `lib/plates.ts` `PLATES` | The three free-standing gallery reproductions. Lived inside `app/works/page.tsx` until `/works/periods/` needed the same three. |
 | `lib/provenance.ts` `IMAGE_SOURCE` + `PLATE_CREDIT` | Who made which images. `IMAGE_SOURCE` (via `components/ImageSource.tsx`) goes beside work the estate holds and photographed itself; `PLATE_CREDIT` beside the sixteen other people printed. **The boundary is the point** — see the rule in Development guidelines. `PLATE_CREDIT` had been written out verbatim in two files. |
 | `components/CatalogueSource.tsx` | The retrospective typescript, quoted and openable. The repo's only `<dialog>`; degrades to an anchor into `/life/retrospective/#page-N`. |
@@ -379,6 +387,19 @@ reintroduce and nearly invisible in review.
 No `next/image` optimisation (needs a server), no route handlers, no middleware. A dynamic
 route whose `generateStaticParams` returns `[]` fails the build — that is why the painting
 route is generated rather than committed.
+
+**The Catalogue Raisonné has two modes, and they are two routes on purpose.**
+`/works/` is the curated way *through* the work; `/works/search/` is the way *to* one
+particular work. A tab or toggle on a single route would mean the editorial page existed
+only once client state said so, stripping it out of the prerendered HTML — the regression
+the no-JavaScript rule exists to prevent. Both routes read with scripting off.
+The search route puts all four grades of evidence in one index so a researcher need not
+know whether a work is a sheet, a plate or a line on a drawing before looking for it —
+which is **not** a merge: `grade` is on every row, it is the first facet in the rail, and
+the results head prints counts per grade. Nothing may ever render one total for 98
+records. Medium is a filter there, which is why `/works/` no longer scrolls through five
+medium-headed groups; reinstating those without removing the filter makes the page argue
+with itself.
 
 **Three dynamic routes, two opposite treatments — do not "simplify" them into one.**
 `app/works/[paintingId]/` is *generated and gitignored* because its table is legitimately
@@ -429,6 +450,15 @@ overlay and its first `<dialog>`; the trigger is a real anchor into
 established — the object record reads *"Sievan: Retrospective, (Lee Sievan?) with article
 'A Lost Generation' Paul Waldo Schwartz"* — so crediting him for it would be a
 fabrication. `CV_SOURCE`, which does say "Sievan's own account", covers page 8's CV only.
+
+**A caveat that drifts is a caveat nobody trusts.**
+Four of these are now single exported constants rendered through a single component,
+and none may be retyped at a call site: `CV_SOURCE` (`components/CVSource.tsx`),
+`PERIOD_SOURCE` (`components/PeriodSource.tsx`), `IMAGE_SOURCE` / `PLATE_CREDIT`
+(`components/ImageSource.tsx`), and `NO_TEXT_LAYER` (`components/NoTextLayer.tsx`).
+The last was written out five times in five wordings across `/research/`,
+`/about/method/`, the site search, the press browser and the two catalogue browsers
+before it was given one home.
 
 **Never fabricate a record.**
 Not a placeholder painting, not a sample citation, not an invented date. In a catalogue
@@ -488,10 +518,21 @@ Minimum sweep before a commit that touches the UI:
 - [ ] One record page (`/archive/press/MS-AR-00003-C/`) — related sections render and are labelled
 - [ ] A drawing (`/archive/objects/MS-AR-00054/`) — recto **and** verso render the right way up
 - [ ] `/archive/objects/MS-AR-00076/` — states its scan is absent by decision, not by backlog
-- [ ] `/works/` — opens on the spine and the five periods, with the dating caveat as one
-      line beneath the title; three plates render (confirm `MSAR00029-p01`, *Oombix*, is
-      not rotated and its printed caption is legible at tile size), 25 entries across 5
-      medium groups, every entry title distinct
+- [ ] `/works/` — opens on the compact spine and the five periods, with `PeriodSource`
+      beneath them and the dating denominator in the note under it; three plates render
+      (confirm `MSAR00029-p01`, *Oombix*, is not rotated and its printed caption is
+      legible at tile size). **Eight** sheets are shown, not 25 — the selection rule
+      ("the sheets that record the most paintings") is stated on the page and derivable,
+      and all 25 are one link away in the browser. Medium is a FILTER now, not a set of
+      scroll-through headings; do not reinstate the five medium groups without also
+      removing the filter, or the page argues with itself
+- [ ] `/works/search/` — **with JavaScript off it must show the complete unfiltered
+      index**, every facet populated with counts. The results head must read
+      `25 held · 3 reproduced · 13 printed · 57 named` and **never one total**: the four
+      grades are four strengths of evidence and summing them is the rule
+      `lib/artworkIndex.ts` is arranged around. The 13 typescript plates must show
+      "not separable from the page it is printed on" where their image would be —
+      a stated absence, not a broken tile
 - [ ] **Read `/works/` cold and ask two questions.** *How many paintings does this archive
       have a catalogue entry for?* — must be **none**; 25 works on paper are catalogued, no
       paintings are. *Does it read as though the estate holds no images of Sievan's work?*
@@ -503,7 +544,21 @@ Minimum sweep before a commit that touches the UI:
       stray slab of dialog text in the flow
 - [ ] Any record page — no `Box` or `Folder` fact, and no `MS-CS-00N` anywhere on the site
       (`grep -rl "MS-CS-00" out/ | grep -v scans` must be empty)
-- [ ] `/life/` — no artwork imagery, the CV in three columns, one `CVSource` caveat
+- [ ] `/` — the hero is the `painting-portrait` clip and shows its **poster with
+      JavaScript off**; no unattributed superlative anywhere (the banner reading
+      "A Private Vision" is gone — the phrase survives only in Karp's transcript, where
+      he actually said it); four sections, and the footer carries no inventory line
+- [ ] `/life/` — uses `.pageWide`, narrative left and the record right; no artwork
+      imagery; the five witnesses appear **inside the biography** beside the claims they
+      support, not as a "Who was there" directory at the foot; **one `CVSource` per
+      CV-derived block and no more** — it must not sit under `PEER_NETWORK`, which does
+      not come from the CV
+- [ ] `/archive/` — the documentary record only. The 25 drawings must NOT be here; they
+      are the Catalogue Raisonné's. Their record pages stay at `/archive/objects/<id>/`
+      and back-link to `/works/`. With JS off the complete 51-object list prerenders,
+      and the undigitised keep their place as `AbsentTile`
+- [ ] `/research/` — the fuller account the home page's last section is condensed from;
+      "Where to start" and "When the site is not enough" both present
 - [ ] `/works/periods/` — five periods in order, per-kind counts, never one total
 - [ ] **Read `/works/periods/` cold and ask: is the career mapped?** The answer must be
       **no** — 26 of 98 artwork records carry a year. Every gate is green either way
@@ -547,7 +602,7 @@ how that bug was found.
 
 **4. `check-export: OK — 231 pages`.**
 `MIN_PAGES` once defaulted to **60** against 205 actual pages: all 60 press pages could
-vanish and it still passed. The floor now tracks the real count (`262` against `264`,
+vanish and it still passed. The floor now tracks the real count (`263` against `265`,
 `scripts/check-export.mjs`) — *keep raising it* when a box is ingested or a route family is
 added, or the same blind spot reopens.
 
@@ -595,7 +650,18 @@ but only after a long upload. Gitignore a new box *before* copying it in, not af
 → *Stage explicit paths and audit sizes* before committing:
 `git diff --cached --name-only | xargs du -h | sort -rh | head`
 
-**13. Lint is load-bearing, not cosmetic.**
+**13. A client component importing `lib/data.ts` ships the whole archive to the browser.**
+`components/ArtworkBrowser.tsx` imported its labels from `lib/artworkIndex.ts`, which
+imports `lib/data.ts`, which imports the bundle. Next duly inlined all 234 KB of
+`archive.generated.json` into a client chunk — and with it `MS-CS-001` and `MS-CS-002`,
+which the site does not put in front of a reader. Every gate was green: typecheck, lint,
+`check-data`, `check-export`, and the page looked and behaved correctly.
+→ *Constants a client component needs live in a module that imports nothing* —
+`lib/artworkGrades.ts` beside `lib/artworkIndex.ts`, `lib/facets.ts` beside
+`lib/data.ts`. Check with
+`grep -rl '\"archiveObjects\"' out/_next/static/` — it must find nothing.
+
+**14. Lint is load-bearing, not cosmetic.**
 `react-hooks/static-components` caught a component defined during render that would have
 remounted a filter rail on every keystroke. The build passes with it; the UI misbehaves
 subtly.

@@ -6,71 +6,22 @@ import type { Painting } from '@/lib/types';
 import { highlightNeedles, scoreFields, tokenize } from '@/lib/search';
 import { decadeLabel } from '@/lib/dates';
 import { useUrlState } from '@/lib/useUrlState';
+import { facetOf, parseDims } from '@/lib/facets';
+import { CheckList, ClearFilters, RailSearch } from './FacetRail';
 import { Highlight } from './Highlight';
 import styles from './WorksBrowser.module.css';
 
 type View = 'list' | 'grid-s' | 'grid-l' | 'scale';
 type Sort = 'date-asc' | 'date-desc' | 'title';
 
-/** Free-text dimensions, e.g. "24 x 30 in." — used only by Scale view. */
-const DIMS = /(\d+(?:\.\d+)?)\s*[x×]\s*(\d+(?:\.\d+)?)/;
-
-function parseDims(s: string | null): { h: number; w: number } | null {
-  if (!s) return null;
-  const m = s.match(DIMS);
-  return m ? { h: Number(m[1]), w: Number(m[2]) } : null;
-}
-
-/** Count distinct values of one field, as [value, count] pairs. */
-function facetOf(
-  paintings: Painting[],
-  key: (p: Painting) => string | null | undefined,
-): [string, number][] {
-  const counts = new Map<string, number>();
-  for (const p of paintings) {
-    const k = key(p);
-    if (k) counts.set(k, (counts.get(k) ?? 0) + 1);
-  }
-  return [...counts.entries()];
-}
-
-/**
- * One facet block. Defined at module scope, not inside WorksBrowser: a component
- * created during render is a new type on every render, so React unmounts and
- * remounts the whole subtree and any focus inside it is lost.
+/*
+ * The rail, the facet counter and the dimension parser now live in lib/facets.ts and
+ * components/FacetRail.tsx, shared with the catalogue browser. Behaviour here is
+ * unchanged — the only difference is that parseDims returns `a`/`b` rather than
+ * `h`/`w`, because on an attested work nothing records which figure is the height.
+ * A Painting's `dimensions` IS height-first (see the Pending panel on /works/), so
+ * `a` is the height in this component and the scale view is still correct.
  */
-function CheckList({
-  label, options, selected, param, onToggle, format,
-}: {
-  label: string;
-  options: [string, number][];
-  selected: Set<string>;
-  param: string;
-  onToggle: (param: string, value: string) => void;
-  format?: (v: string) => string;
-}) {
-  if (options.length < 2) return null;
-  return (
-    <>
-      <p className={styles.label}>{label}</p>
-      <ul className={styles.checkList}>
-        {options.map(([v, n]) => (
-          <li key={v}>
-            <label className={styles.check}>
-              <input
-                type="checkbox"
-                checked={selected.has(v)}
-                onChange={() => onToggle(param, v)}
-              />
-              <span>{format ? format(v) : v}</span>
-              <span className={styles.count}>{n}</span>
-            </label>
-          </li>
-        ))}
-      </ul>
-    </>
-  );
-}
 
 /**
  * The catalogue browser.
@@ -169,7 +120,7 @@ export function WorksBrowser({ paintings }: { paintings: Painting[] }) {
     let max = 0;
     for (const p of results) {
       const d = parseDims(p.dimensions);
-      if (d) max = Math.max(max, d.h, d.w);
+      if (d) max = Math.max(max, d.a, d.b);
     }
     return max || 1;
   }, [results]);
@@ -186,17 +137,12 @@ export function WorksBrowser({ paintings }: { paintings: Painting[] }) {
   return (
     <div className="railLayout">
       <aside className="rail" aria-label="Filters">
-        <label htmlFor="works-q" className={styles.label}>Search</label>
-        <input
+        <RailSearch
           id="works-q"
-          type="search"
-          className={styles.search}
-          defaultValue={query}
+          label="Search"
           placeholder="Title, medium, collection…"
-          onChange={(e) => update((p) => {
-            const v = e.target.value;
-            if (v) p.set('q', v); else p.delete('q');
-          })}
+          value={query}
+          onChange={(v) => update((p) => { if (v) p.set('q', v); else p.delete('q'); })}
         />
 
         <CheckList
@@ -212,11 +158,7 @@ export function WorksBrowser({ paintings }: { paintings: Painting[] }) {
           param="collection" onToggle={toggle}
         />
 
-        {anyFilter && (
-          <button type="button" className={styles.clear} onClick={clear}>
-            Clear all filters
-          </button>
-        )}
+        {anyFilter && <ClearFilters onClear={clear} />}
       </aside>
 
       <div>
@@ -289,7 +231,10 @@ export function WorksBrowser({ paintings }: { paintings: Painting[] }) {
               const d = parseDims(p.dimensions);
               const scaleStyle =
                 view === 'scale' && d
-                  ? { width: `${(d.w / maxDim) * 100}%`, aspectRatio: `${d.w} / ${d.h}` }
+                  // `a` is height, `b` is width: a Painting's dimensions are recorded
+                  // height-first, which is the whole reason Scale view is allowed here
+                  // and is NOT offered on the attested works.
+                  ? { width: `${(d.b / maxDim) * 100}%`, aspectRatio: `${d.b} / ${d.a}` }
                   : undefined;
               return (
                 <li key={p.id} style={view === 'scale' ? scaleStyle : undefined}>

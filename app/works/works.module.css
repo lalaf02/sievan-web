@@ -4,6 +4,21 @@
   color: var(--ink-muted);
 }
 
+.findLink {
+  font-family: var(--sans);
+  font-size: var(--t-base);
+  margin: var(--s-4) 0 0;
+}
+
+.findLink a {
+  color: var(--oxide);
+  text-decoration: none;
+  border-bottom: 1px solid currentColor;
+  padding-bottom: 0.1em;
+}
+
+.findLink a:hover { color: var(--ink); }
+
 .section {
   margin-bottom: var(--s-7);
 }
@@ -38,49 +53,10 @@
   gap: var(--s-4);
 }
 
-@media (max-width: 1020px) {
-  .sketchGrid { grid-template-columns: repeat(3, 1fr); }
-}
-
 .period {
   display: flex;
   flex-direction: column;
-}
-
-.periodMedia {
-  display: block;
-  background: var(--paper-deep);
-  border: 1px solid var(--rule);
-}
-
-.periodMedia img {
-  display: block;
-  width: 100%;
-  height: auto;
-}
-
-.periodMedia:hover {
-  border-color: var(--oxide);
-}
-
-/* The card links to the period page twice already; this says the image does
-   something different — it opens the source. */
-.periodMediaHint {
-  display: block;
-  font-family: var(--sans);
-  font-size: var(--t-xs);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--ink-faint);
-  border-top: 1px solid var(--rule);
-  padding: var(--s-2) var(--s-3);
-}
-
-.periodMedia:hover .periodMediaHint {
-  color: var(--oxide);
-}
-
-.periodBody {
+  border-top: 2px solid var(--rule-strong);
   padding-top: var(--s-3);
 }
 
@@ -130,18 +106,12 @@
   margin: 0 0 var(--s-3);
 }
 
-.subheadCount {
-  font-variant-numeric: tabular-nums;
-  color: var(--ink-faint);
-}
-
 @media (max-width: 1020px) {
   .periods { grid-template-columns: repeat(3, 1fr); }
 }
 
 @media (max-width: 860px) {
   .periods { grid-template-columns: repeat(2, 1fr); }
-  .sketchGrid { grid-template-columns: repeat(2, 1fr); }
   .cvGrid,
   .meanwhile {
     grid-template-columns: 1fr;
@@ -150,7 +120,6 @@
 
 @media (max-width: 560px) {
   .periods { grid-template-columns: 1fr; }
-  .sketchGrid { grid-template-columns: 1fr; }
 }
 
 /* ------------------------------------------------------------ the plates */
@@ -170,30 +139,6 @@
 }
 
 /* ------------------------------------------------- works on paper entries */
-
-.mediumGroup {
-  margin-top: var(--s-5);
-}
-
-.mediumName {
-  display: flex;
-  align-items: baseline;
-  gap: var(--s-3);
-  font-family: var(--sans);
-  font-size: var(--t-xs);
-  text-transform: uppercase;
-  letter-spacing: 0.09em;
-  font-weight: 400;
-  color: var(--ink-faint);
-  border-bottom: 1px solid var(--rule);
-  padding-bottom: var(--s-2);
-  margin: 0 0 var(--s-3);
-}
-
-.mediumCount {
-  color: var(--ink-muted);
-  font-variant-numeric: tabular-nums;
-}
 
 @media (max-width: 1020px) {
   .plateGrid { grid-template-columns: repeat(2, 1fr); }

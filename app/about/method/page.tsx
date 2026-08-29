@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { NO_TEXT_LAYER } from '@/lib/search';
 import Link from 'next/link';
 import { allArticles, allObjects, counts } from '@/lib/data';
 
@@ -110,9 +111,7 @@ export default function MethodPage() {
             use and recorded as deliberately unscanned.
           </li>
           <li>
-            <strong>The scans have no text layer.</strong> Search here covers the
-            catalogue records, never the text of the clippings themselves. Reading the
-            clippings requires opening the scans.
+            {NO_TEXT_LAYER} Reading a clipping requires opening its scan.
           </li>
           <li>
             <strong>{noHeadline} notices have no recorded headline and {noByline} no

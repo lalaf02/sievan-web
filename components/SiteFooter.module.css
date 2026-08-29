@@ -13,7 +13,6 @@
   align-items: baseline;
 }
 
-.counts,
 .meta {
   font-family: var(--sans);
   font-size: var(--t-sm);

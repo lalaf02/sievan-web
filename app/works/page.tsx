@@ -1,17 +1,17 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import {
-  allPaintings, artworkDatingCoverage, contentsForPeriod, counts, pageOf,
-  worksOnPaperByMedium,
+  allPaintings, artworkDatingCoverage, attestationsForObject, catalogueWorksOnPaper,
+  contentsForPeriod, counts, pageOf,
 } from '@/lib/data';
 import type { ScanPage } from '@/lib/types';
 import { SheetTile } from '@/components/MediaTile';
 import { WorksBrowser } from '@/components/WorksBrowser';
 import { CatalogueEntry, CatalogueEntryList } from '@/components/CatalogueEntry';
-import { CatalogueSource } from '@/components/CatalogueSource';
 import { ImageSource } from '@/components/ImageSource';
 import { PeriodSpine } from '@/components/PeriodSpine';
-import { PERIODS, formatSpan, pageForPeriod } from '@/lib/periods';
+import { PeriodSource } from '@/components/PeriodSource';
+import { PERIODS, pageForPeriod } from '@/lib/periods';
 import { PLATES } from '@/lib/plates';
 import { PLATE_CREDIT } from '@/lib/provenance';
 import { Pending } from '@/components/Pending';
@@ -27,14 +27,13 @@ export const metadata: Metadata = {
 };
 
 /**
- * The way in: the career, then the five periods that divide it.
+ * The five periods.
  *
- * This is the top of the page because the reader came for the work. It used to open on
- * three paragraphs of disclaimer — what the estate holds, what it does not, and how
- * little of it is dated — which put the archive's caveats in front of its subject. The
- * denominator still has to be stated, because five period cards read as a mapped career
- * unless the page says how little carries a year; it is now one line rather than three
- * paragraphs, and the full account stays on /works/periods/.
+ * These cards used to lead with a full scan of the catalogue page each period is
+ * printed on — five book pages, stacked, immediately under the spine. It was the
+ * largest thing on a page about paintings, and none of it was a painting. The page
+ * images now appear where they belong: one, in context, on each period page, and all
+ * fifteen on /life/retrospective/.
  */
 function Periods() {
   return (
@@ -42,41 +41,29 @@ function Periods() {
       {PERIODS.map((period) => {
         const page = pageForPeriod(period);
         const { plates: galleryPlates, worksOnPaper, attested } = contentsForPeriod(period);
-        const href = `/works/periods/${period.id}/`;
         return (
           <li key={period.id} className={styles.period}>
+            <h3 className={styles.periodTitle}>
+              <Link href={`/works/periods/${period.id}/`}>{period.name}</Link>
+            </h3>
             {/*
-              The page image opens the source in an overlay rather than acting as a
-              second link to the period page: the card already links there twice, and
-              the catalogue is a document to consult, not a route.
+              The catalogue's own heading, verbatim. The archive's year range is NOT
+              repeated here: the spine states it directly above, and printing it a
+              second time within an inch of the first was the page arguing with itself.
             */}
-            <CatalogueSource page={page} className={styles.periodMedia}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={page.image}
-                alt={`Retrospective catalogue page ${page.page}: ${period.heading}`}
-                loading="lazy"
-                decoding="async"
-              />
-              <span className={styles.periodMediaHint}>See the page</span>
-            </CatalogueSource>
-            <div className={styles.periodBody}>
-              <h2 className={styles.periodTitle}>
-                <Link href={href}>{period.name}</Link>
-              </h2>
-              {/* The catalogue's own heading, verbatim; the archive's span beneath. */}
-              <p className={styles.periodHeading}>{period.heading}</p>
-              <p className={styles.plateYears}>
-                <span className="tnum">{formatSpan(period)}</span>
-              </p>
-              <p className={styles.periodText}>
-                {page.plateYears.length} plate
-                {page.plateYears.length === 1 ? '' : 's'}
-                {galleryPlates.length > 0 && `, ${galleryPlates.length} gallery reproduction${galleryPlates.length === 1 ? '' : 's'}`}
-                {worksOnPaper.length > 0 && `, ${worksOnPaper.length} sheet${worksOnPaper.length === 1 ? '' : 's'} held`}
-                {attested.length > 0 && `, ${attested.length} painting${attested.length === 1 ? '' : 's'} named`}
-              </p>
-            </div>
+            <p className={styles.periodHeading}>{period.heading}</p>
+            {/*
+              Four counts, never one sum: a plate the catalogue printed, a plate a
+              gallery printed, a sheet the estate holds and a painting Sievan named are
+              four different strengths of evidence. Same rule as contentsForPeriod.
+            */}
+            <p className={styles.periodText}>
+              {page.plateYears.length} plate
+              {page.plateYears.length === 1 ? '' : 's'}
+              {galleryPlates.length > 0 && `, ${galleryPlates.length} gallery reproduction${galleryPlates.length === 1 ? '' : 's'}`}
+              {worksOnPaper.length > 0 && `, ${worksOnPaper.length} sheet${worksOnPaper.length === 1 ? '' : 's'} held`}
+              {attested.length > 0 && `, ${attested.length} painting${attested.length === 1 ? '' : 's'} named`}
+            </p>
           </li>
         );
       })}
@@ -85,19 +72,28 @@ function Periods() {
 }
 
 /**
- * The catalogue proper: the works the estate physically holds.
+ * The works the estate physically holds.
  *
- * Rendered in BOTH branches below. When the painting catalogue opens these do not
- * stop being works, and dropping them would delete the archive's account of its own
- * holdings on the day the first photograph arrives.
+ * Eight entries, not twenty-five. This was five medium-headed groups and a very long
+ * scroll, which is the section the estate asked to reconsider: medium is a property to
+ * filter by, not a reason to make somebody scroll past twenty-four sheets to reach the
+ * twenty-fifth. The selection rule is stated and derivable — the sheets that record the
+ * most paintings — rather than a curator's pick presented as one, and all twenty-five
+ * are one link away in the browser, where medium IS a filter.
  */
 function WorksOnPaper() {
-  const groups = worksOnPaperByMedium();
-  if (!groups.length) return null;
+  const all = catalogueWorksOnPaper();
+  if (!all.length) return null;
+
+  const featured = [...all]
+    .sort((a, b) =>
+      attestationsForObject(b.id).length - attestationsForObject(a.id).length
+      || a.id.localeCompare(b.id))
+    .slice(0, 8);
 
   return (
     <section className={styles.section} id="works-on-paper">
-      <h2>Works on paper</h2>
+      <h2>The sheets in his own hand</h2>
       <p className={styles.lede}>
         {counts.worksOnPaperCatalogued} entries across {counts.worksOnPaperSheets} sheets,
         held by the estate and photographed from the originals in its care. These are the
@@ -117,23 +113,21 @@ function WorksOnPaper() {
         <strong>What these entries do not carry.</strong> None has a title — Sievan gave the
         sheets none, and the archive does not supply one. None has been measured.
         Twenty-four of the twenty-five are undated. Where a line is missing below, the
-        record is missing, not the page. A catalogue raisonné is normally ordered by year;
-        these cannot be, so they are ordered by medium. The artwork that{' '}
-        <em>does</em> carry a year is ordered by year, in{' '}
-        <Link href="/works/periods/">the five periods</Link>.
+        record is missing, not the page.
       </p>
 
-      {groups.map(({ medium, works }) => (
-        <div key={medium} className={styles.mediumGroup}>
-          <h3 className={styles.mediumName}>
-            {medium}
-            <span className={styles.mediumCount}>{works.length}</span>
-          </h3>
-          <CatalogueEntryList>
-            {works.map((o) => <CatalogueEntry key={o.id} object={o} />)}
-          </CatalogueEntryList>
-        </div>
-      ))}
+      <h3 className={styles.subhead}>
+        The eight sheets that record the most paintings
+      </h3>
+      <CatalogueEntryList>
+        {featured.map((o) => <CatalogueEntry key={o.id} object={o} />)}
+      </CatalogueEntryList>
+
+      <p className={styles.note}>
+        <Link href="/works/search/?evidence=held">
+          All {counts.worksOnPaperCatalogued} sheets, filterable by medium →
+        </Link>
+      </p>
     </section>
   );
 }
@@ -242,25 +236,36 @@ export default function WorksPage() {
       <header className="measure" style={{ marginBottom: 'var(--s-5)' }}>
         <h1>Catalogue Raisonné</h1>
         {/*
-          One line, and it has to keep its denominator: five period cards read as a
-          mapped career unless the page says how little of the work carries a year.
-          Interpolated from artworkDatingCoverage(), never typed as a literal, so it
-          cannot go stale the way the spelled-out numbers elsewhere on this page can.
+          The page used to open on its own denominator — "26 of the archive's 98
+          artwork records carry a year" — which introduced Sievan's work as a
+          completeness statistic. The denominator still has to be stated, because five
+          period cards read as a mapped career otherwise; it now sits under the spine,
+          where it explains the sparseness a reader is actually looking at, and in full
+          on /works/search/.
         */}
         <p className={styles.lede}>
-          The work, ordered by the five periods of Sievan’s career.{' '}
-          <span className="tnum">{coverage.dated}</span> of the archive’s{' '}
-          <span className="tnum">{coverage.total}</span> artwork records carry a year;
-          the other <span className="tnum">{coverage.undated}</span> carry none and are
-          gathered below by medium.
+          Sievan kept the figure when New York gave it up, and painted the same few
+          subjects for fifty years — the harbour, the suburbs, the studio. The work
+          divides into the five periods his retrospective catalogue names, and the
+          archive can place a work in one only where the work states its own year.
+        </p>
+        <p className={styles.findLink}>
+          <Link href="/works/search/">Looking for a particular work? Search the catalogue →</Link>
         </p>
       </header>
 
       <PeriodSpine />
       <Periods />
+      <PeriodSource />
       <p className={styles.note} style={{ marginTop: 'var(--s-4)' }}>
-        Each period is a page of the retrospective typescript held in the archive, and a
-        route into everything the archive dates into those years —{' '}
+        The marks on the rail above are every work the archive can date:{' '}
+        <span className="tnum">{coverage.dated}</span> of{' '}
+        <span className="tnum">{coverage.total}</span> artwork records state a year, and
+        the other <span className="tnum">{coverage.undated}</span> state none — so the
+        career is not mapped, and the rail is honest about how much of it is missing.
+        Undated work is reached by medium, place or size in{' '}
+        <Link href="/works/search/">the catalogue browser</Link>. Each period is itself a
+        page of the retrospective typescript held in the archive —{' '}
         <Link href="/works/periods/">the five periods, end to end</Link>.
       </p>
 
@@ -285,7 +290,7 @@ export default function WorksPage() {
       <Reproductions />
       <AttestedSummary />
 
-      <section className={styles.section}>
+      <section className={styles.section} id="the-catalogue-of-paintings">
         <h2>The catalogue of paintings</h2>
         {/*
           Do NOT fill seed_paintings.json to "turn the catalogue on".

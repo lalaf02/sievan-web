@@ -1,76 +1,99 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import {
-  archive, byDateUndatedLast, counts, coverFor, objectLead, objectsForCollection,
-  paperCollections, pluralObjectType,
+  allObjects, counts, coverFor, exhibitionsForObject, objectLead, OBJECT_TYPE_LABELS,
 } from '@/lib/data';
-import { SheetTile, AbsentTile } from '@/components/MediaTile';
+import { ArchiveBrowser } from '@/components/ArchiveBrowser';
+import type { ArchiveRow } from '@/components/ArchiveBrowser';
 import styles from './archive.module.css';
 
 export const metadata: Metadata = {
   title: 'The archive',
   description:
-    'Seventy-six objects holding sixty press notices, exhibition catalogues, posters, ' +
-    'and twenty-five drawings and sketches in Sievan’s own hand.',
+    'The documentary record of Maurice Sievan’s career: sixty press notices, the '
+    + 'exhibition catalogues and posters they were cut from, and thirty publications.',
 };
 
 /**
- * The two groups, named for what they hold rather than for the container they arrived
- * in. Keyed on collection_id because that is how the material actually divides, but no
- * box number reaches the reader: shelving is the archive's own business, and an id like
- * MS-CS-002 on a public page reads as a second identifier competing with the object's.
+ * The archive tab: the documentary record, and only that.
  *
- * Grouped rather than run together as one sequence for the reason recorded below: the
- * two hold different kinds of thing, and a single date-ordered list buried that
- * distinction while stranding twenty-five undated sheets in an unexplained clump.
+ * It used to hold the drawings as well — the twenty-five sheets that ARE the Catalogue
+ * Raisonné — presented in a second grid under their own heading. The same rows were
+ * therefore the subject of two tabs under two framings, which is the duplication the
+ * estate asked to resolve. They now belong to the Catalogue Raisonné alone, and this
+ * page is one thing: what documents the career, as opposed to what the career produced.
+ *
+ * The RECORD pages do not move. /archive/objects/<id>/ stays canonical for all seventy-
+ * six objects, drawings included, and already switches its title and back-link to the
+ * Catalogue Raisonné when `artwork` is set. Only this index changed.
  */
-const GROUPS: Record<string, { title: string; blurb: string }> = {
-  'MS-CS-001': {
-    title: 'The press record',
-    blurb:
-      'Bundles of photocopied clippings, exhibition catalogues, posters, two books '
-      + 'and assorted promotional material — the reviews, catalogues and posters that '
-      + 'followed the exhibitions.',
-  },
-  'MS-CS-002': {
-    title: 'Drawings and sketches in Sievan’s hand',
-    blurb:
-      'Drawings and sketches for paintings, on envelopes, index cards and note paper. '
-      + 'Sievan drew each painting he had made and wrote its title, size, medium and '
-      + 'price beside it — these are his own records of his work.',
-  },
-};
+function buildRows(): ArchiveRow[] {
+  return allObjects
+    .filter((o) => !o.artwork)
+    .map((o) => {
+      const cover = coverFor(o.id);
+      const shows = exhibitionsForObject(o.id);
+      const year = o.date_earliest;
+      return {
+        id: o.id,
+        href: `/archive/objects/${o.id}/`,
+        lead: objectLead(o),
+        thumb: cover?.thumb ?? null,
+        dateText: o.date_text,
+        year,
+        decade: year == null ? null : String(Math.floor(year / 10) * 10),
+        type: o.object_type,
+        typeLabel: OBJECT_TYPE_LABELS[o.object_type] ?? o.object_type,
+        scanned: Boolean(cover),
+        /*
+          Labelled by VENUE and year, not by name. Thirteen of the fifteen shows are
+          titled "Maurice Sievan", so a facet keyed on the name offered a reader
+          thirteen identical checkboxes. The venue is what identifies a show, and the
+          year separates the two that share one (Contemporary Arts, 1939 and 1941).
+        */
+        exhibitionNames: shows.map(
+          (e) => [e.gallery_or_venue ?? e.name ?? 'Untitled exhibition', e.date_earliest]
+            .filter(Boolean).join(', '),
+        ),
+        exhibitionIds: shows.map((e) => e.id),
+        // The show's own title stays searchable even though it is not the label.
+        body: [o.raw_title_description, ...shows.map((e) => e.name ?? '')]
+          .filter(Boolean).join(' '),
+      };
+    });
+}
 
 export default function ArchivePage() {
-  const byType = archive.derived.facets.objectType;
-  const digitised = counts.objectsWithScans;
-  const undigitised = counts.archiveObjects - digitised;
+  const rows = buildRows();
+  const digitised = rows.filter((r) => r.scanned).length;
+  const undigitised = rows.length - digitised;
 
   return (
     <div className="page" style={{ paddingTop: 'var(--s-6)' }}>
-      <header style={{ marginBottom: 'var(--s-6)' }}>
-        <p className="eyebrow">Papers and drawings</p>
+      <header style={{ marginBottom: 'var(--s-5)' }}>
+        <p className="eyebrow">The documentary record</p>
         <h1>The archive</h1>
         <p className="measure muted">
-          Everything the estate holds on paper. One part is the press record — the
-          reviews, catalogues and posters that followed the exhibitions. The other is{' '}
-          {byType.work_on_paper} drawings and sketches in Sievan’s own hand. Further
-          material is catalogued but not yet in this archive.
+          What followed Sievan around: the reviews, the exhibition catalogues, the
+          posters and the promotional material his galleries printed. These are the
+          objects that document the career — not the work itself, which is in the{' '}
+          <Link href="/works/">Catalogue Raisonné</Link>. Further material is
+          catalogued but not yet in this archive.
         </p>
       </header>
 
       <div className={styles.stats}>
         <Link href="/archive/press/" className={styles.stat}>
           <span className={styles.statNum}>{counts.newsArticles}</span>
-          <span className={styles.statLabel}>press notices</span>
+          <span className={styles.statLabel}>press notices, filterable by critic</span>
         </Link>
-        <div className={styles.stat}>
-          <span className={styles.statNum}>{counts.archiveObjects}</span>
-          <span className={styles.statLabel}>physical objects</span>
-        </div>
         <Link href="/archive/publications/" className={styles.stat}>
           <span className={styles.statNum}>{counts.publications}</span>
-          <span className={styles.statLabel}>publications</span>
+          <span className={styles.statLabel}>publications that carried them</span>
+        </Link>
+        <Link href="/archive/search/" className={styles.stat}>
+          <span className={styles.statNum}>{counts.transcribedInterviews}</span>
+          <span className={styles.statLabel}>interviews, searchable in full</span>
         </Link>
         {/*
           Stated plainly rather than concealed: a coverage figure reads as rigour,
@@ -78,102 +101,22 @@ export default function ArchivePage() {
         */}
         <div className={styles.stat}>
           <span className={styles.statNum}>
-            {digitised}<span className={styles.statOf}>/{counts.archiveObjects}</span>
+            {digitised}<span className={styles.statOf}>/{rows.length}</span>
           </span>
-          <span className={styles.statLabel}>digitised</span>
+          <span className={styles.statLabel}>you can look at</span>
         </div>
       </div>
 
-      <p className="ui muted" style={{ marginBottom: 'var(--s-6)' }}>
-        {undigitised} objects are catalogued but not photographed: twenty consecutive
-        rows of the press record, and one folder of drawings the curator recorded as
-        withdrawn from use and deliberately left unscanned. Their records below are
-        transcribed from the catalogue sheet.
+      <p className="ui muted" style={{ marginBottom: 'var(--s-6)', maxWidth: '68ch' }}>
+        {undigitised} of these objects are catalogued but not photographed — twenty
+        consecutive rows of the press record, which being consecutive suggests a batch
+        that was never photographed rather than material that is lost. Their records are
+        transcribed from the catalogue sheet, and they keep their place in the sequence
+        below rather than being hidden: an archive that shows only what it has scanned
+        looks more complete than it is.
       </p>
 
-      <h2>What the archive holds</h2>
-      <ul className={styles.typeList}>
-        {Object.entries(byType)
-          .sort((a, b) => b[1] - a[1])
-          .map(([type, n]) => (
-            <li key={type}>
-              <span className={styles.typeCount}>{n}</span>{' '}
-              {pluralObjectType(type, n)}
-            </li>
-          ))}
-      </ul>
-
-      {/*
-        Grouped by what the material is, rather than run together as one sequence.
-        The two hold different kinds of thing — printed press in one, Sievan's own
-        drawings in the other — and a single date-ordered list buried that distinction
-        while stranding the twenty-five undated sheets in an unexplained clump at the
-        end.
-      */}
-      {/*
-        This was rows of text across the full width, with a long horizontal void
-        between each object's one-line description and its right-aligned id. This is
-        mostly paper with something on it, so it should look like it. The
-        undigitised objects keep their place in the sequence as labelled empty frames —
-        dropping them would make the archive look more complete than it is.
-      */}
-      {paperCollections.map((collection) => {
-        const group = GROUPS[collection.id];
-        const objects = [...objectsForCollection(collection.id)].sort(byDateUndatedLast);
-        if (!objects.length) return null;
-        const dated = objects.filter((o) => o.date_earliest != null).length;
-
-        return (
-          <section key={group.title}>
-            <h2 className={styles.gridHeading}>{group.title}</h2>
-            <p className="measure ui muted" style={{ marginBottom: 'var(--s-3)' }}>
-              {group.blurb}
-            </p>
-            <p className="ui muted" style={{ marginBottom: 'var(--s-5)' }}>
-              {objects.length} objects
-              {dated === objects.length
-                ? ', in date order.'
-                : `, in date order — ${objects.length - dated} carry no date and come last.`}
-              {' '}The sheet itself, where there is one. Everything links to its
-              catalogue record.
-            </p>
-
-            <ol className={styles.objectGrid}>
-              {objects.map((o) => {
-                const cover = coverFor(o.id);
-                const href = `/archive/objects/${o.id}/`;
-                const caption = (
-                  <Link href={href} className={styles.tileLead}>{objectLead(o)}</Link>
-                );
-                const meta = `${o.id} · ${o.date_text ?? 'undated'}`;
-
-                return (
-                  <li key={o.id}>
-                    {cover ? (
-                      <SheetTile
-                        sheet={cover}
-                        href={href}
-                        aspect="3 / 4"
-                        alt={`${objectLead(o)} — ${o.id}`}
-                        caption={caption}
-                        meta={meta}
-                      />
-                    ) : (
-                      <AbsentTile
-                        aspect="3 / 4"
-                        note="Catalogued from the sheet; no scan on file."
-                        caption={caption}
-                        meta={meta}
-                      />
-                    )}
-                  </li>
-                );
-              })}
-            </ol>
-          </section>
-        );
-      })}
-
+      <ArchiveBrowser rows={rows} />
     </div>
   );
 }
