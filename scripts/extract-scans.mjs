@@ -94,9 +94,12 @@ const ROTATE = {
    * them. Every entry here was set by reading the annotation in the rendered page.
    */
   'MSAR00052-p01': 90,   // "Woodstock Landscape 12 x 16" / "Studio Interior 12 x 16"
-  'MSAR00053-p01': 90,   // "Southhampton Landscape 18 x 24 oil on canvas board"
+  'MSAR00053-p01': 90,   // "SOUTHAMPTON LANDSCAPE 18 x 24 oil on canvas board" — sheet has one H
   'MSAR00054-p01': 90,   // five numbered paintings, recto
-  'MSAR00054-p02': 90,   // ...and verso
+  // The verso is written the other way up from the recto: at 90 it rendered upside
+  // down, which the landscape heuristic cannot see because the sheet is square-ish.
+  // Found by eye, and it is the page CLAUDE.md's UI sweep names for exactly this.
+  'MSAR00054-p02': 270,  // ...and verso, inverted relative to the recto
   'MSAR00055-p01': 90,   // "The Chess Game 10 3/4 x 12 water color [Paris]"
   'MSAR00056-p01': 90,   // "ProvenceTown Landscape 25 x 30 on board 400"
   'MSAR00057-p01': 90,   // "Birchland #1 ... 20 x 24"
@@ -105,13 +108,18 @@ const ROTATE = {
   'MSAR00060-p01': 90,   // "Early Spring 22 x 28 oil on canvas"
   'MSAR00060-p02': 90,   // ...and verso
   'MSAR00061-p01': 90,   // "at Dusk 9 x 12 oil"
-  'MSAR00062-p01': 90,   // "For the Col Students Landscape (Oct 1957) 16 x 24"
-  'MSAR00066-p01': 90,   // two sketches with notes, recto
+  'MSAR00062-p01': 90,   // "For the Art Students League (Oct 1957) 18 x 24" — INTERIOR (PROVINCETOWN)
+  // Also inverted, and also invisible to the heuristic: at 90 the sheet rendered
+  // upside down. "Hampton Bays Landscape 25 x 30 $800" / "Siesta 32 x 40 $800".
+  'MSAR00066-p01': 270,  // two sketches with notes, recto
+  // The verso came off the feeder sideways; the recto did not. Found by eye on the
+  // rendered page, which is the only way these box-2 sheets ever surface.
+  'MSAR00067-p02': 270,  // "3) THE POOL" / "Landscape #12" / "In my Naborhood" / "Sag Harbor"
   'MSAR00072-p01': 90,   // "Croton Landscape 12 x 16" / "Monhegan Seascape 16 x 20"
   'MSAR00072-p02': 90,   // ...and verso, a used envelope
   'MSAR00073-p01': 180,  // "Sold to Jeans Friends daughter / 22 x 28 oil / The Highway"
   'MSAR00074-p01': 270,  // "Landscape #3 16 x 20"
-  'MSAR00075-p01': 180,  // "At Karp's 1970" — the numbered 1970 pastels, recto
+  'MSAR00075-p01': 180,  // "Shown at Kay's 1970 in Woodstock" — the numbered pastels, recto
   'MSAR00075-p02': 180,  // ...and verso
 };
 

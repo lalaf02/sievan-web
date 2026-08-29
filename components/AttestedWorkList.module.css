@@ -1,0 +1,171 @@
+/*
+ * The ledger: a sheet on the left, the paintings it names on the right.
+ *
+ * Two columns because the sheet is the evidence and the rows are the claim, and a
+ * reader checking one against the other should not have to scroll between them.
+ * At the single breakpoint it becomes one column, sheet first.
+ */
+
+.sheets {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.sheet {
+  scroll-margin-top: var(--s-5);
+  display: grid;
+  grid-template-columns: 15rem minmax(0, 1fr);
+  gap: var(--s-6);
+  padding: var(--s-6) 0;
+  border-top: 1px solid var(--rule);
+}
+
+.sheet:first-child {
+  border-top: none;
+  padding-top: var(--s-3);
+}
+
+/* The sheet stays in view while its paintings scroll past. */
+.sheetMedia {
+  position: sticky;
+  top: var(--s-5);
+  align-self: start;
+}
+
+.sheetMeta {
+  margin: var(--s-2) 0 0;
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  color: var(--ink-faint);
+  letter-spacing: 0.01em;
+}
+
+.works {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.work {
+  /*
+   * Deep-linked from the chronology, from place pages and from every sheet's own
+   * record page, so a linked row must not land flush against the viewport edge.
+   * Same convention as life.module.css and TranscriptReader.module.css.
+   */
+  scroll-margin-top: var(--s-5);
+  padding-bottom: var(--s-5);
+  margin-bottom: var(--s-5);
+  border-bottom: 1px dotted var(--rule);
+}
+
+.work:last-child {
+  padding-bottom: 0;
+  margin-bottom: 0;
+  border-bottom: none;
+}
+
+.workTitle {
+  margin: 0 0 var(--s-3);
+  font-size: var(--t-md);
+  font-weight: 500;
+  line-height: 1.25;
+  display: flex;
+  align-items: baseline;
+  gap: var(--s-3);
+  flex-wrap: wrap;
+}
+
+/* No title on the sheet is a fact about the sheet, not a blank to be filled. */
+.untitled {
+  color: var(--ink-faint);
+  font-style: italic;
+  font-size: var(--t-body);
+}
+
+/*
+ * Sievan's own inventory number. Set apart because it is his system, not the
+ * archive's — and because it is the one field most likely to match a canvas that
+ * surfaces later to a sheet in this box.
+ */
+.artistNo {
+  font-family: var(--mono);
+  font-size: var(--t-xs);
+  color: var(--ink-muted);
+  border: 1px solid var(--rule);
+  padding: 0.1em 0.45em;
+  white-space: nowrap;
+}
+
+.quote {
+  margin: var(--s-3) 0 var(--s-2);
+  padding-left: var(--s-4);
+  border-left: 2px solid var(--rule-strong);
+  font-size: var(--t-sm);
+}
+
+.provenance {
+  margin: 0;
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  color: var(--ink-faint);
+}
+
+.note {
+  margin: var(--s-3) 0 0;
+  font-size: var(--t-sm);
+  color: var(--ink-muted);
+  max-width: 60ch;
+}
+
+/* A lead the archive refuses to resolve, marked in the one accent colour. */
+.collision {
+  margin: var(--s-3) 0 0;
+  padding: var(--s-3) var(--s-4);
+  background: var(--paper-deep);
+  border-left: 2px solid var(--oxide);
+  font-size: var(--t-sm);
+  color: var(--ink-muted);
+  max-width: 60ch;
+}
+
+.places {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.qualifier {
+  color: var(--ink-faint);
+  font-size: var(--t-xs);
+}
+
+.party {
+  font-style: italic;
+}
+
+@media (max-width: 860px) {
+  .sheet {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--s-4);
+  }
+
+  /* Sticky is worse than useless in one column: it covers the rows. */
+  .sheetMedia {
+    position: static;
+    max-width: 15rem;
+  }
+}
+
+/*
+ * Shown only once a curator has matched this sheet to a catalogued painting. The
+ * accent marks it as the one line on the row that points INTO the catalogue rather
+ * than at the evidence.
+ */
+.matched {
+  margin: var(--s-3) 0 0;
+  padding: var(--s-2) var(--s-4);
+  border-left: 2px solid var(--oxide);
+  font-family: var(--sans);
+  font-size: var(--t-sm);
+}

@@ -11,6 +11,9 @@ const KIND_LABELS: Record<TimelineKind, string> = {
   exhibition: 'Exhibitions',
   object: 'Physical items',
   painting: 'Works',
+  // Distinct from 'Works' on purpose: a painting a sheet NAMES is not a catalogue
+  // entry, and the chip is the only thing labelling it on this page.
+  attestation: 'Works recorded',
   video: 'Interviews',
   event: 'Events',
 };
@@ -23,10 +26,17 @@ const KIND_LABELS: Record<TimelineKind, string> = {
 const DEFAULT_OFF: TimelineKind[] = ['object'];
 
 export function Chronology({
-  events, undatedTestimony,
+  events, undatedTestimony, undatedAttestations = 0,
 }: {
   events: TimelineEvent[];
   undatedTestimony: { id: string; title: string; href: string; words: number | null }[];
+  /**
+   * How many paintings box 2 names without a year. They deliberately get no band
+   * of their own: seven undated interviews read as a coda, but forty-odd undated
+   * works would read as the main event on a page about when things happened,
+   * while saying nothing about when. One line and a link instead.
+   */
+  undatedAttestations?: number;
 }) {
   const kinds = useMemo(() => {
     const present = new Set(events.map((e) => e.kind));
@@ -153,6 +163,15 @@ export function Chronology({
           );
         })}
       </div>
+
+      {undatedAttestations > 0 && (
+        <p className={styles.undatedNote}>
+          A further {undatedAttestations} paintings are named on Sievan’s own sheets
+          with no year attached, so they cannot be placed on this spine at all. They
+          are listed in the{' '}
+          <Link href="/works/attested/">catalogue raisonné</Link>.
+        </p>
+      )}
 
       {/*
         None of the interviews carry a date, so they cannot sit on the timeline at

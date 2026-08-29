@@ -127,6 +127,64 @@ for (const x of d.paintingExhibitions) {
   need(E.has(x.exhibition_id), `${x.id}: exhibition_id not found`);
 }
 
+// ------------------------------------------------- attested works and places
+
+const PL = ids(d.places);
+const objectsById = toMap(d.archiveObjects);
+const AW_SOURCE_TYPES = ['archive_object', 'news_article', 'video_asset'];
+
+for (const w of d.attestedWorks) {
+  need(AW_SOURCE_TYPES.includes(w.source_type), `${w.id}: unknown source_type ${w.source_type}`);
+  const pool = w.source_type === 'archive_object' ? O
+    : w.source_type === 'news_article' ? A : V;
+  need(pool.has(w.source_id),
+    `${w.id}: source_id ${w.source_id} not found for source_type ${w.source_type}`);
+
+  // A page number past the end of the sheet would link the reader to nothing.
+  if (w.source_page != null && w.source_type === 'archive_object') {
+    const obj = objectsById.get(w.source_id);
+    const pages = (obj?.scan_files ?? []).reduce((n, s) => n + (s.pages ?? []).length, 0);
+    need(pages === 0 || w.source_page <= pages,
+      `${w.id}: source_page ${w.source_page} exceeds the ${pages} sheet(s) of ${w.source_id}`);
+  }
+
+  need(!w.painting_id || PA.has(w.painting_id), `${w.id}: painting_id ${w.painting_id} not found`);
+  need(!w.counterparty_person_id || PE.has(w.counterparty_person_id),
+    `${w.id}: counterparty_person_id ${w.counterparty_person_id} not found`);
+  for (const ref of w.place_refs ?? []) {
+    need(PL.has(ref.place_id), `${w.id}: place_refs -> ${ref.place_id} not found`);
+  }
+}
+
+for (const e of d.exhibitions) {
+  need(!e.venue_place_id || PL.has(e.venue_place_id),
+    `${e.id}: venue_place_id ${e.venue_place_id} not found`);
+}
+
+/*
+ * A place nothing points at is a geography the site invented. Every /places/<id>/
+ * page must have something on it, which is also what keeps the gazetteer honest —
+ * it is a record of where the evidence goes, not a directory of nouns.
+ */
+for (const p of d.places) {
+  need(!p.parent_id || PL.has(p.parent_id), `${p.id}: parent_id ${p.parent_id} not found`);
+  need(p.parent_id !== p.id, `${p.id}: parent_id points at itself`);
+  const u = d.derived.placeUsage?.[p.id];
+  need(u && (u.total > 0 || u.children > 0),
+    `${p.id}: no record points at this place — remove it, or link something to it`);
+}
+// Ancestry must terminate.
+const placesById = toMap(d.places);
+for (const p of d.places) {
+  const seen = new Set([p.id]);
+  let cur = p.parent_id;
+  while (cur) {
+    if (seen.has(cur)) { need(false, `${p.id}: parent_id chain cycles at ${cur}`); break; }
+    seen.add(cur);
+    cur = placesById.get(cur)?.parent_id ?? null;
+  }
+}
+
 // Every route the site generates must have a resolvable target.
 for (const t of d.derived.timeline) {
   need(typeof t.href === 'string' && t.href.startsWith('/'), `timeline ${t.id}: bad href`);

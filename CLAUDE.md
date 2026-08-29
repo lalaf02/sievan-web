@@ -79,11 +79,13 @@ app/                     Five tabs, plus record routes beneath them
     interviews/                         exhibitions, people
     retrospective/
   works/                   /works/ .... Catalogue Raisonné (no paintings yet)
+    attested/                           the 57 paintings box 2 names, each with its quote
   archive/                 /archive/ .. Archives: press, objects, publications
     search/                             + site-wide search
   research/                /research/ . Access, rights, citation, bibliography
   exhibitions/             record routes, reached from within the five
   people/
+  places/                  the gazetteer + /places/[placeId]/ — COMMITTED, see below
   about/method/            how the archive was made
   globals.css              design tokens + layout utilities — the design system
   *.module.css             per-route styles, colocated
@@ -91,7 +93,7 @@ app/                     Five tabs, plus record routes beneath them
 components/              17 components; only 6 are client components
   ── server (10) ──
   SiteFooter  Record  Pending  PullQuote  Highlight  ScanViewer
-  Relations  RelatedSection  ValidationBar  PaintingDetail
+  Relations  RelatedSection  ValidationBar  PaintingDetail  AttestedWorkList
   ── 'use client' (6) ──
   SiteHeader  PressBrowser  WorksBrowser  Chronology  TranscriptReader  SiteSearch
 
@@ -164,8 +166,8 @@ Then three gates, in order — `npm run data` runs the first two, `npm run build
 
 | Gate | Catches |
 |---|---|
-| `check-data.mjs` | Broken foreign keys; scans, media and transcripts referenced but absent from disk |
-| `check-quotes.mjs` | A curated quote whose anchor phrase no longer appears on the transcript page it claims |
+| `check-data.mjs` | Broken foreign keys; scans, media and transcripts referenced but absent from disk; a place nothing points at; a `parent_id` cycle |
+| `check-quotes.mjs` | A curated quote whose anchor phrase no longer appears on the transcript page it claims — **and an attested work whose verbatim quote is not in its source's own text** |
 | `check-export.mjs` | Dead internal links, and a page count that collapsed |
 
 ### The physical boxes
@@ -205,23 +207,48 @@ Two things that will bite:
 - **`extract-scans.mjs`'s landscape heuristic will not catch a sideways box-2 sheet.** These
   sheets are square-ish, so a page rotated 90° is still taller than it is wide and passes
   unflagged. Sievan wrote the title and dimensions along the *edge* of the sheet, so this is
-  common — 19 of box 2's 38 pages needed a `ROTATE` entry, found only by looking at every
+  common — 21 of box 2's 38 pages needed a `ROTATE` entry, found only by looking at every
   page. Render a contact sheet of the new thumbs and read them.
+
+  **A wrong `ROTATE` value looks exactly like a right one to every gate in this repo.**
+  Three box-2 pages shipped rotated: `MSAR00054-p02` and `MSAR00066-p01` were 180° out
+  (set to 90 where they needed 270 — the verso is written the other way up from the recto),
+  and `MSAR00067-p02` had no entry at all. All three passed `check-data`, `check-export` and
+  the build. They were caught by opening the page images and reading them, which is the only
+  method that works. `MS-AR-00054` is on the UI-sweep list below for exactly this reason —
+  and it was the page that was broken.
 
 ### The entity model
 
-14 entity tables in the bundle. **Seven are empty**, and everything downstream of them is
+16 entity tables in the bundle. **Seven are empty**, and everything downstream of them is
 dormant rather than broken:
 
 | Populated | | Empty | |
 |---|---:|---|---:|
 | `archiveObjects` | 76 | `paintings` | 0 |
 | `newsArticles` | 60 | `commentary` | 0 |
-| `publications` | 30 | `commentaryRelations` | 0 |
-| `persons` | 29 | `paintingExhibitions` | 0 |
-| `exhibitions` | 15 | `paintingHistoricalContext` | 0 |
-| `videoAssets` | 7 | `historicalEvents` | 0 |
-| `collections` | 3 | `scholarship` | 0 |
+| `attestedWorks` | 57 | `commentaryRelations` | 0 |
+| `publications` | 30 | `paintingExhibitions` | 0 |
+| `persons` | 29 | `paintingHistoricalContext` | 0 |
+| `places` | 25 | `historicalEvents` | 0 |
+| `exhibitions` | 15 | `scholarship` | 0 |
+| `videoAssets` | 7 | | |
+| `collections` | 3 | | |
+
+**`AttestedWork` is not `Painting`, and the distinction is the point.** An attested work is a
+painting a source *names* — box 2 is Sievan's own sketches of finished canvases, annotated
+with title, size, medium, price and sometimes the buyer. 57 of them across 24 sheets. The
+archive holds the sheets, not the paintings, so these are evidence toward the catalogue and
+never entries in it: separate id space (`MS-AW-#####`), separate URL space, and counts that
+are never added together. Each row carries the verbatim words it rests on, and
+`check-quotes.mjs` fails the build if a quote is not present in its source's own text.
+
+`Place` is a gazetteer of the towns, rivers, galleries and institutions the evidence names.
+Slug ids, like `Person` and `Exhibition`, because it is an authority term the archive
+normalises rather than a thing it holds. **A place nothing points at fails `check-data.mjs`
+as an orphan** — the gazetteer is a record of where the evidence goes, not a directory of
+geography. No coordinates and no map: `"croton?"`, Sievan's own note, is not a thing you can
+put a pin in.
 
 `Painting` is the declared hub of the model. Three tables key on it directly — `Commentary`
 (`painting_ids`), `PaintingExhibition` and `PaintingHistoricalContext` — and
@@ -234,10 +261,13 @@ that return `null` today for exactly this reason: finished code waiting on rows.
 `facets` (decade / publication / author / objectType) · `articlesByObject` ·
 `articlesByPublication` · `articlesByAuthor` · `exhibitionsByObject` ·
 **`articlesByExhibition`** and **`exhibitionsByArticle`** (inferred — see below) ·
-`personMentions` · `publicationMergeGroups` · `timeline` (126 events) · `undatedVideos` ·
-`objectsWithImagery` · `coverByObject` · `clips` · `clipsByVideo` · `counts`.
+`personMentions` · `attestationsByObject` · `attestationsByPlace` (role-typed) ·
+`exhibitionsByPlace` · `placeChildren` · `placeUsage` · **`attestationsByTitleKey`**
+(heuristic — see below) · `undatedAttestations` · `publicationMergeGroups` ·
+`timeline` (136 events) · `undatedVideos` · `objectsWithImagery` · `coverByObject` ·
+`clips` · `clipsByVideo` · `counts`.
 
-Two of these are heuristics, not facts, and the UI says so:
+Three of these are heuristics, not facts, and the UI says so:
 
 - **`personMentions`** substring-matches each person's name and aliases against object
   descriptions. Labelled *mentioned*, never *authored* — a string match cannot prove
@@ -248,6 +278,12 @@ Two of these are heuristics, not facts, and the UI says so:
   falls in the exhibition's year *and* a distinctive token of the venue name appears in the
   clipping's own text. Generic words are excluded, which is why "Contemporary Arts" and
   "National Arts Club" produce no links at all — that is the correct answer, not a bug.
+  (Sievan's own sheet `MS-AR-00068` names Contemporary outright, which the heuristic could
+  never have done; that link comes from a curated attestation, not from this index.)
+- **`attestationsByTitleKey`** groups normalised titles that occur on more than one sheet.
+  Presented as an open question, never a merge: "Birchland #1" on `MS-AR-00057` and
+  "BIRCHLAND BII" on `MS-AR-00066` may be one painting, two, or a series, and nothing in the
+  pipeline decides. Only a curator may, in a `notes` field.
   Currently 21 articles across 5 exhibitions.
 
 ### Schema gotchas
@@ -280,6 +316,7 @@ Two of these are heuristics, not facts, and the UI says so:
 | `lib/validation.ts`, `lib/retrospective.ts` | Synthesised evidence (museums, critics, THESIS) and the retrospective catalogue's transcribed pages + CV. |
 | `components/Record.tsx` | The record-page vocabulary: `RecordHeader`, `Facts`, `Fact` (renders nothing when empty), `Verbatim`, `Absent`, `EditorialNote`, `Section`, `RecordList`. |
 | `components/Pending.tsx` | A stated gap at section scale, for anything not yet in the archive. `PendingLine` for a single empty fact. |
+| `components/AttestedWorkList.tsx` | The ledger of paintings box 2 names, grouped by sheet. A **server** component: 57 rows need no filter rail, and rendering on the server satisfies the no-JavaScript rule by construction. There is deliberately no per-attestation route — each row carries `id="MS-AW-#####"` and is deep-linked as `/works/attested/#MS-AW-…`. |
 | `components/RelatedSection.tsx` | Cross-links, each labelled by the relation that produced it. |
 | `components/Highlight.tsx` | Wraps matches in `<mark>`. Feed it `highlightNeedles(query)`, not `tokenize(query)`. |
 
@@ -301,6 +338,14 @@ reintroduce and nearly invisible in review.
 No `next/image` optimisation (needs a server), no route handlers, no middleware. A dynamic
 route whose `generateStaticParams` returns `[]` fails the build — that is why the painting
 route is generated rather than committed.
+
+**Two dynamic routes, two opposite treatments — do not "simplify" them into one.**
+`app/works/[paintingId]/` is *generated and gitignored* because its table is legitimately
+empty. `app/places/[placeId]/` is *committed*, because its rows ship inside the committed
+bundle. Making places generated for symmetry would break Vercel: `build-data.mjs` exits
+early there (no `DataModel/`), so the route file would never be written and every
+`/places/…` link would 404 — surfacing only as dead links in `check-export`. `build-data.mjs`
+asserts the places seed is non-empty instead of deleting the directory.
 
 **Route segment config must be statically analysable.**
 Next 16 rejects a re-exported `dynamicParams` ("It mustn't be reexported"). Declare
@@ -365,6 +410,10 @@ Minimum sweep before a commit that touches the UI:
 - [ ] One record page (`/archive/press/MS-AR-00003-C/`) — related sections render and are labelled
 - [ ] A drawing (`/archive/objects/MS-AR-00054/`) — recto **and** verso render the right way up
 - [ ] `/archive/objects/MS-AR-00076/` — states its scan is absent by decision, not by backlog
+- [ ] `/works/attested/` — 57 rows, quotes in mono, every row links to its sheet; and the
+      opening paragraph still reads as "the catalogue has none of these"
+- [ ] `/places/` and the thinnest place page — a stub that says nothing should be folded
+      into its parent
 - [ ] `/archive/search/` — with JS off it must show the **complete index**, not an empty box
 - [ ] A quote deep link — it must highlight **the phrase**, not every occurrence of "the"
 - [ ] The home mosaic at ≤860px collapses to one column; video tiles show their posters
@@ -398,9 +447,9 @@ how that bug was found.
 
 **4. `check-export: OK — 231 pages`.**
 `MIN_PAGES` once defaulted to **60** against 205 actual pages: all 60 press pages could
-vanish and it still passed. The floor now tracks the real count (`225` against `231`,
-`scripts/check-export.mjs:33`) — *keep raising it* when a box is ingested, or the same
-blind spot reopens.
+vanish and it still passed. The floor now tracks the real count (`252` against `258`,
+`scripts/check-export.mjs`) — *keep raising it* when a box is ingested or a route family is
+added, or the same blind spot reopens.
 
 **5. "319 internal links all resolve."**
 Resolving is not the same as being useful. That count was identical before and after a change
@@ -427,19 +476,26 @@ Useful as a smoke test, worthless as proof. A page can be full of words and stil
 does not assert the file exists will report a clean run having captured nothing.
 → *Assert on the artifact*, not the exit code.
 
-**10. Regex tag-stripping invents bugs.**
+**10. A blank headless screenshot of a `#fragment` URL is the tool, not the page.**
+Chrome headless scrolls to the anchor and then fails to paint the scrolled region, so
+`--screenshot` of `/works/attested/#MS-AW-00044` returns a uniformly blank image — and so
+does `/life/#chronology`, which has worked since it was written. Confirm against a URL whose
+anchor predates your change before believing it.
+→ *Screenshot the page without the fragment*, or capture at a taller window and crop.
+
+**11. Regex tag-stripping invents bugs.**
 Stripping `<[^>]+>` from built HTML turns React's `<!-- -->` text separators into spaces, so
 `(“passedoit”)` reads as `(“ passedoit ”)`.
 → *Check raw markup before "fixing" a spacing defect* found in stripped text.
 
-**11. `git add -A` would stage ~25 GB.**
+**12. `git add -A` would stage ~25 GB.**
 `Video Archive/` (25 G), `DataModel/` (307 M), `MS-CS-001/` (88 M) and `MS-CS-002/` (44 M)
 live inside the repo and are gitignored. **Keep them that way.** GitHub rejects the push,
 but only after a long upload. Gitignore a new box *before* copying it in, not after.
 → *Stage explicit paths and audit sizes* before committing:
 `git diff --cached --name-only | xargs du -h | sort -rh | head`
 
-**12. Lint is load-bearing, not cosmetic.**
+**13. Lint is load-bearing, not cosmetic.**
 `react-hooks/static-components` caught a component defined during render that would have
 remounted a filter rail on every keystroke. The build passes with it; the UI misbehaves
 subtly.

@@ -1,0 +1,61 @@
+/*
+ * The ledger's front matter. The disclaimer is given real weight — a rule, a tint
+ * and full measure — because it is the one thing on the page that must be read,
+ * and because every automated check on this site can be green while a reader
+ * walks away believing the catalogue has opened.
+ */
+
+.disclaimer {
+  margin-top: var(--s-4);
+  padding: var(--s-4) var(--s-5);
+  background: var(--paper-deep);
+  border-left: 3px solid var(--oxide);
+}
+
+.disclaimer p {
+  margin: 0 0 var(--s-3);
+  font-size: var(--t-body);
+  line-height: 1.55;
+}
+
+.disclaimer p:last-child {
+  margin-bottom: 0;
+}
+
+.summary {
+  margin-bottom: var(--s-6);
+  padding-bottom: var(--s-5);
+  border-bottom: 1px solid var(--rule);
+}
+
+.figures {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  gap: var(--s-4);
+  margin: 0 0 var(--s-4);
+}
+
+.figures div {
+  border-top: 2px solid var(--ink);
+  padding-top: var(--s-2);
+}
+
+.figures dt {
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  letter-spacing: 0.01em;
+  color: var(--ink-muted);
+}
+
+.figures dd {
+  margin: var(--s-1) 0 0;
+  font-size: var(--t-xl);
+  line-height: 1;
+}
+
+.figuresNote {
+  margin: 0;
+  max-width: 68ch;
+  font-size: var(--t-sm);
+  color: var(--ink-muted);
+}

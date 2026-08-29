@@ -39,6 +39,9 @@ const SEEDS = {
   'seed_exhibitions.json': ['Exhibition', 'exhibitions'],
   'seed_video_assets.json': ['VideoAsset', 'videoAssets'],
   'seed_paintings.json': ['Painting', 'paintings'],
+  // Places load before attestations, which reference them.
+  'seed_places.json': ['Place', 'places'],
+  'seed_attested_works.json': ['AttestedWork', 'attestedWorks'],
   'seed_commentary.json': ['Commentary', 'commentary'],
   'seed_commentary_relations.json': ['CommentaryRelation', 'commentaryRelations'],
   'seed_painting_historical_context.json': ['PaintingHistoricalContext', 'paintingHistoricalContext'],
@@ -114,6 +117,26 @@ for (const o of data.archiveObjects) {
       + 'seed_news_articles.json; that file must now hold news articles only');
   }
   seenObjectIds.add(o.id);
+}
+
+/*
+ * An attestation may only carry a year if a source stated one, and may only claim a
+ * Painting if a human says how the match was made. Both are the same rule twice: an
+ * inference must be labelled as one, or it silently becomes a fact.
+ *
+ * These live here rather than in the schema because the schema uses no if/then
+ * anywhere, and because a message from here can explain WHY. Resist "doing it
+ * properly" in ajv later — the error would name a keyword instead of the problem.
+ */
+for (const w of data.attestedWorks) {
+  if (w.date_earliest != null && !w.date_basis) {
+    fail(`${w.id}: date_earliest is set but date_basis is not — say whether the year `
+      + 'is stated on the source or inferred by the curator');
+  }
+  if (w.painting_id && !w.identification_basis) {
+    fail(`${w.id}: painting_id ${w.painting_id} is set but identification_basis is not `
+      + '— record what made the match, so the match can be argued with');
+  }
 }
 
 // ---------------------------------------------------------------- transcripts
@@ -313,6 +336,77 @@ for (const e of data.exhibitions) {
   for (const oid of e.source_archive_object_ids ?? []) (exhibitionsByObject[oid] ??= []).push(e.id);
 }
 
+/*
+ * Attestations, indexed by the sheet that carries them. Box 2's object pages render
+ * this: a reader looking at MS-AR-00067 sees the six paintings its two sheets name,
+ * each beside the words that name it.
+ */
+const attestationsByObject = {};
+for (const w of data.attestedWorks) {
+  if (w.source_type !== 'archive_object') continue;
+  (attestationsByObject[w.source_id] ??= []).push(w.id);
+}
+
+/*
+ * The gazetteer's spine. Role-typed, so a place page can distinguish "Sievan painted
+ * this place" from "Sievan showed work here" — which for Woodstock is both, and that
+ * difference is the whole reason to build this.
+ */
+const attestationsByPlace = {};
+for (const w of data.attestedWorks) {
+  for (const ref of w.place_refs ?? []) {
+    (attestationsByPlace[ref.place_id] ??= [])
+      .push({ attestationId: w.id, role: ref.role, certain: ref.certain !== false });
+  }
+}
+
+const exhibitionsByPlace = {};
+for (const e of data.exhibitions) {
+  if (e.venue_place_id) (exhibitionsByPlace[e.venue_place_id] ??= []).push(e.id);
+}
+
+/** Children, so a settlement page can list the venues inside it. */
+const placeChildren = {};
+for (const p of data.places) {
+  if (p.parent_id) (placeChildren[p.parent_id] ??= []).push(p.id);
+}
+
+/*
+ * What points at each place, and by which relation. Drives the index's counts AND
+ * the orphan gate in check-data.mjs: a place nothing points at is a geography we
+ * invented, and this archive does not invent.
+ */
+const placeUsage = {};
+for (const p of data.places) {
+  const refs = attestationsByPlace[p.id] ?? [];
+  const roles = {};
+  for (const r of refs) roles[r.role] = (roles[r.role] ?? 0) + 1;
+  const exhibitions = (exhibitionsByPlace[p.id] ?? []).length;
+  placeUsage[p.id] = {
+    attestations: refs.length,
+    exhibitions,
+    children: (placeChildren[p.id] ?? []).length,
+    roles,
+    total: refs.length + exhibitions,
+  };
+}
+
+/*
+ * HEURISTIC, and the UI says so. Two sheets writing the same title are a lead, not a
+ * fact: "Birchland #1" (MS-AR-00057) and "BIRCHLAND BII" (MS-AR-00066) may be one
+ * painting, two, or a series. Nothing merges rows on this — it only surfaces the
+ * coincidence for a curator to adjudicate.
+ */
+const titleKey = (s) => (s ?? '').toLowerCase().replace(/[^a-z0-9]/g, '');
+const attestationsByTitleKey = {};
+for (const w of data.attestedWorks) {
+  const k = titleKey(w.title_stated);
+  if (k.length >= 4) (attestationsByTitleKey[k] ??= []).push(w.id);
+}
+for (const k of Object.keys(attestationsByTitleKey)) {
+  if (attestationsByTitleKey[k].length < 2) delete attestationsByTitleKey[k];
+}
+
 /** Precision drives how a date renders: a soft band vs a hard tick. */
 function precisionOf(iso, text) {
   if (!iso) return text ? 'unknown' : 'unknown';
@@ -365,6 +459,35 @@ for (const p of data.paintings) {
     title: p.title ?? p.id, subtitle: p.medium ?? null, href: `/works/${p.id}`,
   });
 }
+/*
+ * Only attestations whose year is STATED on the source reach the chronology. An
+ * inferred year still renders on the record, labelled, but plotting it here would
+ * make a curator's guess indistinguishable from a date Sievan wrote down.
+ *
+ * A separate kind, never 'painting'. The chronology labels 'painting' as "Works",
+ * and a reader must not leave thinking the catalogue has opened.
+ */
+for (const w of data.attestedWorks) {
+  if (w.date_earliest == null || w.date_basis !== 'stated_on_source') continue;
+  timeline.push({
+    id: w.id, kind: 'attestation',
+    year: w.date_earliest, yearEnd: w.date_latest ?? w.date_earliest,
+    precision: 'year', uncertain: !!w.date_uncertain,
+    title: w.title_stated ?? 'Untitled work',
+    subtitle: [w.medium_stated, w.dimensions_stated].filter(Boolean).join(', ') || null,
+    href: `/works/attested/#${w.id}`,
+  });
+}
+/*
+ * The majority carry no date at all — Sievan dated the painting on a minority of
+ * these sheets. They get NO undated band on the chronology: seven undated interviews
+ * read as a coda, but forty undated works would read as the main event, on a page
+ * about when things happened while saying nothing about when. They live in the
+ * catalogue raisonné, and the chronology points at them in one line.
+ */
+const undatedAttestations = data.attestedWorks
+  .filter((w) => w.date_earliest == null).map((w) => w.id);
+
 for (const h of data.historicalEvents) {
   if (h.date_earliest == null) continue;
   timeline.push({
@@ -538,12 +661,19 @@ const objectIdForArticle = Object.fromEntries(
 const objectIdForExhibition = Object.fromEntries(
   data.exhibitions.map((e) => [e.id, (e.source_archive_object_ids ?? [])[0]]),
 );
+// An attestation's evidence is the sheet it was read off.
+const objectIdForAttestation = Object.fromEntries(
+  data.attestedWorks
+    .filter((w) => w.source_type === 'archive_object')
+    .map((w) => [w.id, w.source_id]),
+);
 
 let timelineThumbs = 0;
 for (const ev of timeline) {
   const objectId = ev.kind === 'object' ? ev.id
     : ev.kind === 'article' ? objectIdForArticle[ev.id]
-      : objectIdForExhibition[ev.id];
+      : ev.kind === 'attestation' ? objectIdForAttestation[ev.id]
+        : objectIdForExhibition[ev.id];
   const cover = objectId ? coverByObject[objectId] : undefined;
   if (cover) {
     ev.thumb = cover.thumb;
@@ -590,6 +720,13 @@ const bundle = {
     articlesByExhibition,
     exhibitionsByArticle,
     personMentions,
+    attestationsByObject,
+    attestationsByPlace,
+    exhibitionsByPlace,
+    placeChildren,
+    placeUsage,
+    attestationsByTitleKey,
+    undatedAttestations,
     publicationMergeGroups,
     timeline,
     undatedVideos,
@@ -605,6 +742,15 @@ const bundle = {
       exhibitions: data.exhibitions.length,
       videoAssets: data.videoAssets.length,
       paintings: data.paintings.length,
+      // Never add these to `paintings`. They are what a source NAMES, not what the
+      // catalogue holds, and a combined figure would erase the distinction.
+      attestedWorks: data.attestedWorks.length,
+      attestedWorksDated: data.attestedWorks.filter((w) => w.date_earliest != null).length,
+      attestedWorksWithDimensions:
+        data.attestedWorks.filter((w) => w.dimensions_stated).length,
+      attestedWorksWithPrice: data.attestedWorks.filter((w) => w.price_stated).length,
+      sheetsCarryingAttestations: Object.keys(attestationsByObject).length,
+      places: data.places.length,
       scholarship: data.scholarship.length,
       objectsWithScans: data.archiveObjects.filter((o) => (o.scan_files ?? []).length > 0).length,
       objectsWithImagery: objectsWithImagery.length,
@@ -644,6 +790,22 @@ if (data.paintings.length > 0) {
   rmSync(worksRouteDir, { recursive: true, force: true });
 }
 
+/*
+ * app/places/[placeId]/ is COMMITTED, not generated like the painting route above.
+ *
+ * Its rows ship inside the committed bundle, so it is never empty on Vercel — where
+ * this script exits early because DataModel/ is absent and would therefore never
+ * write a generated route file at all, leaving every /places/ link a 404. The cost
+ * of committing it is that an emptied seed becomes an opaque Next error, so fail
+ * here instead, where the message can say what to do about it.
+ */
+if (data.places.length === 0
+  && existsSync(join(WEB, 'app', 'places', '[placeId]', 'page.tsx'))) {
+  fail('seed_places.json is empty but app/places/[placeId]/ is mounted. A static '
+    + 'export rejects a dynamic route whose generateStaticParams enumerates to '
+    + 'nothing. Either restore the seed or delete the route directory.');
+}
+
 mkdirSync(OUT, { recursive: true });
 mkdirSync(join(OUT, 'transcripts'), { recursive: true });
 writeFileSync(join(OUT, 'archive.generated.json'), JSON.stringify(bundle));
@@ -656,6 +818,9 @@ console.log(
   `  build-data: ${c.archiveObjects} objects · ${c.newsArticles} articles · ` +
   `${c.publications} publications · ${c.persons} people · ${c.exhibitions} exhibitions · ` +
   `${c.videoAssets} videos · ${c.paintings} paintings\n` +
+  `              ${c.attestedWorks} attested works on ${c.sheetsCarryingAttestations} ` +
+  `sheets (${c.attestedWorksDated} dated, ${c.attestedWorksWithDimensions} sized) · ` +
+  `${c.places} places\n` +
   `              ${c.objectsWithScans} objects with scans (${c.scanFiles} files) · ` +
   `${c.transcribedInterviews} transcripts (${c.transcriptWords.toLocaleString()} words) · ` +
   `${timeline.length} timeline entries\n` +

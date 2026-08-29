@@ -112,6 +112,9 @@
 .exhibition { border-left-color: var(--oxide); }
 .object { border-left-color: var(--rule); }
 .painting { border-left-color: var(--ink-muted); }
+/* Dotted, not solid: a painting a sheet names is thinner evidence than an object
+   the archive holds, and the rule should look like it. */
+.attestation { border-left-color: var(--ink-muted); border-left-style: dotted; }
 .video { border-left-color: var(--flag); }
 .event { border-left-color: var(--ink); }
 
@@ -150,4 +153,18 @@
 @media (max-width: 620px) {
   .year { grid-template-columns: 1fr; gap: var(--s-2); }
   .yearLabel { position: static; }
+}
+
+/*
+ * The undated works pointer. Deliberately a line of prose and not a band: they
+ * belong to the catalogue, and this page is about when things happened.
+ */
+.undatedNote {
+  margin: var(--s-5) 0 0;
+  padding-top: var(--s-4);
+  border-top: 1px solid var(--rule);
+  font-family: var(--sans);
+  font-size: var(--t-sm);
+  color: var(--ink-muted);
+  max-width: var(--measure);
 }

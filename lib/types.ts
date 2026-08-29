@@ -159,6 +159,86 @@ export interface Painting {
   notes: string | null;
 }
 
+/** Where a place sits in relation to a work the source names. */
+export type PlaceRole = 'depicted' | 'made_at' | 'shown_at' | 'held_at';
+
+export interface PlaceRef {
+  place_id: string;
+  role: PlaceRole;
+  /** False where the source itself hedges — MS-AR-00068 writes "croton?". */
+  certain?: boolean;
+}
+
+/**
+ * A painting a source NAMES but the archive does not hold.
+ *
+ * Deliberately not a `Painting`. A drawing records that a work existed and what
+ * Sievan called it on the day he drew it — not that the title stuck, not that the
+ * sale went through, not that the work survives. Every row carries the verbatim
+ * words it rests on and the source they come from, so any claim can be checked
+ * against a scan; `check-quotes.mjs` fails the build if `quote` is not present in
+ * the source's own recorded text.
+ */
+export interface AttestedWork {
+  id: string;
+  source_type: 'archive_object' | 'news_article' | 'video_asset';
+  source_id: string;
+  /** 1-indexed into the source's rasterised sheets. */
+  source_page: number | null;
+  /** Where on the sheet, in the transcription's own words: "Verso", "Top left". */
+  sheet_position: string | null;
+  quote: string;
+  /** Exactly as the source writes it — spelling and casing preserved. */
+  title_stated: string | null;
+  /** Sievan's own inventory number: "925", "#180", circled "118". */
+  artist_number: string | null;
+  /** Verbatim and unparsed — which figure is the height is not recorded. */
+  dimensions_stated: string | null;
+  medium_stated: string | null;
+  date_text: string | null;
+  date_earliest: number | null;
+  date_latest: number | null;
+  date_uncertain?: boolean;
+  /** Only `stated_on_source` reaches the chronology. */
+  date_basis?: 'stated_on_source' | 'inferred' | null;
+  price_stated: string | null;
+  price_usd: number | null;
+  /** Empty means the source is silent. There is no `unknown` member by design. */
+  dispositions: Disposition[];
+  counterparty_raw: string | null;
+  counterparty_person_id: string | null;
+  place_refs: PlaceRef[];
+  /** One-way bridge to a catalogue entry. Null on every row today. */
+  painting_id: string | null;
+  identification_basis?:
+    | 'title_and_dimensions' | 'artist_number' | 'photograph' | 'curator_judgement' | null;
+  review_status: ReviewStatus;
+  notes: string | null;
+}
+
+export type Disposition =
+  | 'sold' | 'consigned' | 'offered' | 'returned' | 'retained' | 'exhibited' | 'donated';
+
+export type PlaceKind =
+  | 'settlement' | 'neighbourhood' | 'region' | 'landmark'
+  | 'waterway' | 'venue' | 'institution' | 'country';
+
+/**
+ * A gazetteer entry. Places exist only because something in the archive points at
+ * one — `check-data.mjs` fails on an orphan — so this is a record of where the
+ * evidence goes, not a directory of geography. No coordinates by design.
+ */
+export interface Place {
+  id: string;
+  name: string;
+  kind: PlaceKind;
+  parent_id: string | null;
+  region: string | null;
+  /** Every spelling that occurs in a source, verbatim: "SOUTHHAMPTON". */
+  aliases: string[];
+  notes: string | null;
+}
+
 export interface MediaFile {
   filename: string;
   variant: 'raw' | 'edited' | 'subtitled';
@@ -252,7 +332,13 @@ export interface PaintingExhibition {
 
 export type DatePrecision = 'day' | 'month' | 'year' | 'range' | 'unknown';
 
-export type TimelineKind = 'article' | 'exhibition' | 'object' | 'painting' | 'video' | 'event';
+/**
+ * `attestation` is deliberately distinct from `painting`: the chronology labels
+ * `painting` as "Works", and a reader must not come away thinking the catalogue
+ * has opened because a sheet named a canvas.
+ */
+export type TimelineKind =
+  | 'article' | 'exhibition' | 'object' | 'painting' | 'attestation' | 'video' | 'event';
 
 export interface TimelineEvent {
   id: string;
@@ -294,6 +380,15 @@ export interface PersonMention {
   matchedAs: string;
 }
 
+export interface PlaceUsage {
+  attestations: number;
+  exhibitions: number;
+  children: number;
+  roles: Partial<Record<PlaceRole, number>>;
+  /** attestations + exhibitions. A place with 0 and no children is an orphan. */
+  total: number;
+}
+
 export interface Counts {
   archiveObjects: number;
   newsArticles: number;
@@ -302,6 +397,14 @@ export interface Counts {
   exhibitions: number;
   videoAssets: number;
   paintings: number;
+  /** Paintings the archive can NAME from a source. Never added to `paintings`. */
+  attestedWorks: number;
+  attestedWorksDated: number;
+  attestedWorksWithDimensions: number;
+  attestedWorksWithPrice: number;
+  /** How many box-2 sheets carry at least one attestation. */
+  sheetsCarryingAttestations: number;
+  places: number;
   scholarship: number;
   objectsWithScans: number;
   /** Objects with at least one rasterised sheet the site can display. */
@@ -352,6 +455,21 @@ export interface Derived {
   articlesByExhibition: Record<string, { articleId: string; matchedAs: string }[]>;
   exhibitionsByArticle: Record<string, { exhibitionId: string; matchedAs: string }[]>;
   personMentions: Record<string, PersonMention[]>;
+  /** Attested works keyed by the sheet that carries them. */
+  attestationsByObject: Record<string, string[]>;
+  attestationsByPlace: Record<string, { attestationId: string; role: PlaceRole; certain: boolean }[]>;
+  exhibitionsByPlace: Record<string, string[]>;
+  placeChildren: Record<string, string[]>;
+  /** What points at each place, and by which relation. Drives the orphan gate. */
+  placeUsage: Record<string, PlaceUsage>;
+  /**
+   * HEURISTIC: normalised titles that occur on more than one sheet. Two sheets
+   * writing the same title are a lead, not a fact — nothing merges rows on this,
+   * it only surfaces the coincidence for a curator to adjudicate.
+   */
+  attestationsByTitleKey: Record<string, string[]>;
+  /** The majority. They carry no year, so they cannot go on the chronology. */
+  undatedAttestations: string[];
   publicationMergeGroups: string[][];
   timeline: TimelineEvent[];
   undatedVideos: string[];
@@ -394,6 +512,8 @@ export interface Archive {
   exhibitions: Exhibition[];
   videoAssets: VideoAsset[];
   paintings: Painting[];
+  attestedWorks: AttestedWork[];
+  places: Place[];
   commentary: Commentary[];
   commentaryRelations: CommentaryRelation[];
   paintingHistoricalContext: PaintingHistoricalContext[];

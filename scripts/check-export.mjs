@@ -31,8 +31,9 @@ const errors = [];
 
 // A section quietly disappearing is the failure this catches. The floor sat at 60
 // against 205 actual pages, so all 60 press pages could have vanished and this still
-// passed. Keep it just under the real count — 231 after box 2 added 26 object pages.
-const MIN_PAGES = Number(process.env.MIN_PAGES ?? 225);
+// passed. Keep it just under the real count — 258 after the gazetteer added 25 place
+// pages, its index and the attested-works ledger to box 2's 231.
+const MIN_PAGES = Number(process.env.MIN_PAGES ?? 252);
 if (html.length < MIN_PAGES) {
   errors.push(`only ${html.length} HTML files emitted, expected at least ${MIN_PAGES}`);
 }

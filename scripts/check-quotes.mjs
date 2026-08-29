@@ -96,6 +96,50 @@ for (const q of ALL_QUOTES) {
   }
 }
 
+/*
+ * Every attested work rests on words from a source the archive holds, and this is
+ * the gate that makes that claim mean something: a row may not assert a title, a
+ * size or a buyer unless the source's own recorded text contains the quote it cites.
+ *
+ * Without it "attested" is just a label. With it, a reader can click through from
+ * any row to the sheet and read the same words — which is the only reason this
+ * archive is allowed to name forty-odd paintings it does not hold.
+ *
+ * Normalises whitespace, quote glyphs and dashes only, because the transcriptions
+ * mix straight and curly quotes and carry trailing spaces from the spreadsheet.
+ * Deliberately NOT the search normaliser: this must still notice a changed word.
+ */
+const canon = (s) => s.normalize('NFKC')
+  .replace(/[‘’‛]/g, "'")
+  .replace(/[“”]/g, '"')
+  .replace(/[‐-―]/g, '-')
+  .replace(/\s+/g, ' ')
+  .trim()
+  .toLowerCase();
+
+const bundlePath = join(WEB, 'data', 'archive.generated.json');
+let attested = 0;
+if (existsSync(bundlePath)) {
+  const d = JSON.parse(readFileSync(bundlePath, 'utf8'));
+  const objects = new Map(d.archiveObjects.map((o) => [o.id, o]));
+  const articles = new Map(d.newsArticles.map((a) => [a.id, a]));
+
+  for (const w of d.attestedWorks ?? []) {
+    attested++;
+    const src = w.source_type === 'archive_object'
+      ? objects.get(w.source_id)?.raw_title_description
+      : w.source_type === 'news_article'
+        ? articles.get(w.source_id)?.raw_source_text
+        : null; // a video_asset quote would verify against its transcript
+    if (src == null) continue;
+    if (!canon(src).includes(canon(w.quote))) {
+      errors.push(
+        `${w.id}: quote not found in ${w.source_id}\n      wanted: ${w.quote}`,
+      );
+    }
+  }
+}
+
 if (errors.length) {
   console.error(`\n  check-quotes: ${errors.length} problem(s):\n`);
   for (const e of errors) console.error(`  ${e}`);
@@ -103,4 +147,7 @@ if (errors.length) {
   process.exit(1);
 }
 
-console.log(`  check-quotes: OK - ${ALL_QUOTES.length} quotes anchor to real transcript passages`);
+console.log(
+  `  check-quotes: OK - ${ALL_QUOTES.length} quotes anchor to real transcript passages`
+  + (attested ? `\n                ${attested} attested works quote their source verbatim` : ''),
+);

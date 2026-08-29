@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import {
   allArticles, allObjects, allExhibitions, allPersons, allPublications, allVideos,
+  allAttestedWorks, allPlaces, placeUsage,
   articleTitle, objectLead, getPerson, getPublication, loadTranscript,
   OBJECT_TYPE_LABELS, ROLE_LABELS, counts,
 } from '@/lib/data';
@@ -118,6 +119,41 @@ async function buildIndex(): Promise<SearchRow[]> {
       meta: null,
       href: `/archive/publications/${p.id}/`,
       body: p.aliases.join(' ') || null,
+    });
+  }
+
+  /*
+   * Paintings box 2 names. Searchable by title, size, medium and price — which is
+   * the whole reason for pulling them out of the sheets' prose, where none of it
+   * could be found. The verbatim quote goes in `body` so a reader searching for a
+   * buyer's name ("Orr", "Kassner") lands on the work rather than nothing.
+   */
+  for (const w of allAttestedWorks) {
+    rows.push({
+      id: w.id,
+      kind: 'attested',
+      title: w.title_stated ?? 'A painting with no title on the sheet',
+      subtitle: [w.dimensions_stated, w.medium_stated].filter(Boolean).join(' · ') || null,
+      meta: w.date_text ?? null,
+      href: `/works/attested/#${w.id}`,
+      body: [w.quote, w.counterparty_raw, w.artist_number, w.price_stated]
+        .filter(Boolean).join(' '),
+    });
+  }
+
+  for (const p of allPlaces) {
+    const u = placeUsage(p.id);
+    rows.push({
+      id: p.id,
+      kind: 'place',
+      title: p.name,
+      subtitle: p.region,
+      meta: u.attestations
+        ? `${u.attestations} work${u.attestations === 1 ? '' : 's'}`
+        : null,
+      href: `/places/${p.id}/`,
+      // Aliases are what make a place findable under the source's own spelling.
+      body: [p.aliases.join(' '), p.notes].filter(Boolean).join(' ') || null,
     });
   }
 

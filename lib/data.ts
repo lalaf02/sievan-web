@@ -4,8 +4,9 @@
  */
 import bundle from '@/data/archive.generated.json';
 import type {
-  Archive, ArchiveObject, Clip, Exhibition, NewsArticle, Painting, Person,
-  Publication, ScanPage, TranscriptPage, VideoAsset,
+  Archive, ArchiveObject, AttestedWork, Clip, Exhibition, NewsArticle, Painting,
+  Person, Place, PlaceRole, PlaceUsage, Publication, ScanPage, TranscriptPage,
+  VideoAsset,
 } from './types';
 
 // Runtime validation to catch corrupted bundles early
@@ -55,6 +56,92 @@ export const allExhibitions = archive.exhibitions;
 export const allVideos = archive.videoAssets;
 export const allPaintings = archive.paintings;
 export const allScholarship = archive.scholarship;
+
+// ------------------------------------------------- attested works and places
+
+/*
+ * Paintings the archive can NAME but does not hold. Kept rigorously apart from
+ * `allPaintings` — see lib/types.ts. Nothing here should ever be counted together
+ * with the catalogue.
+ */
+const attestedWorks = index(archive.attestedWorks);
+const places = index(archive.places);
+
+export const allAttestedWorks = archive.attestedWorks;
+export const allPlaces = archive.places;
+export const getAttestedWork = (id: string): AttestedWork | undefined => attestedWorks.get(id);
+export const getPlace = (id: string | null): Place | undefined =>
+  id ? places.get(id) : undefined;
+
+/** The attestations carried by one sheet, in seed order (Sievan's own numbering). */
+export const attestationsForObject = (objectId: string): AttestedWork[] =>
+  (archive.derived.attestationsByObject[objectId] ?? [])
+    .map((id) => attestedWorks.get(id))
+    .filter((w): w is AttestedWork => !!w);
+
+/** Sheets that carry at least one attestation, in id order. */
+export const objectsWithAttestations = (): ArchiveObject[] =>
+  Object.keys(archive.derived.attestationsByObject)
+    .sort()
+    .map((id) => objects.get(id))
+    .filter((o): o is ArchiveObject => !!o);
+
+export const placeUsage = (placeId: string): PlaceUsage =>
+  archive.derived.placeUsage[placeId]
+  ?? { attestations: 0, exhibitions: 0, children: 0, roles: {}, total: 0 };
+
+/** Works this place is attached to, grouped by the relation that attached them. */
+export const attestationsForPlace = (
+  placeId: string,
+): { role: PlaceRole; work: AttestedWork; certain: boolean }[] =>
+  (archive.derived.attestationsByPlace[placeId] ?? [])
+    .map(({ attestationId, role, certain }) => {
+      const work = attestedWorks.get(attestationId);
+      return work ? { role, work, certain } : null;
+    })
+    .filter((r): r is { role: PlaceRole; work: AttestedWork; certain: boolean } => !!r);
+
+export const exhibitionsForPlace = (placeId: string): Exhibition[] =>
+  (archive.derived.exhibitionsByPlace[placeId] ?? [])
+    .map((id) => exhibitions.get(id))
+    .filter((e): e is Exhibition => !!e);
+
+export const childPlaces = (placeId: string): Place[] =>
+  (archive.derived.placeChildren[placeId] ?? [])
+    .map((id) => places.get(id))
+    .filter((p): p is Place => !!p);
+
+/**
+ * Titles that occur on more than one sheet. A LEAD, not a fact — two sheets
+ * writing the same title may be one painting, two, or a series, and nothing here
+ * merges them. Returns the other attestations sharing this one's title.
+ */
+export const sameTitleElsewhere = (work: AttestedWork): AttestedWork[] => {
+  const key = (work.title_stated ?? '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  if (key.length < 4) return [];
+  return (archive.derived.attestationsByTitleKey[key] ?? [])
+    .filter((id) => id !== work.id)
+    .map((id) => attestedWorks.get(id))
+    .filter((w): w is AttestedWork => !!w);
+};
+
+/** How a place relates to a work, in the site's words rather than the schema's. */
+export const PLACE_ROLE_LABELS: Record<PlaceRole, string> = {
+  depicted: 'Named as the subject',
+  made_at: 'Painted here',
+  shown_at: 'Shown here',
+  held_at: 'Went into a collection here',
+};
+
+export const DISPOSITION_LABELS: Record<string, string> = {
+  sold: 'sold',
+  consigned: 'left with a dealer',
+  offered: 'offered',
+  returned: 'came back to him',
+  retained: 'kept',
+  exhibited: 'exhibited',
+  donated: 'given',
+};
 
 /**
  * The paper boxes, in id order. One Collection per physical box; MS-VA-001 is the

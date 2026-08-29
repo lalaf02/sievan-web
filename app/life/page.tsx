@@ -157,7 +157,11 @@ export default function LifePage() {
           nature: it thickens around each exhibition and thins to nothing between them.
           Those gaps are shown rather than closed up.
         </p>
-        <Chronology events={timeline} undatedTestimony={testimony} />
+        <Chronology
+          events={timeline}
+          undatedTestimony={testimony}
+          undatedAttestations={archive.derived.undatedAttestations.length}
+        />
       </section>
 
       {/* -------------------------------------------------- the institutional record */}

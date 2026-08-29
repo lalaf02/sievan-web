@@ -1,0 +1,66 @@
+.notes {
+  max-width: var(--measure);
+  color: var(--ink-muted);
+  font-size: var(--t-body);
+  /* Bottom margin required: Section's heading rule sits flush without it. */
+  margin: var(--s-4) 0 var(--s-5);
+}
+
+/*
+ * The corroboration panel. It uses the accent because it marks the one thing on
+ * the site where two independent records agree — and it carries its own caveat,
+ * because agreement between two second-hand sources is still not the painting.
+ */
+.corroboration {
+  /* Bottom margin matters: the next Section's heading rule sat flush against it. */
+  margin: var(--s-5) 0 var(--s-6);
+  padding: var(--s-4) var(--s-5);
+  background: var(--paper-deep);
+  border-left: 3px solid var(--oxide);
+  max-width: var(--measure);
+}
+
+.corroborationHead {
+  margin: 0 0 var(--s-2);
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  color: var(--oxide);
+}
+
+.corroboration p {
+  margin: 0 0 var(--s-3);
+  font-size: var(--t-body);
+  line-height: 1.55;
+}
+
+.corroboration p:last-child {
+  margin-bottom: 0;
+}
+
+.corroborationCaveat {
+  font-size: var(--t-sm) !important;
+  color: var(--ink-muted);
+}
+
+.meta {
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  color: var(--ink-faint);
+}
+
+.unsure {
+  color: var(--ink-faint);
+  font-size: var(--t-sm);
+}
+
+.footer {
+  margin-top: var(--s-6);
+  padding-top: var(--s-4);
+  border-top: 1px solid var(--rule);
+  font-family: var(--sans);
+  font-size: var(--t-sm);
+  color: var(--ink-muted);
+  max-width: var(--measure);
+}

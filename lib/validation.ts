@@ -14,6 +14,14 @@ export interface Museum {
   location: string;
   /** Notable for display emphasis */
   notable?: boolean;
+  /**
+   * Place.id, set ONLY where the archive independently points at the same
+   * institution — which today means St. Lawrence University, named both here (from
+   * the retrospective CV) and in Sievan's own hand on MS-AR-00058. It is what lets
+   * a place page say that two sources agree. Do not mint places to fill this in:
+   * a place nothing else references fails check-data.mjs as an orphan.
+   */
+  placeId?: string;
 }
 
 export interface Critic {
@@ -95,6 +103,8 @@ export const MUSEUM_COLLECTIONS: Museum[] = [
     name: 'St. Lawrence University',
     shortName: 'SLU',
     location: 'Canton, NY',
+    // The one entry on this list the archive can corroborate from its own holdings.
+    placeId: 'st-lawrence-university',
   },
   {
     name: 'Queens Museum',

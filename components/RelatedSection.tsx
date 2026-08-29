@@ -22,6 +22,7 @@ const KIND_LABEL: Record<TimelineKind, string> = {
   exhibition: 'Exhibition',
   object: 'Object',
   painting: 'Work',
+  attestation: 'Work recorded on a sheet',
   video: 'Interview',
   event: 'Event',
 };

@@ -19,30 +19,42 @@ The single biggest gap. `/works/` is titled *Catalogue Raisonné* and contains n
 because none are photographed or catalogued. The archive holds exactly 13 dated plates, all
 of them reproduced *inside* scanned catalogue pages rather than as individual images.
 
-**Box 2 changes the outlook here.** Its 25 drawings are Sievan's own records of paintings he
-had made, and he annotated them: title, dimensions, medium, year, asking price, and
-sometimes the buyer. A single sheet (`MS-AR-00054`) itemises eight works. Read across the
-box there are on the order of forty named works with sizes — *"Southhampton Landscape 18 ×
-24 oil on canvas board"*, *"Morning Landscape … oil on canvas board 12 × 16, $250, painted
-1955, at Passedoit summer show"*, *"Windscape by Maurice Sievan 10 × 12½ pastel 1970"*,
-*"The Chess Game 10¾ × 12 water color [Paris]"*, and disposals like *"sold to ORR"* and
-*"I think she sold this one for 100"*.
+**Box 2 has now been curated into `AttestedWork` rows — done, and deliberately not
+`Painting` rows.** Its 25 drawings are Sievan's own records of paintings he had made,
+annotated with title, dimensions, medium, year, asking price and sometimes the buyer. A
+curator pass over all 24 scanned sheets produced **57 attested works** (50 with a size, 29
+with a price, 10 with a year), each carrying the verbatim words it rests on and a link to
+the sheet — see `/works/attested/`. `check-quotes.mjs` fails the build if any quote is not
+present in its source's own recorded text.
 
-This is the strongest lead the archive has toward the catalogue, and it is **evidence to be
-curated, not parsed**. Do not auto-generate `Painting` rows from sketch annotations: a
-drawing records that a painting existed and what Sievan called it, which is not the same as
-establishing the work, its present whereabouts, or that the title stuck. In a catalogue
-raisonné an inferred row is indistinguishable from provenance. The right move is a curator
-reading the 25 sheets and deciding, work by work, what the evidence supports.
+These are **evidence toward the catalogue, not entries in it**, and the separation is
+structural: a distinct entity, a distinct id space (`MS-AW-#####`), a distinct URL space, and
+counts that are never added to `counts.paintings`. Do not promote them to `Painting` rows
+wholesale — a drawing records that a painting existed and what Sievan called it, which is not
+the same as establishing the work, its present whereabouts, or that the title stuck.
+`AttestedWork.painting_id` is the one-way bridge for when a curator does match a photographed
+canvas to a sheet; setting it requires `identification_basis`, enforced in `build-data.mjs`.
 
-**Needs:** a spreadsheet of works (title, year, medium, dimensions, current location) plus a
-folder of photographs.
+**Still needed for the catalogue itself:** a spreadsheet of works (title, year, medium,
+dimensions, current location) plus a folder of photographs.
 **Then:** write `DataModel/scripts/parse_paintings.py`, modelled on the existing
 `parse_manifest.py`, emitting rows against the `Painting` `$def`. **It does not exist yet.**
 Record dimensions as `H × W` — `WorksBrowser`'s Scale view enables itself once ≥80% parse.
 **Done when:** `/works/` flips from its `Pending` panel to the live browser and
 `/works/<id>/` pages generate. Both are already built and tested against fixtures; they need
-rows, not code.
+rows, not code. The attested works and the box-2 sheets stay on the page either way.
+
+**Open questions the curator pass raised, all recorded in `notes` on the rows:**
+- `MS-AR-00067` says the dealer Kassner "has 5 of my paintings" and then lists six; the sheet
+  marks one "this one is Out / I have it back". The arithmetic suggests which came back, but
+  the sheet does not say so.
+- "Birchland #1" (`MS-AR-00057`) and "BIRCHLAND BII" (`MS-AR-00066` verso); "a grey day"
+  (`MS-AR-00068`) and "Gray Day" (`MS-AR-00070`). One work, two, or a series is not recorded.
+  `attestationsByTitleKey` surfaces the collision without resolving it.
+- Buyers are named only as Sievan wrote them — ORR, Kassner, Irving Cohn, miss Marsh, Zitners
+  House, "Jenns Friends daughter". The retrospective CV lists an "I. David Orr" and a
+  "Charles Zitner", which is a lead, not an identification. `counterparty_person_id` is null
+  on all 57 rows and should stay null until someone can actually make the link.
 
 ### Boxes 3–6 — four physical boxes still outside the archive
 `DataModel/Archive Master Sheet.xlsx` has six tabs, one per box. Two are ingested.
@@ -145,12 +157,19 @@ facet bucket. The unreviewed count is the one to attack: `parse_manifest.py` is 
 import that **would overwrite curator corrections if re-run**, so corrections must go into the
 seed files, not the source spreadsheet.
 
-**Box 2 transcription check.** The descriptions are transcriptions of Sievan's handwriting
-and have not been proofed against the scans. One discrepancy is already visible:
-`MS-AR-00053` is transcribed *"SOUTHHAMPTON LANDSCAPE"* where the sheet reads
-**SOUTHAMPTON**. Worth a pass over all 26 now that every page is rasterised and legible —
-these annotations are the evidence base for the catalogue, so their spelling of a title
-matters more than usual. Corrections go in `seed_archive_objects.json`, not the master sheet.
+**Box 2 transcription check — done for every sheet that carries an attested work.**
+Proofed page by page against the scans before the quotes became load-bearing, because
+`check-quotes.mjs` means a later correction breaks every quote drawn from a corrected line.
+Four transcription fixes landed in `seed_archive_objects.json`: `MS-AR-00053`
+*SOUTHHAMPTON* → **SOUTHAMPTON**; `MS-AR-00058` *FEIGN* → **FEIGIN** (Dorothy Feigin, a real
+painter); `MS-AR-00067` *Kasner* → **Kassner**, legible on the scan and matching
+`MS-AR-00071`'s own spelling; and `MS-AR-00067` #5 *oil on canvas* → **oil on canvas board**.
+Three rotation defects were found the same way — see the ROTATE note in CLAUDE.md.
+
+Still unproofed: the sheets that carry no attested work, and the sheets' finer details
+(`MS-AR-00058`'s *"Buds Budsworth"* is a guess at a courier's name). Corrections go in
+`seed_archive_objects.json`, not the master sheet — and re-run `npm run data`, which will
+tell you immediately if a correction broke a quote.
 
 ---
 

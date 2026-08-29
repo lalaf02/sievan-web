@@ -2,8 +2,9 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import {
-  allObjects, articleTitle, articlesForObject, exhibitionsForObject, getObject,
-  getPerson, getPublication, objectLead, OBJECT_TYPE_LABELS,
+  allObjects, articleTitle, articlesForObject, attestationsForObject,
+  exhibitionsForObject, getObject, getPerson, getPublication, objectLead,
+  OBJECT_TYPE_LABELS,
 } from '@/lib/data';
 import { formatArticleDate } from '@/lib/dates';
 import { Fact, Facts, RecordHeader, RecordList, Section, Verbatim } from '@/components/Record';
@@ -33,6 +34,7 @@ export default async function ObjectPage({ params }: Props) {
   if (!object) notFound();
 
   const articles = articlesForObject(object.id);
+  const attestations = attestationsForObject(object.id);
   const exhibitions = exhibitionsForObject(object.id);
   const scans = object.scan_files as ScanInfo[];
 
@@ -78,6 +80,38 @@ export default async function ObjectPage({ params }: Props) {
       </Facts>
 
       <Verbatim label="Catalogue description" text={object.raw_title_description} />
+
+      {/*
+        Placed straight after the verbatim description, so the reader meets the
+        sheet's own words first and then what was drawn out of them — and can see
+        that the second is contained in the first.
+      */}
+      {attestations.length > 0 && (
+        <Section title={`Paintings named on this sheet (${attestations.length})`}>
+          <p className="ui muted" style={{ marginTop: 0 }}>
+            Works Sievan names here that the archive does not hold. Each is the
+            sheet’s own words and nothing more — evidence toward the catalogue, not
+            an entry in it.
+          </p>
+          <RecordList>
+            {attestations.map((w) => (
+              <li key={w.id}>
+                <Link href={`/works/attested/#${w.id}`}>
+                  {w.title_stated ?? 'A painting with no title on the sheet'}
+                </Link>
+                {w.artist_number && (
+                  <span className="ui faint"> · his no. {w.artist_number}</span>
+                )}
+                <br />
+                <span className="ui faint">
+                  {[w.dimensions_stated, w.medium_stated, w.price_stated, w.date_text]
+                    .filter(Boolean).join(' · ')}
+                </span>
+              </li>
+            ))}
+          </RecordList>
+        </Section>
+      )}
 
       {articles.length > 0 && (
         <Section title={`Clippings on this sheet (${articles.length})`}>

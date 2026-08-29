@@ -18,7 +18,8 @@ import styles from './SiteSearch.module.css';
  */
 
 export type SearchKind =
-  | 'article' | 'object' | 'exhibition' | 'person' | 'publication' | 'interview' | 'transcript';
+  | 'article' | 'object' | 'exhibition' | 'person' | 'publication' | 'interview'
+  | 'transcript' | 'attested' | 'place';
 
 export interface SearchRow {
   id: string;
@@ -41,11 +42,20 @@ const KIND_LABEL: Record<SearchKind, string> = {
   object: 'Archive objects',
   person: 'People',
   publication: 'Publications',
+  // Named on a sheet, not held. The label has to carry that on its own here,
+  // because a search result arrives without the page's framing around it.
+  attested: 'Paintings named on a sheet (not held)',
+  place: 'Places',
 };
 
-/** Records first, then the things records are about, then raw transcript text. */
+/*
+ * Records first, then the things records are about, then raw transcript text.
+ * A kind missing from this array scores, matches and never renders — with no
+ * error anywhere — so it must list every member of SearchKind.
+ */
 const KIND_ORDER: SearchKind[] = [
-  'article', 'interview', 'transcript', 'exhibition', 'object', 'person', 'publication',
+  'article', 'interview', 'transcript', 'exhibition', 'object', 'attested',
+  'person', 'place', 'publication',
 ];
 
 export function SiteSearch({ rows }: { rows: SearchRow[] }) {
