@@ -14,7 +14,7 @@ Outstanding work lives in [BACKLOG.md](./BACKLOG.md).
 
 A static website over the surviving archive of the American painter **Maurice Sievan
 (1898–1981)**, published by his estate. It exists so the record outlives any hosting
-account: `output: 'export'` produces ~205 plain HTML pages that will open from a USB stick
+account: `output: 'export'` produces ~231 plain HTML pages that will open from a USB stick
 in twenty years.
 
 Next 16 (App Router) · React 19 · TypeScript · **zero UI dependencies**. The entire
@@ -24,11 +24,11 @@ over design tokens in `app/globals.css`.
 
 Two facts explain most of the decisions in this codebase:
 
-**The corpus is small and uneven.** 50 archive objects (20 of them never digitised),
-60 press notices, 30 publications, 29 people, 15 exhibitions, 7 videos, **0 paintings**.
-That is roughly 190 records in total. Designs that assume volume — dense dashboards, infinite
-scroll, "showing 1–20 of many" — make the archive look emptier than it is. Design for a
-small, precious, incomplete collection.
+**The corpus is small and uneven.** 76 archive objects across two boxes (21 never
+digitised), 60 press notices, 30 publications, 29 people, 15 exhibitions, 7 videos,
+**0 paintings**. That is roughly 215 records in total. Designs that assume volume — dense
+dashboards, infinite scroll, "showing 1–20 of many" — make the archive look emptier than
+it is. Design for a small, precious, incomplete collection.
 
 **The archive's credibility is the product.** This is the estate's scholarly record of an
 artist who was written out of the canon; its whole argument is that the evidence can be
@@ -88,7 +88,7 @@ app/                     Five tabs, plus record routes beneath them
   globals.css              design tokens + layout utilities — the design system
   *.module.css             per-route styles, colocated
 
-components/              16 components; only 6 are client components
+components/              17 components; only 6 are client components
   ── server (10) ──
   SiteFooter  Record  Pending  PullQuote  Highlight  ScanViewer
   Relations  RelatedSection  ValidationBar  PaintingDetail
@@ -101,19 +101,22 @@ lib/                     10 modules, no framework code
 
 scripts/                 the build pipeline and its gates
   build-data.mjs  check-data.mjs  check-quotes.mjs  check-export.mjs
-  extract-clips.mjs  extract-retrospective.mjs        (one-offs, output committed)
+  extract-scans.mjs  extract-clips.mjs  extract-retrospective.mjs
+                                                     (one-offs, output committed)
 
 data/                    GENERATED, COMMITTED — archive.generated.json + transcripts/
-public/scans/            GENERATED, COMMITTED — 88 MB, 31 files
+public/scans/            GENERATED, COMMITTED — 150 MB, 56 PDFs + 102 page images
 public/retrospective/    committed — 15 catalogue page scans
 public/clips/            committed — 1.7 MB of silent video loops
 
 DataModel/               SOURCE OF RECORD — gitignored
-MS-CS-001/               the scans it points at — gitignored, 88 MB
+MS-CS-001/               box 1's scans — gitignored, 88 MB
+MS-CS-002/               box 2's scans — gitignored, 44 MB
 Video Archive/           the masters — gitignored, 25 GB
 ```
 
-**Why generated output is committed.** `DataModel/`, `MS-CS-001/` and `Video Archive/` total
+**Why generated output is committed.** `DataModel/`, the `MS-CS-00N/` boxes and
+`Video Archive/` total
 ~25 GB and never leave the curator's machine. `data/` and `public/scans/` are the build's
 output *and* are checked in, which is what lets Vercel build without any source material —
 `build-data.mjs` detects the missing `DataModel/` and falls through to the committed bundle.
@@ -132,9 +135,9 @@ fetching. The word "backend" here means a build-time pipeline, and that pipeline
 of this repo most worth understanding.
 
 ```
-MS-CS-001/Manifest/Manifest_MSCS001.xlsx ─┐
-Video Archive/**                          ─┤  DataModel/scripts/*.py
-                                           │  (one-shot Python import — re-running
+DataModel/Archive Master Sheet.xlsx       ─┐  (six tabs, one per physical box)
+MS-CS-001/Manifest/Manifest_MSCS001.xlsx  ─┤  DataModel/scripts/*.py
+Video Archive/**                          ─┤  (one-shot Python import — re-running
                                            │   OVERWRITES curator corrections)
                                            ▼
                         DataModel/seed/*.json          ← THE SOURCE OF RECORD
@@ -165,6 +168,46 @@ Then three gates, in order — `npm run data` runs the first two, `npm run build
 | `check-quotes.mjs` | A curated quote whose anchor phrase no longer appears on the transcript page it claims |
 | `check-export.mjs` | Dead internal links, and a page count that collapsed |
 
+### The physical boxes
+
+`DataModel/Archive Master Sheet.xlsx` is the collection-wide inventory: **six tabs, one per
+physical box**, sharing a header row at row 5. It supersedes `Manifest_MSCS001.xlsx`, whose
+tab it reproduces exactly — verified row for row, so ingesting from it is additive and never
+revises what is already published.
+
+| Box | Object ids | Catalogued | In the site |
+|---|---|---:|---|
+| MS-CS-001 | 00001–00050 | 50 | yes |
+| MS-CS-002 | 00051–00123 | 26 | yes — 47 rows are bare ids, see below |
+| MS-CS-003 | 00124–00189 | 66 | no — catalogued but no digital twin exists |
+| MS-CS-004/005/006 | — | 0 | no |
+
+**Ingesting a box** is three commands and a look:
+
+```bash
+# 1. gitignore /MS-CS-00N/ FIRST, then copy the scans in beside MS-CS-001/
+python3 DataModel/scripts/parse_master_sheet.py MS-CS-00N   # merges; never overwrites
+node scripts/extract-scans.mjs                              # rasterises every box
+npm run data
+```
+
+`parse_master_sheet.py` maps columns directly and infers nothing — box 2 is drawings, so
+there are no bylines to extract and no clippings to split. Register the box's default
+`object_type` in its `DEFAULT_OBJECT_TYPE` map or it refuses to run, and add a `Collection`
+row to `seed_collections.json`.
+
+Two things that will bite:
+
+- **Rows with an id but no description are skipped, deliberately.** Box 2's tab numbers 73
+  slots and catalogues 26; the other 47 (`MS-AR-00077`–`00123`) carry a folder number and
+  nothing else. `raw_title_description` is required by the schema, and inventing one to fill
+  the gap is the one thing this archive does not do.
+- **`extract-scans.mjs`'s landscape heuristic will not catch a sideways box-2 sheet.** These
+  sheets are square-ish, so a page rotated 90° is still taller than it is wide and passes
+  unflagged. Sievan wrote the title and dimensions along the *edge* of the sheet, so this is
+  common — 19 of box 2's 38 pages needed a `ROTATE` entry, found only by looking at every
+  page. Render a contact sheet of the new thumbs and read them.
+
 ### The entity model
 
 14 entity tables in the bundle. **Seven are empty**, and everything downstream of them is
@@ -172,13 +215,13 @@ dormant rather than broken:
 
 | Populated | | Empty | |
 |---|---:|---|---:|
-| `archiveObjects` | 50 | `paintings` | 0 |
+| `archiveObjects` | 76 | `paintings` | 0 |
 | `newsArticles` | 60 | `commentary` | 0 |
 | `publications` | 30 | `commentaryRelations` | 0 |
 | `persons` | 29 | `paintingExhibitions` | 0 |
 | `exhibitions` | 15 | `paintingHistoricalContext` | 0 |
 | `videoAssets` | 7 | `historicalEvents` | 0 |
-| `collections` | 2 | `scholarship` | 0 |
+| `collections` | 3 | `scholarship` | 0 |
 
 `Painting` is the declared hub of the model. Three tables key on it directly — `Commentary`
 (`painting_ids`), `PaintingExhibition` and `PaintingHistoricalContext` — and
@@ -191,8 +234,8 @@ that return `null` today for exactly this reason: finished code waiting on rows.
 `facets` (decade / publication / author / objectType) · `articlesByObject` ·
 `articlesByPublication` · `articlesByAuthor` · `exhibitionsByObject` ·
 **`articlesByExhibition`** and **`exhibitionsByArticle`** (inferred — see below) ·
-`personMentions` · `publicationMergeGroups` · `timeline` (125 events) · `undatedVideos` ·
-`counts`.
+`personMentions` · `publicationMergeGroups` · `timeline` (126 events) · `undatedVideos` ·
+`objectsWithImagery` · `coverByObject` · `clips` · `clipsByVideo` · `counts`.
 
 Two of these are heuristics, not facts, and the UI says so:
 
@@ -209,11 +252,17 @@ Two of these are heuristics, not facts, and the UI says so:
 
 ### Schema gotchas
 
-- **`seed_news_articles.json` is an object**, not an array, unlike every other seed file.
+- **Archive objects live in `seed_archive_objects.json`**, covering every box. They used
+  to sit inside `seed_news_articles.json` as `{archive_objects, news_articles}`; both are
+  now plain arrays like every other seed. `parse_manifest.py` still writes the old
+  combined shape, so `build-data.mjs` fails on a duplicate object id rather than
+  silently ingesting box 1 twice.
 - Id patterns are enforced: `MS-AR-#####`, `MS-VI-#####`, `MS-PA-#####`, `MS-SC-#####`.
   ajv rejects anything else and names the offending record.
 - `MS-AR-00003` has two scan files (`I`/`II`); `MSAR00025` is a JPG not a PDF; `MSAR00026`
-  is 29 MB / 15 pages and is linked rather than inlined; 20 objects have no scan at all.
+  is 29 MB / 15 pages and is linked rather than inlined; 21 objects have no scan at all
+  (box-1 rows 31–50, plus `MS-AR-00076`, which the curator recorded as deliberately not
+  scanned rather than merely pending).
 
 ---
 
@@ -314,6 +363,8 @@ Minimum sweep before a commit that touches the UI:
 
 - [ ] The five tabs: `/`, `/life/`, `/works/`, `/archive/`, `/research/`
 - [ ] One record page (`/archive/press/MS-AR-00003-C/`) — related sections render and are labelled
+- [ ] A drawing (`/archive/objects/MS-AR-00054/`) — recto **and** verso render the right way up
+- [ ] `/archive/objects/MS-AR-00076/` — states its scan is absent by decision, not by backlog
 - [ ] `/archive/search/` — with JS off it must show the **complete index**, not an empty box
 - [ ] A quote deep link — it must highlight **the phrase**, not every occurrence of "the"
 - [ ] The home mosaic at ≤860px collapses to one column; video tiles show their posters
@@ -345,10 +396,11 @@ populated path.
 → *Exercise empty code paths with temporary fixture rows*, confirm, then remove them. This is
 how that bug was found.
 
-**4. `check-export: OK — 205 pages`.**
-`MIN_PAGES` defaults to **60** (`scripts/check-export.mjs:33`) against **205** actual pages.
-All 60 press pages could vanish and it would still pass.
-→ *Compare against the real number*, or raise the floor: `MIN_PAGES=200 npm run build`.
+**4. `check-export: OK — 231 pages`.**
+`MIN_PAGES` once defaulted to **60** against 205 actual pages: all 60 press pages could
+vanish and it still passed. The floor now tracks the real count (`225` against `231`,
+`scripts/check-export.mjs:33`) — *keep raising it* when a box is ingested, or the same
+blind spot reopens.
 
 **5. "319 internal links all resolve."**
 Resolving is not the same as being useful. That count was identical before and after a change
@@ -381,8 +433,9 @@ Stripping `<[^>]+>` from built HTML turns React's `<!-- -->` text separators int
 → *Check raw markup before "fixing" a spacing defect* found in stripped text.
 
 **11. `git add -A` would stage ~25 GB.**
-`Video Archive/` (25 G), `DataModel/` (307 M) and `MS-CS-001/` (88 M) live inside the repo and
-are gitignored. **Keep them that way.** GitHub rejects the push, but only after a long upload.
+`Video Archive/` (25 G), `DataModel/` (307 M), `MS-CS-001/` (88 M) and `MS-CS-002/` (44 M)
+live inside the repo and are gitignored. **Keep them that way.** GitHub rejects the push,
+but only after a long upload. Gitignore a new box *before* copying it in, not after.
 → *Stage explicit paths and audit sizes* before committing:
 `git diff --cached --name-only | xargs du -h | sort -rh | head`
 

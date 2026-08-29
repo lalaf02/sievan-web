@@ -1,6 +1,10 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { allPaintings, counts } from '@/lib/data';
+import {
+  allPaintings, byDateUndatedLast, counts, coverFor, hasImagery, objectLead,
+  objectsForCollection,
+} from '@/lib/data';
+import { SheetTile } from '@/components/MediaTile';
 import { WorksBrowser } from '@/components/WorksBrowser';
 import { RETROSPECTIVE_PAGES, CV } from '@/lib/retrospective';
 import { getQuote } from '@/lib/quotes';
@@ -48,6 +52,12 @@ export default function WorksPage() {
   const periods = RETROSPECTIVE_PAGES.filter((p) => p.plateYears.length > 0);
   const platesKnown = periods.reduce((n, p) => n + p.plateYears.length, 0);
 
+  // Sievan's own drawings, from box 2. Only those with a scan can be shown; the one
+  // that has none is a retired folder, and belongs on the archive page, not here.
+  const sketches = objectsForCollection('MS-CS-002')
+    .filter((o) => o.object_type === 'work_on_paper' && hasImagery(o.id))
+    .sort(byDateUndatedLast);
+
   return (
     <div className="page" style={{ paddingTop: 'var(--s-6)' }}>
       <header className="measure" style={{ marginBottom: 'var(--s-6)' }}>
@@ -90,10 +100,70 @@ export default function WorksPage() {
         <p className={styles.note}>
           The plates are reproduced inside the catalogue’s scanned pages, not as separate
           images — which is exactly the gap the catalogue raisonné will close. Titles,
-          media and dimensions for these works are not recorded anywhere in the archive.{' '}
+          media and dimensions for these particular works are recorded nowhere in the
+          archive.{' '}
           <Link href="/life/retrospective/">Read the catalogue as scanned</Link>.
         </p>
       </section>
+
+      {/* -------------------------------------------------------- works on paper */}
+      {/*
+        The one part of this page that is not a stated gap. These are real works by
+        Sievan that the archive holds and can show — but they are drawings OF paintings,
+        so the framing has to keep them distinct from the catalogue of paintings itself.
+        Naming them "works on paper" rather than folding them into a count of works is
+        the whole point: a visitor must not leave thinking the catalogue has opened.
+      */}
+      {sketches.length > 0 && (
+        <section className={styles.section}>
+          <h2>Works on paper</h2>
+          <p className={styles.lede}>
+            The archive does hold {sketches.length} works in Sievan’s own hand: drawings
+            and sketches on envelopes, index cards and note paper, catalogued as box{' '}
+            <Link href="/archive/">MS-CS-002</Link>.
+          </p>
+          <p className={styles.lede}>
+            Most of them are drawings <em>of</em> paintings. Sievan sketched a work he had
+            made and wrote its title, dimensions, medium and asking price beside it —{' '}
+            <em>“Southampton Landscape 18 × 24 oil on canvas board”</em>,{' '}
+            <em>“Morning Landscape … painted 1955, at Passedoit summer show”</em>, and
+            occasionally where it went: <em>“sold to ORR”</em>. They are the artist’s own
+            record of paintings that are otherwise unphotographed, and the strongest
+            evidence the archive has toward the catalogue below. They are not that
+            catalogue: a sketch records a painting, it does not establish one.
+          </p>
+
+          <ol className={styles.sketchGrid}>
+            {sketches.map((o) => {
+              const cover = coverFor(o.id);
+              const href = `/archive/objects/${o.id}/`;
+              return (
+                <li key={o.id}>
+                  {cover && (
+                    <SheetTile
+                      sheet={cover}
+                      href={href}
+                      aspect="4 / 3"
+                      alt={`${objectLead(o)} — ${o.id}`}
+                      caption={
+                        <Link href={href} className={styles.sketchLead}>
+                          {objectLead(o)}
+                        </Link>
+                      }
+                      meta={`${o.id} · ${o.date_text ?? 'undated'}`}
+                    />
+                  )}
+                </li>
+              );
+            })}
+          </ol>
+          <p className={styles.note}>
+            Every sheet is transcribed verbatim on its record page, including the
+            annotations on the reverse.{' '}
+            <Link href="/archive/">See the box in full</Link>.
+          </p>
+        </section>
+      )}
 
       {/* ------------------------------------------------------------ where it went */}
       <section className={styles.section}>

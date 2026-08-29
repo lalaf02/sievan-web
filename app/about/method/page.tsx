@@ -21,6 +21,7 @@ export default function MethodPage() {
   const initials = allArticles.filter((a) => a.author_raw && !a.author_person_id).length;
   const undigitised = allObjects.filter((o) => o.scan_files.length === 0).length;
   const stated = allObjects.filter((o) => o.stated_item_count).length;
+  const worksOnPaper = allObjects.filter((o) => o.object_type === 'work_on_paper').length;
 
   return (
     /*
@@ -33,20 +34,22 @@ export default function MethodPage() {
         <p className="eyebrow">About</p>
         <h1>How this archive was made</h1>
         <p>
-          Everything here comes from one bankers box and one folder of videotape. This
+          Everything here comes from two boxes of paper and one folder of videotape. This
           page describes what was in them, how the contents were read, and — as
           importantly — what is uncertain or absent.
         </p>
 
-        <h2>What is in the box</h2>
+        <h2>What is in the boxes</h2>
         <p>
-          The box is labelled <em>“Reprints of Reviews — Exhibition Catalogs &amp; Review
-          Copies”</em> and holds {counts.archiveObjects} catalogued objects: bundles of
-          photocopied clippings, exhibition catalogues, posters, two books and assorted
-          promotional material. From these come {counts.newsArticles} individual press
-          notices published between 1940 and 1983 across {counts.publications}{' '}
-          publications, and {counts.exhibitions} exhibitions documented by a surviving
-          catalogue or poster.
+          The first box is labelled <em>“Reprints of Reviews — Exhibition Catalogs &amp;
+          Review Copies”</em>. The second is a small archival box of{' '}
+          <em>“Drawings and Sketches for Paintings Various Years”</em>. Between them they
+          hold {counts.archiveObjects} catalogued objects: bundles of
+          photocopied clippings, exhibition catalogues, posters, two books, assorted
+          promotional material, and {worksOnPaper} drawings in Sievan’s own hand. From
+          these come {counts.newsArticles} individual press notices published between
+          1940 and 1983 across {counts.publications} publications, and{' '}
+          {counts.exhibitions} exhibitions documented by a surviving catalogue or poster.
         </p>
         <p>
           Separately, the estate holds {counts.videoAssets} videotapes:{' '}
@@ -57,8 +60,8 @@ export default function MethodPage() {
 
         <h2>How the clippings were read</h2>
         <p>
-          Most objects in the box are not single clippings but sheets with several
-          photocopied together — one holds six. The archive manifest describes each sheet
+          Most objects in the first box are not single clippings but sheets with several
+          photocopied together — one holds six. The catalogue sheet describes each of them
           in a single free-text cell, written by hand over many years, with no consistent
           order and frequently missing fields. A short heuristic splits those cells into
           individual records: take the trailing date, treat the first comma segment as
@@ -100,10 +103,11 @@ export default function MethodPage() {
         <h2>What we don’t know</h2>
         <ul>
           <li>
-            <strong>{undigitised} of {counts.archiveObjects} objects are not yet
-            scanned</strong> — precisely the last {undigitised} rows of the manifest,
-            which suggests a batch that was never photographed rather than material that
-            is lost.
+            <strong>{undigitised} of {counts.archiveObjects} objects are not
+            scanned</strong> — the last twenty rows of box 1, which being consecutive
+            suggests a batch that was never photographed rather than material that is
+            lost, and one folder in box 2 the curator withdrew from use and recorded as
+            deliberately unscanned.
           </li>
           <li>
             <strong>The scans have no text layer.</strong> Search here covers the

@@ -21,13 +21,30 @@ const mb = (bytes: number) => `${(bytes / 1024 / 1024).toFixed(1)} MB`;
  * images produced by scripts/extract-scans.mjs, and the PDF stays as a download
  * beside them: the image is what you read, the PDF is the archival object.
  */
-export function ScanViewer({ scans, objectId }: { scans: ScanInfo[]; objectId: string }) {
+export function ScanViewer({
+  scans, objectId, withheld = false,
+}: {
+  scans: ScanInfo[];
+  objectId: string;
+  /**
+   * True when the absence is a decision rather than a backlog: MS-AR-00076 is a
+   * folder the curator withdrew from use and recorded as deliberately not scanned.
+   * Calling that "not yet digitised" would promise a scan that is never coming.
+   */
+  withheld?: boolean;
+}) {
   if (scans.length === 0) {
-    // A stated gap, not a broken frame. These are exactly objects 31–50.
-    return (
+    // A stated gap, not a broken frame. Box 1 rows 31-50, plus MS-AR-00076.
+    return withheld ? (
+      <Absent title="Not scanned">
+        The curator recorded this item as withdrawn from use and retained for the record
+        only. It was deliberately not scanned. The record below is transcribed from the
+        catalogue sheet.
+      </Absent>
+    ) : (
       <Absent title="Not yet digitised">
-        This item is catalogued in the archive manifest but has no scan on file. The
-        record below is transcribed from the manifest.
+        This item is catalogued in the archive but has no scan on file. The record below
+        is transcribed from the catalogue sheet.
       </Absent>
     );
   }

@@ -12,7 +12,8 @@ import { fileURLToPath } from 'node:url';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const WEB = join(HERE, '..');
-// DataModel/, MS-CS-001/ and Video Archive/ live inside the repo, not beside it.
+// DataModel/, the MS-CS-00N/ box directories and Video Archive/ live inside the repo,
+// not beside it.
 const ROOT = WEB;
 const DM = join(ROOT, 'DataModel');
 
@@ -64,7 +65,10 @@ for (const o of d.archiveObjects) {
     need(!art || art.archive_object_id === o.id, `${o.id}: ${aid} does not back-reference it`);
   }
   for (const s of o.scan_files ?? []) {
-    need(SKIP_FILE_CHECKS || existsSync(join(ROOT, 'MS-CS-001', s.filename)), `${o.id}: scan ${s.filename} missing on disk`);
+    // One scan directory per physical box, named for the collection — MS-CS-001/,
+    // MS-CS-002/, ... Same resolution as build-data.mjs.
+    need(SKIP_FILE_CHECKS || existsSync(join(ROOT, o.collection_id, s.filename)),
+      `${o.id}: scan ${s.filename} missing from ${o.collection_id}/`);
     // The rasterised pages are committed to public/, so unlike the source PDF they
     // exist on Vercel too — check them unconditionally. This is the one file check
     // in here that is not disabled by a missing DataModel/.

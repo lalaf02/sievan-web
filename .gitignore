@@ -45,12 +45,14 @@ next-env.d.ts
 /app/works/[paintingId]/
 
 # Source material, kept locally and never committed.
-# DataModel/ is the record of origin; MS-CS-001/ holds the scans it points at and
-# Video Archive/ the 25 GB of masters. The site is a consumer of all three: the
-# generated bundle in data/ and the copies in public/scans/ ARE committed, which is
-# what lets Vercel build without any of this (see the guard in build-data.mjs).
+# DataModel/ is the record of origin; MS-CS-00N/ holds the scans it points at, one
+# directory per physical box, and Video Archive/ the 25 GB of masters. The site is a
+# consumer of all of them: the generated bundle in data/ and the copies in
+# public/scans/ ARE committed, which is what lets Vercel build without any of this
+# (see the guard in build-data.mjs).
 /DataModel/
 /MS-CS-001/
+/MS-CS-002/
 /Video Archive/
 
 # Stray duplicate created by an editor.

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Rasterise every scan in MS-CS-001 into web-sized page images.
+ * Rasterise every scan in every MS-CS-NNN box into web-sized page images.
  *
  * The scans are the archive's only substantial imagery, and until now they were
  * unusable: 30 of the 31 files are PDFs, so nothing could put them in an `<img>`.
@@ -28,8 +28,14 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const WEB = join(dirname(fileURLToPath(import.meta.url)), '..');
-// DataModel/, MS-CS-001/ and Video Archive/ live inside the repo, not beside it.
-const SRC = join(WEB, 'MS-CS-001');
+// DataModel/, the MS-CS-00N/ box directories and Video Archive/ live inside the repo,
+// not beside it. One directory per physical box, discovered rather than hardcoded so
+// that adding a box needs no edit here.
+const SRC_DIRS = readdirSync(WEB)
+  .filter((f) => /^MS-CS-\d{3}$/.test(f))
+  .filter((f) => existsSync(join(WEB, f)) && statSync(join(WEB, f)).isDirectory())
+  .sort()
+  .map((f) => join(WEB, f));
 const PAGES = join(WEB, 'public', 'scans', 'pages');
 const THUMBS = join(WEB, 'public', 'scans', 'thumbs');
 const TMP = join(WEB, '.scans-tmp');
@@ -48,9 +54,24 @@ const SKIP = new Set(['MSAR00026']);
  * output stem. Populated by eye from the first run — see the console summary, which
  * flags every landscape page as a candidate.
  */
-/** Genuinely landscape originals — wide sheets, correctly oriented. Not rotation bugs. */
+/**
+ * Genuinely landscape originals — wide sheets, correctly oriented. Not rotation bugs.
+ * Box 2 adds a lot of them: the drawings are on envelopes, index cards and note cards
+ * that are landscape by nature, so the heuristic below flags them every run unless
+ * they are listed here. Each was checked by eye.
+ */
 const LANDSCAPE_OK = new Set([
   'MSAR00021-p02', 'MSAR00022-p02', 'MSAR00023-p01', 'MSAR00023-p03',
+  // Box 2 — MS-CS-002
+  'MSAR00051-p01', // landscape sketch on an envelope, signed "Sievan 69"
+  'MSAR00051-p02', // ...its blank verso
+  'MSAR00065-p01', // note card, "Spring Hat 20 x 24"
+  'MSAR00065-p02', // ..."Lower Manhattan 22 x 28"
+  'MSAR00065-p03', // ..."Winter 16 x 20"
+  'MSAR00065-p04', // ..."22 x 28 landscape (on canvas board)"
+  'MSAR00069-p01', // "Morning Landscape ... painted 1955, at Passedoit summer show"
+  'MSAR00071-p01', // "at Sundown ... Apr 6 1958 16 x 20"
+  'MSAR00071-p02', // ...its verso, a reused ledger card; kept in the recto's orientation
 ]);
 
 const ROTATE = {
@@ -66,10 +87,36 @@ const ROTATE = {
   'MSAR00028-p03': 270,  // ...and its gallery hours
   'MSAR00029-p02': 270,  // Vanderwoude Tananbaum, address panel
   'MSAR00030-p02': 270,  // Passedoit Gallery 1957, checklist
+  /*
+   * Box 2. Sievan wrote the title, size and price along the edge of each sheet, so
+   * these came off the feeder sideways far more often than box 1 did — and unlike
+   * box 1 the sheets are square-ish, so the landscape heuristic below never flagged
+   * them. Every entry here was set by reading the annotation in the rendered page.
+   */
+  'MSAR00052-p01': 90,   // "Woodstock Landscape 12 x 16" / "Studio Interior 12 x 16"
+  'MSAR00053-p01': 90,   // "Southhampton Landscape 18 x 24 oil on canvas board"
+  'MSAR00054-p01': 90,   // five numbered paintings, recto
+  'MSAR00054-p02': 90,   // ...and verso
+  'MSAR00055-p01': 90,   // "The Chess Game 10 3/4 x 12 water color [Paris]"
+  'MSAR00056-p01': 90,   // "ProvenceTown Landscape 25 x 30 on board 400"
+  'MSAR00057-p01': 90,   // "Birchland #1 ... 20 x 24"
+  'MSAR00057-p02': 90,   // ...and verso
+  'MSAR00059-p01': 90,   // "Scene in Woodstock, oil on paper 15 1/2 x 18"
+  'MSAR00060-p01': 90,   // "Early Spring 22 x 28 oil on canvas"
+  'MSAR00060-p02': 90,   // ...and verso
+  'MSAR00061-p01': 90,   // "at Dusk 9 x 12 oil"
+  'MSAR00062-p01': 90,   // "For the Col Students Landscape (Oct 1957) 16 x 24"
+  'MSAR00066-p01': 90,   // two sketches with notes, recto
+  'MSAR00072-p01': 90,   // "Croton Landscape 12 x 16" / "Monhegan Seascape 16 x 20"
+  'MSAR00072-p02': 90,   // ...and verso, a used envelope
+  'MSAR00073-p01': 180,  // "Sold to Jeans Friends daughter / 22 x 28 oil / The Highway"
+  'MSAR00074-p01': 270,  // "Landscape #3 16 x 20"
+  'MSAR00075-p01': 180,  // "At Karp's 1970" — the numbered 1970 pastels, recto
+  'MSAR00075-p02': 180,  // ...and verso
 };
 
-if (!existsSync(SRC)) {
-  console.error(`  extract-scans: ${SRC} not found`);
+if (!SRC_DIRS.length) {
+  console.error('  extract-scans: no MS-CS-NNN box directory found');
   process.exit(1);
 }
 
@@ -78,24 +125,26 @@ mkdirSync(THUMBS, { recursive: true });
 rmSync(TMP, { recursive: true, force: true });
 mkdirSync(TMP, { recursive: true });
 
-const sources = readdirSync(SRC)
+/** Every scan across every box, as {dir, file} so the source stays traceable. */
+const sources = SRC_DIRS.flatMap((dir) => readdirSync(dir)
   .filter((f) => /\.(pdf|jpe?g)$/i.test(f))
   .filter((f) => !SKIP.has(f.replace(/\.[^.]+$/, '')))
-  .sort();
+  .sort()
+  .map((file) => ({ dir, file })));
 
 /** Pull each PDF page's single embedded image out at full scanner resolution. */
-for (const file of sources) {
+for (const { dir, file } of sources) {
   const stem = file.replace(/\.[^.]+$/, '');
   if (/\.pdf$/i.test(file)) {
     execFileSync('python3', ['-c', `
 from pypdf import PdfReader
-r = PdfReader(${JSON.stringify(join(SRC, file))})
+r = PdfReader(${JSON.stringify(join(dir, file))})
 for i, page in enumerate(r.pages, 1):
     open(f"${TMP}/${stem}-p{i:02d}.bin", "wb").write(page.images[0].data)
 `], { stdio: ['ignore', 'inherit', 'inherit'] });
   } else {
     // MSAR00025 is a JPG, not a PDF — the one scan that was never wrapped.
-    copyFileSync(join(SRC, file), join(TMP, `${stem}-p01.bin`));
+    copyFileSync(join(dir, file), join(TMP, `${stem}-p01.bin`));
   }
 }
 

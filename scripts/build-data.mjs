@@ -45,6 +45,8 @@ const SEEDS = {
   'seed_painting_exhibitions.json': ['PaintingExhibition', 'paintingExhibitions'],
   'seed_historical_events.json': ['HistoricalEvent', 'historicalEvents'],
   'seed_scholarship.json': ['Scholarship', 'scholarship'],
+  'seed_archive_objects.json': ['ArchiveObject', 'archiveObjects'],
+  'seed_news_articles.json': ['NewsArticle', 'newsArticles'],
 };
 
 const fail = (msg) => {
@@ -93,16 +95,26 @@ for (const [file, [defName, key]] of Object.entries(SEEDS)) {
   data[key] = rows;
 }
 
-// seed_news_articles.json is the one seed that is an object, not an array.
-// Any loader written by glob-and-parse breaks on exactly this file.
-const newsFile = read(join(SEED, 'seed_news_articles.json'));
-if (Array.isArray(newsFile) || !newsFile.archive_objects || !newsFile.news_articles) {
-  fail('seed_news_articles.json must be {archive_objects, news_articles}');
+/**
+ * Archive objects used to live inside seed_news_articles.json as
+ * {archive_objects, news_articles}. They now have their own seed, because boxes 2
+ * onward hold drawings rather than press and filing them under "news articles" was
+ * only ever an accident of which box was catalogued first.
+ *
+ * parse_manifest.py still writes the old combined shape, so guard against a re-run
+ * silently reintroducing all 50 box-1 objects a second time. A duplicate id would
+ * otherwise sail through: ajv validates each row on its own and every derived index
+ * keys by id, so the bundle would look fine and render each object twice.
+ */
+const seenObjectIds = new Set();
+for (const o of data.archiveObjects) {
+  if (seenObjectIds.has(o.id)) {
+    fail(`duplicate archive object id ${o.id} in seed_archive_objects.json — if `
+      + 'parse_manifest.py was re-run it may have restored archive_objects into '
+      + 'seed_news_articles.json; that file must now hold news articles only');
+  }
+  seenObjectIds.add(o.id);
 }
-validate('ArchiveObject', newsFile.archive_objects, 'seed_news_articles.json');
-validate('NewsArticle', newsFile.news_articles, 'seed_news_articles.json');
-data.archiveObjects = newsFile.archive_objects;
-data.newsArticles = newsFile.news_articles;
 
 // ---------------------------------------------------------------- transcripts
 
@@ -374,8 +386,23 @@ timeline.sort((a, b) =>
 
 // ---------------------------------------------------------------- scans
 
-const scanDir = join(ROOT, 'MS-CS-001');
-const scansOnDisk = new Set(existsSync(scanDir) ? readdirSync(scanDir) : []);
+/**
+ * Scans live in one directory per physical box, named for the collection:
+ * MS-CS-001/, MS-CS-002/, ... So resolve them from the object's own collection_id
+ * rather than a hardcoded path, and every further box works without an edit here.
+ * Each directory is read once, not once per object.
+ */
+const scanDirs = new Map();
+const boxScans = (collectionId) => {
+  if (!scanDirs.has(collectionId)) {
+    const dir = join(ROOT, collectionId);
+    scanDirs.set(collectionId, {
+      dir,
+      files: new Set(existsSync(dir) ? readdirSync(dir) : []),
+    });
+  }
+  return scanDirs.get(collectionId);
+};
 const publicScans = join(WEB, 'public', 'scans');
 mkdirSync(publicScans, { recursive: true });
 
@@ -403,15 +430,16 @@ function isValidFilename(filename) {
 const missingScans = [];
 let copied = 0;
 for (const o of data.archiveObjects) {
+  const box = boxScans(o.collection_id);
   for (const s of o.scan_files ?? []) {
     if (!isValidFilename(s.filename)) {
       fail(`invalid scan filename in ${o.id}: ${s.filename}`);
     }
-    if (!scansOnDisk.has(s.filename)) {
-      missingScans.push(`${o.id} -> ${s.filename}`);
+    if (!box.files.has(s.filename)) {
+      missingScans.push(`${o.id} -> ${s.filename} (expected in ${o.collection_id}/)`);
       continue;
     }
-    const src = join(scanDir, s.filename);
+    const src = join(box.dir, s.filename);
     const dest = join(publicScans, s.filename);
     // Enrich the record so the viewer can decide between inlining and linking.
     s.sizeBytes = statSync(src).size;

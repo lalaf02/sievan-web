@@ -56,7 +56,9 @@ export interface ScanFile {
 
 export type ObjectType =
   | 'news_clipping_bundle' | 'single_article' | 'exhibition_catalog'
-  | 'exhibition_poster' | 'promotional_material' | 'book' | 'other';
+  | 'exhibition_poster' | 'promotional_material' | 'book'
+  /** A drawing or sketch by Sievan himself — box 2 onward, not press material. */
+  | 'work_on_paper' | 'other';
 
 export interface ArchiveObject {
   id: string;

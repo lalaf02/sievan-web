@@ -49,7 +49,11 @@ export default async function ObjectPage({ params }: Props) {
         {objectLead(object)}
       </p>
 
-      <ScanViewer scans={scans} objectId={object.id} />
+      <ScanViewer
+        scans={scans}
+        objectId={object.id}
+        withheld={/not scanned/i.test(object.raw_title_description)}
+      />
 
       <Facts>
         <Fact label="Type">{OBJECT_TYPE_LABELS[object.object_type]}</Fact>
@@ -73,7 +77,7 @@ export default async function ObjectPage({ params }: Props) {
         </Fact>
       </Facts>
 
-      <Verbatim label="Manifest description" text={object.raw_title_description} />
+      <Verbatim label="Catalogue description" text={object.raw_title_description} />
 
       {articles.length > 0 && (
         <Section title={`Clippings on this sheet (${articles.length})`}>

@@ -38,6 +38,34 @@
   gap: var(--s-4);
 }
 
+/* The drawings are small, wide sheets — cards and envelopes — so four across at a
+   landscape aspect, rather than the five portrait columns the periods use. */
+.sketchGrid {
+  list-style: none;
+  margin: var(--s-5) 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--s-5) var(--s-4);
+  align-items: start;
+}
+
+@media (max-width: 1020px) {
+  .sketchGrid { grid-template-columns: repeat(3, 1fr); }
+}
+
+/* Matches .tileLead on the archive index: the caption is a quiet label on the
+   sheet, not a run of underlined link text across every tile. */
+.sketchLead {
+  color: var(--ink);
+  text-decoration: none;
+  font-family: var(--serif);
+  font-size: var(--t-sm);
+  line-height: 1.35;
+}
+
+.sketchLead:hover { color: var(--oxide); }
+
 .period {
   display: flex;
   flex-direction: column;
@@ -165,6 +193,7 @@
 
 @media (max-width: 860px) {
   .periods { grid-template-columns: repeat(2, 1fr); }
+  .sketchGrid { grid-template-columns: repeat(2, 1fr); }
   .cvGrid,
   .meanwhile {
     grid-template-columns: 1fr;
@@ -173,4 +202,5 @@
 
 @media (max-width: 560px) {
   .periods { grid-template-columns: 1fr; }
+  .sketchGrid { grid-template-columns: 1fr; }
 }

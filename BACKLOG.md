@@ -19,6 +19,22 @@ The single biggest gap. `/works/` is titled *Catalogue Raisonné* and contains n
 because none are photographed or catalogued. The archive holds exactly 13 dated plates, all
 of them reproduced *inside* scanned catalogue pages rather than as individual images.
 
+**Box 2 changes the outlook here.** Its 25 drawings are Sievan's own records of paintings he
+had made, and he annotated them: title, dimensions, medium, year, asking price, and
+sometimes the buyer. A single sheet (`MS-AR-00054`) itemises eight works. Read across the
+box there are on the order of forty named works with sizes — *"Southhampton Landscape 18 ×
+24 oil on canvas board"*, *"Morning Landscape … oil on canvas board 12 × 16, $250, painted
+1955, at Passedoit summer show"*, *"Windscape by Maurice Sievan 10 × 12½ pastel 1970"*,
+*"The Chess Game 10¾ × 12 water color [Paris]"*, and disposals like *"sold to ORR"* and
+*"I think she sold this one for 100"*.
+
+This is the strongest lead the archive has toward the catalogue, and it is **evidence to be
+curated, not parsed**. Do not auto-generate `Painting` rows from sketch annotations: a
+drawing records that a painting existed and what Sievan called it, which is not the same as
+establishing the work, its present whereabouts, or that the title stuck. In a catalogue
+raisonné an inferred row is indistinguishable from provenance. The right move is a curator
+reading the 25 sheets and deciding, work by work, what the evidence supports.
+
 **Needs:** a spreadsheet of works (title, year, medium, dimensions, current location) plus a
 folder of photographs.
 **Then:** write `DataModel/scripts/parse_paintings.py`, modelled on the existing
@@ -27,6 +43,25 @@ Record dimensions as `H × W` — `WorksBrowser`'s Scale view enables itself onc
 **Done when:** `/works/` flips from its `Pending` panel to the live browser and
 `/works/<id>/` pages generate. Both are already built and tested against fixtures; they need
 rows, not code.
+
+### Boxes 3–6 — four physical boxes still outside the archive
+`DataModel/Archive Master Sheet.xlsx` has six tabs, one per box. Two are ingested.
+
+- **MS-CS-003** (`MS-AR-00124`–`00189`) is the ready one: **66 rows, fully catalogued**,
+  with title, date, medium, folder, condition *and* an `Alternate ID` column of D-numbers
+  (`D166`, `D345`…) that the other tabs lack. What is missing is the digital twin — no
+  scans have been supplied. Ingesting it would add 66 catalogued-but-undigitised records, a
+  pattern the archive already carries for 20 box-1 objects.
+  **Needs:** either the scans, or a decision that the records are worth publishing without
+  them. Also a decision on where `Alternate ID` goes — there is no schema field for it, and
+  `digital_record_id` means something else.
+- **MS-CS-004, 005, 006** are empty: box titles only, no rows.
+
+**Sheet bug to resolve first:** tab `MS-CS-006` duplicates box 4's title *and* its
+`New box ID` cell (`MS-CS-004`), while box 5's own title reads *"This box has been divided
+into 2 parts) 1 of 2"*. Tab 6 is almost certainly box 5 part 2, mis-copied. Confirm with the
+curator before ingesting either — `parse_master_sheet.py` keys on the tab name, so a wrong
+`New box ID` would file records under the wrong physical box.
 
 ### Secondary literature — `seed_scholarship.json` has 0 rows
 Schema (`Scholarship`), seed file and the Research page section all exist. No citations have
@@ -110,6 +145,13 @@ facet bucket. The unreviewed count is the one to attack: `parse_manifest.py` is 
 import that **would overwrite curator corrections if re-run**, so corrections must go into the
 seed files, not the source spreadsheet.
 
+**Box 2 transcription check.** The descriptions are transcriptions of Sievan's handwriting
+and have not been proofed against the scans. One discrepancy is already visible:
+`MS-AR-00053` is transcribed *"SOUTHHAMPTON LANDSCAPE"* where the sheet reads
+**SOUTHAMPTON**. Worth a pass over all 26 now that every page is rasterised and legible —
+these annotations are the evidence base for the catalogue, so their spelling of a title
+matters more than usual. Corrections go in `seed_archive_objects.json`, not the master sheet.
+
 ---
 
 ## 5. Open decisions
@@ -135,6 +177,9 @@ seed files, not the source spreadsheet.
 
 For context on what the current shape of the site assumes:
 
+- **Box 2 ingested** (`MS-CS-002`, 26 objects, 25 scans): archive objects moved out of
+  `seed_news_articles.json` into their own seed, scan resolution keyed on `collection_id`
+  so further boxes need no code change, and a *Works on paper* section on `/works/`
 - Five-tab IA; `/why` absorbed into Home and Life, `/about` into Research
 - The data pipeline unblocked (`ROOT` resolved outside the repo, so all seed edits were no-ops)
 - Quote deep links with build-time anchor verification (`scripts/check-quotes.mjs`)

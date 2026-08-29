@@ -56,6 +56,31 @@ export const allVideos = archive.videoAssets;
 export const allPaintings = archive.paintings;
 export const allScholarship = archive.scholarship;
 
+/**
+ * The paper boxes, in id order. One Collection per physical box; MS-VA-001 is the
+ * video archive and is excluded here because it holds no ArchiveObjects.
+ */
+export const paperCollections = archive.collections
+  .filter((c) => c.material_type === 'paper_archive')
+  .sort((a, b) => a.id.localeCompare(b.id));
+
+export const objectsForCollection = (collectionId: string): ArchiveObject[] =>
+  allObjects.filter((o) => o.collection_id === collectionId);
+
+/**
+ * Date order, undated last. Sorting on `date_earliest ?? 0` puts every undated
+ * object *before* 1939 — which was harmless while all 50 objects carried a date,
+ * and wrong the moment box 2 arrived with 25 undated drawings.
+ */
+export const byDateUndatedLast = (a: ArchiveObject, b: ArchiveObject): number => {
+  const ay = a.date_earliest;
+  const by = b.date_earliest;
+  if (ay == null && by == null) return a.id.localeCompare(b.id);
+  if (ay == null) return 1;
+  if (by == null) return -1;
+  return ay - by || a.id.localeCompare(b.id);
+};
+
 export const articlesForObject = (objectId: string): NewsArticle[] =>
   (archive.derived.articlesByObject[objectId] ?? [])
     .map((id) => articles.get(id))
@@ -148,7 +173,22 @@ export const OBJECT_TYPE_LABELS: Record<string, string> = {
   exhibition_poster: 'Exhibition poster',
   promotional_material: 'Promotional material',
   book: 'Book',
+  work_on_paper: 'Work on paper',
   other: 'Other',
+};
+
+/**
+ * Plurals, because appending "s" produced "Work on papers". Only the irregular
+ * ones need an entry; `pluralObjectType` falls back to label + "s".
+ */
+const OBJECT_TYPE_PLURALS: Record<string, string> = {
+  work_on_paper: 'Works on paper',
+};
+
+export const pluralObjectType = (type: string, n: number): string => {
+  const label = OBJECT_TYPE_LABELS[type] ?? type;
+  if (n === 1) return label;
+  return OBJECT_TYPE_PLURALS[type] ?? `${label}s`;
 };
 
 export const ROLE_LABELS: Record<string, string> = {
@@ -168,9 +208,9 @@ export const ROLE_LABELS: Record<string, string> = {
 /**
  * Scans and clips, resolved in scripts/build-data.mjs and read only through here.
  *
- * Thirty of the fifty objects have a readable sheet. The other twenty are catalogued
- * but not digitised, and `coverFor` returns undefined for them on purpose — callers
- * are expected to render that absence, not skip the record.
+ * Fifty-five of the seventy-six objects have a readable sheet. The other twenty-one
+ * are catalogued but not digitised, and `coverFor` returns undefined for them on
+ * purpose — callers are expected to render that absence, not skip the record.
  */
 
 /** Every rasterised sheet of an object, in page order across its scan files. */

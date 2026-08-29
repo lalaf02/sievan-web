@@ -4,8 +4,8 @@
  *
  * Both are meant to sit inside a Mosaic <Tile>, which sets the size; these fill it.
  * Neither invents anything — an object with no scan renders as a labelled empty
- * frame rather than being dropped from the grid, because twenty of the fifty objects
- * are catalogued and not digitised and that is part of the record.
+ * frame rather than being dropped from the grid, because twenty-one of the seventy-six
+ * objects are catalogued and not digitised and that is part of the record.
  */
 import Link from 'next/link';
 import type { Clip, ScanPage } from '@/lib/types';
