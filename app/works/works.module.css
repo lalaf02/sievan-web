@@ -63,6 +63,23 @@
   border-color: var(--oxide);
 }
 
+/* The card links to the period page twice already; this says the image does
+   something different — it opens the source. */
+.periodMediaHint {
+  display: block;
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  border-top: 1px solid var(--rule);
+  padding: var(--s-2) var(--s-3);
+}
+
+.periodMedia:hover .periodMediaHint {
+  color: var(--oxide);
+}
+
 .periodBody {
   padding-top: var(--s-3);
 }

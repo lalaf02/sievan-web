@@ -238,9 +238,11 @@ export default function Home() {
                 <span className={styles.doorNum}>{counts.worksOnPaperCatalogued}</span>
                 <span className={styles.doorTitle}>Catalogue Raisonné</span>
                 <span className={styles.doorText}>
-                  Works on paper in Sievan’s own hand, catalogued in full; every surviving
-                  reproduction of the paintings; and {counts.attestedWorks} more canvases he
-                  named himself. No painting has been photographed yet, and the page says so.
+                  Works on paper in Sievan’s own hand, catalogued in full and
+                  photographed by the estate; the reproductions his galleries printed;
+                  and {counts.attestedWorks} more canvases he named himself. The
+                  paintings are being photographed now, and the page says where that
+                  stands.
                 </span>
               </Link>
             </li>

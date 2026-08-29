@@ -1,10 +1,15 @@
 /**
- * The paintings, as they survive: reproductions printed inside somebody else's
+ * Paintings as other people reproduced them: plates printed inside somebody else's
  * catalogue.
  *
- * No photograph of a Sievan painting exists in this archive. These three plates and
- * the thirteen printed inside the retrospective catalogue (lib/retrospective.ts) are
- * the entire visual record of the finished work.
+ * These three, and the thirteen printed inside the retrospective typescript
+ * (lib/retrospective.ts), are the only images of finished PAINTINGS the archive holds.
+ * That is not the same as holding no images of Sievan's work, which is what this file
+ * and the pages reading it used to say: the estate photographs the works in its own
+ * care, as their restorer, and the works on paper are catalogued from those
+ * photographs. Paintings are being photographed as the works are treated. See
+ * IMAGE_SOURCE in lib/provenance.ts for the statement that belongs beside those, and
+ * PLATE_CREDIT for the one that belongs beside these.
  *
  * Titles, dates, media and sizes here are the galleries' own, set in type beneath the
  * plate — not the estate's, and not verified against the canvas. `year` is null where

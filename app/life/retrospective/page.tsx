@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { CV, RETROSPECTIVE_PAGES } from '@/lib/retrospective';
+import { CatalogueSource } from '@/components/CatalogueSource';
 import styles from './retrospective.module.css';
 
 export const metadata: Metadata = {
@@ -124,11 +125,15 @@ export default function RetrospectivePage() {
       <ul className={styles.contact}>
         {RETROSPECTIVE_PAGES.map((p) => (
           <li key={p.page}>
-            <a href={p.image}>
+            {/*
+              Each thumbnail used to be a bare link to the raw JPG, which navigated the
+              reader out of the archive and left them on a bitmap with no way back.
+            */}
+            <CatalogueSource page={p}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={p.image} alt={`Page ${p.page}`} loading="lazy" />
               <span className={styles.contactNo}>{p.page}</span>
-            </a>
+            </CatalogueSource>
           </li>
         ))}
       </ul>

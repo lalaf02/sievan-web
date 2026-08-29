@@ -44,7 +44,7 @@ export default function PlacesPage() {
           the build fails if one slips in.
         </p>
         <p className={styles.lede}>
-          Most of these come from box 2, where Sievan titled his paintings after the
+          Most of these come from Sievan’s own sheets, where he titled his paintings after the
           towns and rivers he painted and then noted, in the margin, where the canvas
           went. There is no map: the archive has no coordinates, and{' '}
           <em>“croton?”</em> — his own note, question mark and all — is not a thing

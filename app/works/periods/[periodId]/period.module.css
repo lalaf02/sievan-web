@@ -53,14 +53,17 @@
 /* ------------------------------------------------ the catalogue page itself */
 
 .source {
+  margin: 0 0 var(--s-7);
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+  /* The page scan was sized for three paragraphs of transcription beside it. Only the
+     opening quotation stands there now — the rest is in the overlay — so the media
+     column narrows rather than leaving a column-height void next to two lines. */
+  grid-template-columns: minmax(0, 320px) minmax(0, 1fr);
   gap: var(--s-6);
   align-items: start;
   padding: var(--s-5) 0 var(--s-6);
   border-top: 1px solid var(--rule-strong);
   border-bottom: 1px solid var(--rule);
-  margin-bottom: var(--s-7);
 }
 
 .sourceMedia {
@@ -72,20 +75,40 @@
 .sourceMedia img { display: block; width: 100%; height: auto; }
 .sourceMedia:hover { border-color: var(--oxide); }
 
-.sourceTitle {
+.sourceHint {
+  display: block;
   font-family: var(--sans);
   font-size: var(--t-xs);
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  font-weight: 500;
-  color: var(--ink-muted);
-  margin: 0 0 var(--s-4);
+  color: var(--ink-faint);
+  border-top: 1px solid var(--rule);
+  padding: var(--s-2) var(--s-3);
 }
 
-.sourceText {
-  font-size: var(--t-body);
-  line-height: 1.6;
+.sourceMedia:hover .sourceHint { color: var(--oxide); }
+
+/* A quotation, set as one — the section used to print the page's whole text as if it
+   were the archive's own prose. */
+.sourceQuote {
   margin: 0 0 var(--s-3);
+  padding: 0;
+  border: none;
+}
+
+.sourceQuoteLink {
+  display: block;
+  font-size: var(--t-md);
+  line-height: 1.5;
+  color: var(--ink);
+  text-decoration: none;
+  text-wrap: pretty;
+}
+
+.sourceQuoteLink:hover {
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--oxide) 40%, transparent);
+  text-underline-offset: 0.2em;
 }
 
 .sourceCaption {

@@ -34,15 +34,15 @@ export default function MethodPage() {
         <p className="eyebrow">About</p>
         <h1>How this archive was made</h1>
         <p>
-          Everything here comes from two boxes of paper and one folder of videotape. This
-          page describes what was in them, how the contents were read, and — as
+          Everything here comes from the estate’s papers and one folder of videotape.
+          This page describes what was in them, how the contents were read, and — as
           importantly — what is uncertain or absent.
         </p>
 
-        <h2>What is in the boxes</h2>
+        <h2>What the archive holds</h2>
         <p>
-          The first box is labelled <em>“Reprints of Reviews — Exhibition Catalogs &amp;
-          Review Copies”</em>. The second is a small archival box of{' '}
+          The press material arrived labelled <em>“Reprints of Reviews — Exhibition
+          Catalogs &amp; Review Copies”</em>, the drawings as{' '}
           <em>“Drawings and Sketches for Paintings Various Years”</em>. Between them they
           hold {counts.archiveObjects} catalogued objects: bundles of
           photocopied clippings, exhibition catalogues, posters, two books, assorted
@@ -60,7 +60,7 @@ export default function MethodPage() {
 
         <h2>How the clippings were read</h2>
         <p>
-          Most objects in the first box are not single clippings but sheets with several
+          Most objects in the press material are not single clippings but sheets with several
           photocopied together — one holds six. The catalogue sheet describes each of them
           in a single free-text cell, written by hand over many years, with no consistent
           order and frequently missing fields. A short heuristic splits those cells into
@@ -104,10 +104,10 @@ export default function MethodPage() {
         <ul>
           <li>
             <strong>{undigitised} of {counts.archiveObjects} objects are not
-            scanned</strong> — the last twenty rows of box 1, which being consecutive
-            suggests a batch that was never photographed rather than material that is
-            lost, and one folder in box 2 the curator withdrew from use and recorded as
-            deliberately unscanned.
+            scanned</strong> — twenty consecutive rows of the press material, which
+            being consecutive suggests a batch that was never photographed rather than
+            material that is lost, and one folder of drawings the curator withdrew from
+            use and recorded as deliberately unscanned.
           </li>
           <li>
             <strong>The scans have no text layer.</strong> Search here covers the
@@ -139,10 +139,11 @@ export default function MethodPage() {
 
         <h2>What comes next</h2>
         <p>
-          The paintings themselves. They are being photographed and catalogued now, and
-          the data model behind this site is already built to receive them — every work
-          linked to the shows it hung in, to the notices written about it, and to the
-          events around it.
+          The paintings themselves. The estate is photographing and cataloguing them as
+          the works are treated, and the data model behind this site is already built to
+          receive them — every work linked to the shows it hung in, to the notices
+          written about it, and to the events around it. The drawings here were
+          photographed the same way, from the originals in the estate’s care.
         </p>
         <p>
           The layer after that is commentary: not simply <em>which</em> critic mentioned

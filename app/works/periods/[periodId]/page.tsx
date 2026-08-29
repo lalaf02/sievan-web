@@ -7,11 +7,14 @@ import {
 import { contentsForPeriod, coverFor, objectLead } from '@/lib/data';
 import { PeriodSpine } from '@/components/PeriodSpine';
 import { PeriodSource } from '@/components/PeriodSource';
+import { CatalogueSource } from '@/components/CatalogueSource';
+import { ImageSource } from '@/components/ImageSource';
 import { CatalogueEntry, CatalogueEntryList } from '@/components/CatalogueEntry';
 import { AttestedWorkList } from '@/components/AttestedWorkList';
 import type { AttestedGroup } from '@/components/AttestedWorkList';
 import { SheetTile } from '@/components/MediaTile';
 import { Absent } from '@/components/Record';
+import { PLATE_CREDIT } from '@/lib/provenance';
 import { pageOf, attestationsForObject, getObject } from '@/lib/data';
 import styles from './period.module.css';
 
@@ -80,6 +83,9 @@ export default async function PeriodPage({ params }: Props) {
   if (!period) notFound();
 
   const page = pageForPeriod(period);
+  // The opening passage, verbatim, as the quotation. The rest of the page's text is in
+  // the overlay — quoting the source is the point, reprinting it wholesale was not.
+  const opening = page.text?.[0] ?? null;
   const { catalogueYears, plates, worksOnPaper, attested } = contentsForPeriod(period);
   const { previous, next } = neighbours(period);
 
@@ -118,28 +124,43 @@ export default async function PeriodPage({ params }: Props) {
 
       <PeriodSpine current={period.id} />
 
-      {/* The catalogue page this period is printed on, and what it says. */}
-      <section className={styles.source}>
-        <a href={page.image} className={styles.sourceMedia}>
+      {/*
+        The typescript quoted, not installed as the narrator. This was headed "What the
+        catalogue says" with the page's whole text printed beneath it, which made one
+        undated working draft the voice of the archive. It now shows the opening
+        passage as a quotation and opens the page itself in an overlay; the rest of the
+        text is in there, where a reader who wants the source can consult it.
+
+        The attribution names the document rather than Sievan. Who wrote this prose is
+        not established anywhere in the archive — the object record reads "Sievan:
+        Retrospective, (Lee Sievan?) with article 'A Lost Generation' Paul Waldo
+        Schwartz" — so crediting him for it would be an invention.
+      */}
+      <figure className={styles.source}>
+        <CatalogueSource page={page} className={styles.sourceMedia}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={page.image}
             alt={`Retrospective catalogue page ${page.page}: ${period.heading}`}
           />
-        </a>
+          <span className={styles.sourceHint}>See the page</span>
+        </CatalogueSource>
         <div className={styles.sourceBody}>
-          <h2 className={styles.sourceTitle}>What the catalogue says</h2>
-          {page.text?.map((paragraph) => (
-            <p key={paragraph.slice(0, 40)} className={styles.sourceText}>{paragraph}</p>
-          ))}
+          {opening && (
+            <blockquote className={styles.sourceQuote}>
+              <CatalogueSource page={page} className={styles.sourceQuoteLink}>
+                “{opening}”
+              </CatalogueSource>
+            </blockquote>
+          )}
           {page.caption && <p className={styles.sourceCaption}>{page.caption}</p>}
-          <p className={styles.sourceMeta}>
-            Page {page.page} of the retrospective catalogue,{' '}
-            <Link href="/archive/objects/MS-AR-00026/">MS-AR-00026</Link>. Published in
-            full at <Link href="/life/retrospective/">the retrospective catalogue</Link>.
-          </p>
+          <figcaption className={styles.sourceMeta}>
+            From the retrospective typescript held in the archive, page {page.page} —{' '}
+            <Link href="/archive/objects/MS-AR-00026/">the archive record</Link>, or{' '}
+            <Link href="/life/retrospective/">the document in full</Link>.
+          </figcaption>
         </div>
-      </section>
+      </figure>
 
       <EvidenceSection
         title="Plates in the retrospective catalogue"
@@ -180,10 +201,7 @@ export default async function PeriodPage({ params }: Props) {
             );
           })}
         </ol>
-        <p className={styles.note}>
-          Titles, dates, media and sizes here are the galleries’ own, printed beneath
-          the plate — not the estate’s, and not verified against the canvas.
-        </p>
+        <p className={styles.note}>{PLATE_CREDIT}</p>
       </EvidenceSection>
 
       <EvidenceSection
@@ -192,9 +210,9 @@ export default async function PeriodPage({ params }: Props) {
         absent="No sheet in the archive carries a date in these years."
       >
         <p className={styles.lede}>
-          Catalogued works on paper, physically held by the estate in box{' '}
-          <Link href="/archive/">MS-CS-002</Link>.
+          Catalogued works on paper, held by the estate.
         </p>
+        <ImageSource />
         <CatalogueEntryList>
           {worksOnPaper.map((o) => <CatalogueEntry key={o.id} object={o} />)}
         </CatalogueEntryList>

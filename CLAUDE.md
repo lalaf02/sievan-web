@@ -102,17 +102,18 @@ app/                     Five tabs, plus record routes beneath them
   globals.css              design tokens + layout utilities — the design system
   *.module.css             per-route styles, colocated
 
-components/              17 components; only 6 are client components
-  ── server (10) ──
+components/              19 components; only 7 are client components
+  ── server ──
   SiteFooter  Record  Pending  PullQuote  Highlight  ScanViewer
   Relations  RelatedSection  ValidationBar  PaintingDetail  AttestedWorkList
-  PeriodSpine  PeriodSource  CatalogueEntry
-  ── 'use client' (6) ──
+  PeriodSpine  PeriodSource  ImageSource  CatalogueEntry
+  ── 'use client' (7) ──
   SiteHeader  PressBrowser  WorksBrowser  Chronology  TranscriptReader  SiteSearch
+  CatalogueSource                        the only overlay; see the rule below
 
-lib/                     12 modules, no framework code
+lib/                     13 modules, no framework code
   data  types  search  dates  useUrlState  quotes
-  citation  contact  validation  retrospective  periods  plates
+  citation  contact  validation  retrospective  periods  plates  provenance
 
 scripts/                 the build pipeline and its gates
   build-data.mjs  check-data.mjs  check-quotes.mjs  check-export.mjs
@@ -350,6 +351,8 @@ Three of these are heuristics, not facts, and the UI says so:
 | `lib/validation.ts`, `lib/retrospective.ts` | Synthesised evidence (museums, critics, THESIS) and the retrospective catalogue's transcribed pages + CV. |
 | `lib/periods.ts` `PERIODS` | The catalogue's five career periods, **derived from `RETROSPECTIVE_PAGES`** and keyed on each heading verbatim — same discipline as `MUSEUM_COLLECTIONS`, and it throws at module scope on a miss. The **year ranges are the archive's, not the catalogue's**, whose divisions overlap at 1930 and across the '60s; `PERIOD_SOURCE` is the one caveat that must accompany every range, rendered via `components/PeriodSource.tsx` and never retyped. Two more module-scope gates: every plate year must fall inside its own period, and the five ranges must tile the career with no gap and no overlap. |
 | `lib/plates.ts` `PLATES` | The three free-standing gallery reproductions. Lived inside `app/works/page.tsx` until `/works/periods/` needed the same three. |
+| `lib/provenance.ts` `IMAGE_SOURCE` + `PLATE_CREDIT` | Who made which images. `IMAGE_SOURCE` (via `components/ImageSource.tsx`) goes beside work the estate holds and photographed itself; `PLATE_CREDIT` beside the sixteen other people printed. **The boundary is the point** — see the rule in Development guidelines. `PLATE_CREDIT` had been written out verbatim in two files. |
+| `components/CatalogueSource.tsx` | The retrospective typescript, quoted and openable. The repo's only `<dialog>`; degrades to an anchor into `/life/retrospective/#page-N`. |
 | `components/Record.tsx` | The record-page vocabulary: `RecordHeader`, `Facts`, `Fact` (renders nothing when empty), `Verbatim`, `Absent`, `EditorialNote`, `Section`, `RecordList`. |
 | `components/Pending.tsx` | A stated gap at section scale, for anything not yet in the archive. `PendingLine` for a single empty fact. |
 | `components/CatalogueEntry.tsx` | One catalogue entry, shared by `/works/` and the period pages. Module scope, not declared in either page — see the static-components rule. |
@@ -390,6 +393,42 @@ asserts the places seed is non-empty instead of deleting the directory.
 Next 16 rejects a re-exported `dynamicParams` ("It mustn't be reexported"). Declare
 `export const dynamicParams = false` in the route file itself. This exact bug sat in
 `build-data.mjs` undetected, because the route it writes only exists when paintings do.
+
+**The estate photographed this material itself. Never write that it did not.**
+The site used to say *"No photograph of a Sievan painting exists in this archive"* and
+that every image it held was *"printed inside somebody else's catalogue"*. Both were
+false: the estate is this collection's **restorer**, and the sheet images throughout the
+site are its own photography, made from the originals in its care. The gap that remains
+is narrower — no finished *painting* has yet been photographed, measured and located —
+and it is being closed as the works are treated, not merely confessed. Two constants in
+`lib/provenance.ts` hold the distinction and must not blur: `IMAGE_SOURCE`
+(rendered by `components/ImageSource.tsx`) belongs beside work the estate holds and
+photographed; `PLATE_CREDIT` belongs beside the sixteen reproductions other people
+printed. Attaching the wrong one replaces one false claim with another.
+
+**No box or folder identifier appears in user-facing text.**
+`MS-CS-002`, "box 2", "the first box", the `Box` and `Folder` facts on a record page —
+all internal shelving, and all removed. They mean nothing to a reader, and an id like
+`MS-CS-002` on a public page reads as a second identifier competing with the object's
+own. `/archive/` still groups by `collection_id` internally, but heads each group by what
+it holds ("The press record", "Drawings and sketches in Sievan's hand"). Grouping was
+kept rather than merged into one list for the reason recorded in `app/archive/page.tsx`:
+a single date-ordered sequence stranded the twenty-five undated sheets in an unexplained
+clump. Curator `notes` in the seeds are rendered text — they carried "box 2" in thirteen
+places and were rewritten in `DataModel/seed/`, not in the bundle.
+
+**The retrospective catalogue is a source, not the narrator.**
+It was staged as an authority — a literal `<h2>What the catalogue says</h2>` with its
+prose printed underneath — which made one undated working draft the voice of the archive.
+It is now quoted: the opening passage as a `blockquote`, a quiet citation, and the page
+itself openable in `components/CatalogueSource.tsx`. That component is the repo's only
+overlay and its first `<dialog>`; the trigger is a real anchor into
+`/life/retrospective/#page-N`, and the click handler pre-empts it only after confirming
+`showModal` exists, so the whole thing reads with scripting off.
+**Attribution names the document, never Sievan.** Who wrote that prose is not
+established — the object record reads *"Sievan: Retrospective, (Lee Sievan?) with article
+'A Lost Generation' Paul Waldo Schwartz"* — so crediting him for it would be a
+fabrication. `CV_SOURCE`, which does say "Sievan's own account", covers page 8's CV only.
 
 **Never fabricate a record.**
 Not a placeholder painting, not a sample citation, not an invented date. In a catalogue
@@ -449,12 +488,21 @@ Minimum sweep before a commit that touches the UI:
 - [ ] One record page (`/archive/press/MS-AR-00003-C/`) — related sections render and are labelled
 - [ ] A drawing (`/archive/objects/MS-AR-00054/`) — recto **and** verso render the right way up
 - [ ] `/archive/objects/MS-AR-00076/` — states its scan is absent by decision, not by backlog
-- [ ] `/works/` — three plates render (confirm `MSAR00029-p01`, *Oombix*, is not rotated
-      and its printed caption is legible at tile size), 25 entries across 5 medium groups,
-      every entry title distinct
-- [ ] **Read `/works/` cold and ask: how many paintings does this archive have a catalogue
-      entry for?** The answer must be **none** — 25 works on paper are catalogued, no
-      paintings are. Every gate is green either way; this is the only check that catches it
+- [ ] `/works/` — opens on the spine and the five periods, with the dating caveat as one
+      line beneath the title; three plates render (confirm `MSAR00029-p01`, *Oombix*, is
+      not rotated and its printed caption is legible at tile size), 25 entries across 5
+      medium groups, every entry title distinct
+- [ ] **Read `/works/` cold and ask two questions.** *How many paintings does this archive
+      have a catalogue entry for?* — must be **none**; 25 works on paper are catalogued, no
+      paintings are. *Does it read as though the estate holds no images of Sievan's work?*
+      — must be **no**; it photographed the sheets itself. Every gate is green either way,
+      and these are the only checks that catch it
+- [ ] A period page — the source reads as a quotation with a quiet citation, never as
+      "what the catalogue says"; the page image and the quote both open the overlay, and
+      **with JavaScript off** both are links to `/life/retrospective/#page-N`, with no
+      stray slab of dialog text in the flow
+- [ ] Any record page — no `Box` or `Folder` fact, and no `MS-CS-00N` anywhere on the site
+      (`grep -rl "MS-CS-00" out/ | grep -v scans` must be empty)
 - [ ] `/life/` — no artwork imagery, the CV in three columns, one `CVSource` caveat
 - [ ] `/works/periods/` — five periods in order, per-kind counts, never one total
 - [ ] **Read `/works/periods/` cold and ask: is the career mapped?** The answer must be

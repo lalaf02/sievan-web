@@ -114,7 +114,7 @@ export default async function PlacePage({ params }: Props) {
         <div className={styles.corroboration}>
           <p className={styles.corroborationHead}>Two sources name this independently</p>
           <p>
-            Sievan’s own sheet in box 2, and the CV page of the 1983 retrospective
+            Sievan’s own sheet, and the CV page of the retrospective
             catalogue, which lists <em>“{museum.name}, {museum.location}”</em> among
             the collections holding his work. The two records were made decades
             apart and neither knew about the other.{' '}

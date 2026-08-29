@@ -5,12 +5,13 @@ import {
   objectsWithAttestations,
 } from '@/lib/data';
 import { AttestedWorkList, type AttestedGroup } from '@/components/AttestedWorkList';
+import { ImageSource } from '@/components/ImageSource';
 import styles from './attested.module.css';
 
 export const metadata: Metadata = {
   title: 'Works Sievan recorded',
   description:
-    'Fifty-seven paintings named in Sievan’s own hand on the sheets in box 2 — title, '
+    'Fifty-seven paintings named in Sievan’s own hand on his own sheets — title, '
     + 'size, medium, price and sometimes the buyer. Attested by a source, not '
     + 'catalogued: the archive holds the sheets, not the paintings.',
 };
@@ -97,9 +98,12 @@ export default function AttestedWorksPage() {
           collectors and dealers the archive has no other record of, and the places
           they went are gathered in the{' '}
           <Link href="/places/">gazetteer</Link>. The catalogue of paintings itself is
-          still empty, though the {counts.worksOnPaperCatalogued} works on paper are now
-          catalogued: <Link href="/works/">see what is and is not in it</Link>.
+          still empty, though the {counts.worksOnPaperCatalogued} works on paper are
+          catalogued and photographed:{' '}
+          <Link href="/works/">see what is and is not in it</Link>.
         </p>
+        {/* The sheets these are quoted from are the estate's own photographs. */}
+        <ImageSource />
       </section>
 
       <AttestedWorkList groups={groups} />

@@ -1,0 +1,10 @@
+.source {
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  line-height: 1.6;
+  color: var(--ink-faint);
+  max-width: var(--measure);
+  margin: 0 0 var(--s-5);
+  border-left: 2px solid var(--rule);
+  padding-left: var(--s-4);
+}

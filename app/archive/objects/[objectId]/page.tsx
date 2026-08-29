@@ -43,8 +43,11 @@ export default async function ObjectPage({ params }: Props) {
       {/*
         A row carrying `artwork` is a catalogue entry, so it is headed like one and
         sends the reader back to the Catalogue Raisonné rather than to the archive.
-        Every other object keeps the archival framing. The box link in Facts below
-        preserves the archival path either way.
+        Every other object keeps the archival framing.
+
+        No box or folder number is shown. They are the archive's internal shelving,
+        they mean nothing to a reader, and `collection_id` in particular reads as a
+        second identifier competing with the object's own.
       */}
       <RecordHeader
         backHref={object.artwork ? '/works/' : '/archive/'}
@@ -75,11 +78,6 @@ export default async function ObjectPage({ params }: Props) {
         </Fact>
         <Fact label="Condition">{object.condition}</Fact>
         <Fact label="Copies held">{object.copies_count}</Fact>
-        {/* Folder is a string because the manifest uses compound values like "4,5". */}
-        <Fact label="Folder">{object.folder_no}</Fact>
-        <Fact label="Box">
-          <Link href="/archive/">{object.collection_id}</Link>
-        </Fact>
         <Fact label="Clippings held">
           {articles.length > 0
             ? `${articles.length}${

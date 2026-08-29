@@ -1,0 +1,117 @@
+/*
+  The archive's only overlay. Native <dialog>, so the backdrop, the escape key and
+  focus containment come from the browser rather than from a library — this repo has
+  no UI dependencies and this feature was not worth becoming the first.
+*/
+.dialog {
+  border: none;
+  padding: 0;
+  background: transparent;
+  max-width: min(72rem, 94vw);
+  max-height: 92vh;
+  width: 100%;
+  overflow: visible;
+  color: var(--ink);
+}
+
+.dialog::backdrop {
+  background: color-mix(in srgb, var(--ink) 72%, transparent);
+}
+
+.panel {
+  background: var(--paper);
+  border: 1px solid var(--rule-strong);
+  max-height: 92vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.closeRow {
+  display: flex;
+  justify-content: flex-end;
+  border-bottom: 1px solid var(--rule);
+  margin: 0;
+  flex: none;
+}
+
+.close {
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  background: none;
+  border: none;
+  padding: var(--s-3) var(--s-4);
+  cursor: pointer;
+}
+
+.close:hover { color: var(--oxide); }
+
+/* The page scan is the point of the overlay, so the panel scrolls rather than clips. */
+.body {
+  display: grid;
+  grid-template-columns: 5fr 4fr;
+  gap: var(--s-5);
+  padding: var(--s-5);
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.figure { margin: 0; }
+
+.figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--rule);
+  background: var(--paper-deep);
+}
+
+.pageNo {
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-top: var(--s-2);
+}
+
+.text { min-width: 0; }
+
+.heading {
+  font-size: var(--t-md);
+  margin: 0 0 var(--s-4);
+}
+
+.text p {
+  font-size: var(--t-base);
+  line-height: 1.7;
+}
+
+.caption {
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  color: var(--ink-muted);
+  border-left: 2px solid var(--rule);
+  padding-left: var(--s-4);
+}
+
+.meta {
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  line-height: 1.6;
+  color: var(--ink-faint);
+  border-top: 1px solid var(--rule);
+  padding-top: var(--s-3);
+  margin-bottom: 0;
+}
+
+/* One column below the site's single breakpoint, image first — it is the evidence. */
+@media (max-width: 860px) {
+  .body {
+    grid-template-columns: 1fr;
+    gap: var(--s-4);
+    padding: var(--s-4);
+  }
+}
