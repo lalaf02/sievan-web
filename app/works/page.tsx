@@ -1,13 +1,15 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import {
-  allPaintings, attestationsForObject, counts, entryTitle, pageOf,
+  allPaintings, artworkDatingCoverage, contentsForPeriod, counts, pageOf,
   worksOnPaperByMedium,
 } from '@/lib/data';
-import type { ArchiveObject, ScanPage } from '@/lib/types';
+import type { ScanPage } from '@/lib/types';
 import { SheetTile } from '@/components/MediaTile';
 import { WorksBrowser } from '@/components/WorksBrowser';
-import { RETROSPECTIVE_PAGES } from '@/lib/retrospective';
+import { CatalogueEntry, CatalogueEntryList } from '@/components/CatalogueEntry';
+import { PERIODS, formatSpan, pageForPeriod } from '@/lib/periods';
+import { PLATES } from '@/lib/plates';
 import { Pending } from '@/components/Pending';
 import { CONTACT, mailtoHref } from '@/lib/contact';
 import styles from './works.module.css';
@@ -19,75 +21,6 @@ export const metadata: Metadata = {
     + 'names: 25 works on paper catalogued in full, every surviving reproduction of '
     + 'the paintings, and 57 more canvases he named himself.',
 };
-
-/**
- * A reproduction of a finished painting, printed inside somebody else's catalogue.
- *
- * Titles, dates, media and sizes are the galleries' own, set in type beneath the
- * plate — not the estate's, and not verified against the canvas. `year` is null
- * where the source document's own date is in doubt.
- */
-const PLATES: {
-  objectId: string; page: number; title: string; year: string | null;
-  detail: string | null; source: string;
-}[] = [
-  {
-    objectId: 'MS-AR-00029', page: 3, title: 'Eebak', year: '1962',
-    detail: 'Oil on canvas, 86″ × 69″',
-    source: 'Reproduced in the Vanderwoude Tananbaum catalogue, 1986',
-  },
-  {
-    objectId: 'MS-AR-00029', page: 1, title: 'Oombix', year: '1962',
-    detail: 'Oil on canvas, 69½″ × 60″',
-    source: 'Reproduced in the Vanderwoude Tananbaum catalogue, 1986',
-  },
-  {
-    // No year: the archive records the catalogue as 1957, its own checklist reads
-    // "April 16 — May 5" with 1951 pencilled at the foot. Until that is resolved
-    // the archive does not choose between them.
-    objectId: 'MS-AR-00023', page: 1, title: 'Provincetown Harbor', year: null,
-    detail: null,
-    source: 'Cover of the Salpeter Gallery catalogue; its checklist lists the picture '
-      + 'as “PROVINCETOWN HARBOR (illustrated)”',
-  },
-];
-
-/** One catalogue entry. Module scope — a component defined in render remounts. */
-function Entry({ object }: { object: ArchiveObject }) {
-  const art = object.artwork!;
-  const cover = pageOf(object.id, 1);
-  const records = attestationsForObject(object.id).length;
-  const href = `/archive/objects/${object.id}/`;
-  return (
-    <li className={styles.entry}>
-      {cover && (
-        <Link href={href} className={styles.entryMedia}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={cover.thumb} alt={entryTitle(object)} loading="lazy" decoding="async" />
-        </Link>
-      )}
-      <div className={styles.entryBody}>
-        <h4 className={styles.entryTitle}>
-          <Link href={href}>{entryTitle(object)}</Link>
-        </h4>
-        <p className={styles.entryFacts}>
-          <span className={styles.entryId}>{object.id}</span>
-          {/* "Graphite on an envelope", not "Graphite on An envelope". */}
-          {' · '}{art.medium_stated} on{' '}
-          {art.support.charAt(0).toLowerCase() + art.support.slice(1)}
-          {art.sheet_count ? ` · ${art.sheet_count} sheets` : ''}
-          {object.date_text ? ` · ${object.date_text}` : ''}
-        </p>
-        {art.signed && <p className={styles.entrySigned}>{art.signed}</p>}
-        {records > 0 && (
-          <p className={styles.entryRecords}>
-            Records {records} painting{records === 1 ? '' : 's'}
-          </p>
-        )}
-      </div>
-    </li>
-  );
-}
 
 /**
  * The catalogue proper: the works the estate physically holds.
@@ -122,7 +55,9 @@ function WorksOnPaper() {
         sheets none, and the archive does not supply one. None has been measured.
         Twenty-four of the twenty-five are undated. Where a line is missing below, the
         record is missing, not the page. A catalogue raisonné is normally ordered by year;
-        this one cannot be, so it is ordered by medium.
+        this one cannot be, so it is ordered by medium. The artwork that{' '}
+        <em>does</em> carry a year is ordered by year, in{' '}
+        <Link href="/works/periods/">the five periods</Link>.
       </p>
 
       {groups.map(({ medium, works }) => (
@@ -131,9 +66,9 @@ function WorksOnPaper() {
             {medium}
             <span className={styles.mediumCount}>{works.length}</span>
           </h3>
-          <ol className={styles.entryList}>
-            {works.map((o) => <Entry key={o.id} object={o} />)}
-          </ol>
+          <CatalogueEntryList>
+            {works.map((o) => <CatalogueEntry key={o.id} object={o} />)}
+          </CatalogueEntryList>
         </div>
       ))}
     </section>
@@ -145,8 +80,7 @@ function Reproductions() {
   const plates = PLATES
     .map((p) => ({ ...p, sheet: pageOf(p.objectId, p.page) }))
     .filter((p): p is typeof p & { sheet: ScanPage } => !!p.sheet);
-  const periods = RETROSPECTIVE_PAGES.filter((p) => p.plateYears.length > 0);
-  const platesKnown = periods.reduce((n, p) => n + p.plateYears.length, 0);
+  const platesKnown = PERIODS.reduce((n, p) => n + pageForPeriod(p).plateYears.length, 0);
 
   return (
     <section className={styles.section} id="paintings">
@@ -190,25 +124,49 @@ function Reproductions() {
         Inside the retrospective catalogue
         <span className={styles.subheadCount}>{platesKnown}</span>
       </h3>
+      <p className={styles.lede}>
+        The catalogue divides Sievan’s career into five periods and prints these plates
+        across them. Each period below is a page of that document, and a route into
+        everything else the archive dates into those years —{' '}
+        <Link href="/works/periods/">the five periods, end to end</Link>.
+      </p>
       <ol className={styles.periods}>
-        {periods.map((p) => (
-          <li key={p.page} className={styles.period}>
-            {/* The plate itself, not a link out of the tab: the full-size page image. */}
-            <a href={p.image} className={styles.periodMedia}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={p.image} alt={`Retrospective catalogue page ${p.page}: ${p.heading}`} />
-            </a>
-            <div className={styles.periodBody}>
-              <h4 className={styles.periodTitle}>{p.heading}</h4>
-              <p className={styles.plateYears}>
-                {p.plateYears.length} plate{p.plateYears.length === 1 ? '' : 's'} ·{' '}
-                <span className="tnum">{p.plateYears.join(', ')}</span>
-              </p>
-              {p.text && <p className={styles.periodText}>{p.text[0]}</p>}
-              {p.caption && <p className={styles.periodCaption}>{p.caption}</p>}
-            </div>
-          </li>
-        ))}
+        {PERIODS.map((period) => {
+          const page = pageForPeriod(period);
+          const { plates: galleryPlates, worksOnPaper, attested } = contentsForPeriod(period);
+          const href = `/works/periods/${period.id}/`;
+          return (
+            <li key={period.id} className={styles.period}>
+              {/* The catalogue page, which is the only form these plates exist in. */}
+              <Link href={href} className={styles.periodMedia}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={page.image}
+                  alt={`Retrospective catalogue page ${page.page}: ${period.heading}`}
+                  loading="lazy"
+                  decoding="async"
+                />
+              </Link>
+              <div className={styles.periodBody}>
+                <h4 className={styles.periodTitle}>
+                  <Link href={href}>{period.name}</Link>
+                </h4>
+                {/* The catalogue's own heading, verbatim; the archive's span beneath. */}
+                <p className={styles.periodHeading}>{period.heading}</p>
+                <p className={styles.plateYears}>
+                  <span className="tnum">{formatSpan(period)}</span>
+                </p>
+                <p className={styles.periodText}>
+                  {page.plateYears.length} plate
+                  {page.plateYears.length === 1 ? '' : 's'}
+                  {galleryPlates.length > 0 && `, ${galleryPlates.length} gallery reproduction${galleryPlates.length === 1 ? '' : 's'}`}
+                  {worksOnPaper.length > 0 && `, ${worksOnPaper.length} sheet${worksOnPaper.length === 1 ? '' : 's'} held`}
+                  {attested.length > 0 && `, ${attested.length} painting${attested.length === 1 ? '' : 's'} named`}
+                </p>
+              </div>
+            </li>
+          );
+        })}
       </ol>
       <p className={styles.note}>
         These are photographs of paintings reproduced on a photocopier inside a fifteen-page
@@ -251,6 +209,7 @@ function AttestedSummary() {
 
 export default function WorksPage() {
   const paintings = allPaintings;
+  const coverage = artworkDatingCoverage();
 
   return (
     <div className="page" style={{ paddingTop: 'var(--s-6)' }}>
@@ -267,6 +226,16 @@ export default function WorksPage() {
         </p>
         <p className={styles.lede}>
           Where a field is empty below, the record is empty. Nothing here is estimated.
+        </p>
+        {/*
+          The chronological way in. Stated with its denominator, because five period
+          pages read as a mapped career unless the page says how little is dated.
+        */}
+        <p className={styles.lede}>
+          The retrospective catalogue divides the career into{' '}
+          <Link href="/works/periods/">five periods</Link>. They order the{' '}
+          <span className="tnum">{coverage.dated}</span> artwork records that carry a
+          year; the other <span className="tnum">{coverage.undated}</span> carry none.
         </p>
       </header>
 
@@ -299,7 +268,8 @@ export default function WorksPage() {
           build-data.mjs exits early on Vercel because DataModel/ is absent — so the
           route would never be written there and every /works/MS-PA-…/ link would
           404, failing check-export. Flipping it to committed, as
-          app/places/[placeId]/ already is, is a separate change.
+          app/places/[placeId]/ and app/works/periods/[periodId]/ already are, is a
+          separate change.
         */}
         <Pending
           eyebrow="The gap this catalogue still has"

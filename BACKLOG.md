@@ -102,6 +102,12 @@ every quote already drawn from it. Separate commit, its own `npm run data`.
   **Needs:** either the scans, or a decision that the records are worth publishing without
   them. Also a decision on where `Alternate ID` goes — there is no schema field for it, and
   `digital_record_id` means something else.
+  **This ingest now has somewhere to land.** `/works/periods/` orders the artwork by the
+  retrospective catalogue's five periods, and it is thin at the front precisely because
+  box 3 is out: *Beginnings* holds 3 records and *Landscapes* 4. Box 3's tab is **60 of 66
+  rows dated, 1926–1959** — the only dated artwork in the master sheet, since box 2's
+  `Date` column reads `ND` on 25 of its 26 rows. Ingesting it would fill those two periods
+  with no code change at all; `contentsForPeriod` reads whatever rows are in the bundle.
 - **MS-CS-004, 005, 006** are empty: box titles only, no rows.
 
 **Sheet bug to resolve first:** tab `MS-CS-006` duplicates box 4's title *and* its
@@ -230,6 +236,12 @@ tell you immediately if a correction broke a quote.
 ## Recently completed
 
 For context on what the current shape of the site assumes:
+
+- **The catalogue's five periods** (`/works/periods/` + five committed period routes):
+  the artwork ordered chronologically for the first time. Periods derive from
+  `RETROSPECTIVE_PAGES`; the disjoint year ranges are the archive's own reading, because
+  the catalogue's overlap at 1930 and across the '60s. **26 of 98 artwork records carry a
+  year**, and every page says so — the other 72 are stated, not hidden
 
 - **Box 2 ingested** (`MS-CS-002`, 26 objects, 25 scans): archive objects moved out of
   `seed_news_articles.json` into their own seed, scan resolution keyed on `collection_id`

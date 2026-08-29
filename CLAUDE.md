@@ -90,6 +90,8 @@ app/                     Five tabs, plus record routes beneath them
     retrospective/
   works/                   /works/ .... Catalogue Raisonné (no paintings yet)
     attested/                           the 57 paintings box 2 names, each with its quote
+    periods/                            the catalogue's five periods + /works/periods/[periodId]/
+                                        — COMMITTED, see below
   archive/                 /archive/ .. Archives: press, objects, publications
     search/                             + site-wide search
   research/                /research/ . Access, rights, citation, bibliography
@@ -104,12 +106,13 @@ components/              17 components; only 6 are client components
   ── server (10) ──
   SiteFooter  Record  Pending  PullQuote  Highlight  ScanViewer
   Relations  RelatedSection  ValidationBar  PaintingDetail  AttestedWorkList
+  PeriodSpine  PeriodSource  CatalogueEntry
   ── 'use client' (6) ──
   SiteHeader  PressBrowser  WorksBrowser  Chronology  TranscriptReader  SiteSearch
 
-lib/                     10 modules, no framework code
+lib/                     12 modules, no framework code
   data  types  search  dates  useUrlState  quotes
-  citation  contact  validation  retrospective
+  citation  contact  validation  retrospective  periods  plates
 
 scripts/                 the build pipeline and its gates
   build-data.mjs  check-data.mjs  check-quotes.mjs  check-export.mjs
@@ -262,6 +265,16 @@ Catalogue Raisonné when `artwork` is set. `counts.worksOnPaperCatalogued` is 25
 **`counts.paintings` stays 0** and is the archive's one honest statement of what it lacks.
 Never add the two together.
 
+**The five periods place 26 of 98 artwork records, and the other 72 are the point.**
+`/works/periods/` orders four *different grades of evidence* — a plate the catalogue
+printed, a reproduction a gallery printed, a sheet the estate holds, and a painting
+Sievan merely named — and `contentsForPeriod` returns them as four fields for exactly
+that reason. **Never sum them into one number**; it is the same rule as above. Only
+`date_basis: 'stated_on_source'` places a work: an inferred year is shown on its record
+and labelled there, but it is not evidence and does not enter a period. Box 2's sheets
+are 24-of-25 undated, so the *medium* grouping on `/works/` stays — it is the only spine
+those rows support, and the period route is the second way in, not a replacement.
+
 `Place` is a gazetteer of the towns, rivers, galleries and institutions the evidence names.
 Slug ids, like `Person` and `Exhibition`, because it is an authority term the archive
 normalises rather than a thing it holds. **A place nothing points at fails `check-data.mjs`
@@ -335,8 +348,12 @@ Three of these are heuristics, not facts, and the UI says so:
 | `lib/retrospective.ts` `CV` + `CV_SOURCE` | The catalogue's page-8 CV, verbatim, and **the one caveat that must accompany every rendering of it** — render it with `components/CVSource.tsx`, never by writing the sentence again. It had been written out three times in three wordings. |
 | `lib/validation.ts` `MUSEUM_COLLECTIONS` | **Derived from `CV.museumCollections`**, not a parallel list — keyed on the exact CV string and throwing at module scope on a miss, so correcting the transcription can never silently drop an institution. |
 | `lib/validation.ts`, `lib/retrospective.ts` | Synthesised evidence (museums, critics, THESIS) and the retrospective catalogue's transcribed pages + CV. |
+| `lib/periods.ts` `PERIODS` | The catalogue's five career periods, **derived from `RETROSPECTIVE_PAGES`** and keyed on each heading verbatim — same discipline as `MUSEUM_COLLECTIONS`, and it throws at module scope on a miss. The **year ranges are the archive's, not the catalogue's**, whose divisions overlap at 1930 and across the '60s; `PERIOD_SOURCE` is the one caveat that must accompany every range, rendered via `components/PeriodSource.tsx` and never retyped. Two more module-scope gates: every plate year must fall inside its own period, and the five ranges must tile the career with no gap and no overlap. |
+| `lib/plates.ts` `PLATES` | The three free-standing gallery reproductions. Lived inside `app/works/page.tsx` until `/works/periods/` needed the same three. |
 | `components/Record.tsx` | The record-page vocabulary: `RecordHeader`, `Facts`, `Fact` (renders nothing when empty), `Verbatim`, `Absent`, `EditorialNote`, `Section`, `RecordList`. |
 | `components/Pending.tsx` | A stated gap at section scale, for anything not yet in the archive. `PendingLine` for a single empty fact. |
+| `components/CatalogueEntry.tsx` | One catalogue entry, shared by `/works/` and the period pages. Module scope, not declared in either page — see the static-components rule. |
+| `components/PeriodSpine.tsx` | The career to scale: five bands sized by the years they cover, every dated work plotted on one as a link. A **server** component with no JavaScript at all — it is navigation, so it works with scripting off by construction. |
 | `components/AttestedWorkList.tsx` | The ledger of paintings box 2 names, grouped by sheet. A **server** component: 57 rows need no filter rail, and rendering on the server satisfies the no-JavaScript rule by construction. There is deliberately no per-attestation route — each row carries `id="MS-AW-#####"` and is deep-linked as `/works/attested/#MS-AW-…`. |
 | `components/RelatedSection.tsx` | Cross-links, each labelled by the relation that produced it. |
 | `components/Highlight.tsx` | Wraps matches in `<mark>`. Feed it `highlightNeedles(query)`, not `tokenize(query)`. |
@@ -360,10 +377,11 @@ No `next/image` optimisation (needs a server), no route handlers, no middleware.
 route whose `generateStaticParams` returns `[]` fails the build — that is why the painting
 route is generated rather than committed.
 
-**Two dynamic routes, two opposite treatments — do not "simplify" them into one.**
+**Three dynamic routes, two opposite treatments — do not "simplify" them into one.**
 `app/works/[paintingId]/` is *generated and gitignored* because its table is legitimately
-empty. `app/places/[placeId]/` is *committed*, because its rows ship inside the committed
-bundle. Making places generated for symmetry would break Vercel: `build-data.mjs` exits
+empty. `app/places/[placeId]/` and `app/works/periods/[periodId]/` are *committed*, because
+their rows ship in the repo — the gazetteer inside the committed bundle, the five periods
+inside `lib/periods.ts`, a source file that can never enumerate to nothing. Making places generated for symmetry would break Vercel: `build-data.mjs` exits
 early there (no `DataModel/`), so the route file would never be written and every
 `/places/…` link would 404 — surfacing only as dead links in `check-export`. `build-data.mjs`
 asserts the places seed is non-empty instead of deleting the directory.
@@ -438,6 +456,12 @@ Minimum sweep before a commit that touches the UI:
       entry for?** The answer must be **none** — 25 works on paper are catalogued, no
       paintings are. Every gate is green either way; this is the only check that catches it
 - [ ] `/life/` — no artwork imagery, the CV in three columns, one `CVSource` caveat
+- [ ] `/works/periods/` — five periods in order, per-kind counts, never one total
+- [ ] **Read `/works/periods/` cold and ask: is the career mapped?** The answer must be
+      **no** — 26 of 98 artwork records carry a year. Every gate is green either way
+- [ ] `/works/periods/beginnings/` — the thinnest: 3 catalogue plates and three stated
+      gaps. It must read as a stated gap, not as a page that failed to load
+- [ ] Walk all five prev/next links end to end — no year range without its `PeriodSource`
 - [ ] `/works/attested/` — 57 rows, quotes in mono, every row links to its sheet; and the
       opening paragraph still reads as "the catalogue has none of these"
 - [ ] `/places/` and the thinnest place page — a stub that says nothing should be folded
@@ -475,7 +499,7 @@ how that bug was found.
 
 **4. `check-export: OK — 231 pages`.**
 `MIN_PAGES` once defaulted to **60** against 205 actual pages: all 60 press pages could
-vanish and it still passed. The floor now tracks the real count (`256` against `258`,
+vanish and it still passed. The floor now tracks the real count (`262` against `264`,
 `scripts/check-export.mjs`) — *keep raising it* when a box is ingested or a route family is
 added, or the same blind spot reopens.
 

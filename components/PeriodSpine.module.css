@@ -1,0 +1,142 @@
+/*
+ * The career, to scale. Periods are sized by the years they cover, not evenly, so
+ * the rail draws the real shape of the chronology rather than a tidy fifth each.
+ */
+.spine {
+  margin: 0 0 var(--s-6);
+}
+
+.track {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: stretch;
+  gap: 2px;
+}
+
+.band {
+  position: relative;
+  min-width: 0;
+  background: var(--paper-deep);
+  border: 1px solid var(--rule);
+  padding: var(--s-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-2);
+}
+
+.band:hover { border-color: var(--rule-strong); }
+
+/* The period whose page you are on. */
+.current {
+  background: var(--paper-sunk);
+  border-color: var(--oxide);
+}
+
+.bandLink {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  min-width: 0;
+}
+
+.bandLink:hover .bandName { text-decoration: underline; }
+
+.bandName {
+  display: block;
+  font-family: var(--serif);
+  font-size: var(--t-base);
+  line-height: 1.2;
+  color: var(--ink);
+  /* Five names in a row at 1440px; the shortest band is seven years wide. */
+  overflow-wrap: break-word;
+}
+
+.current .bandName { color: var(--oxide); }
+
+.bandSpan {
+  display: block;
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  letter-spacing: 0.04em;
+  color: var(--ink-faint);
+  margin-top: var(--s-1);
+}
+
+/* The plotted years. Each mark is a link, which is what makes this work with JS off. */
+.plot {
+  position: relative;
+  height: 1.5rem;
+  margin-top: auto;
+  border-bottom: 1px solid var(--rule-strong);
+}
+
+.mark {
+  position: absolute;
+  bottom: 0;
+  width: 3px;
+  height: 0.75rem;
+  background: var(--oxide);
+  /* Nudge left so a mark at 100% still sits inside its own band. */
+  transform: translateX(-1px);
+}
+
+.mark:hover,
+.mark:focus-visible {
+  height: 1.4rem;
+  background: var(--ink);
+}
+
+/*
+ * The mark's own label, revealed on hover or keyboard focus. Not a tooltip built in
+ * JavaScript — it is text in the markup, so it is there for a screen reader and for
+ * a reader with scripting off, and CSS only decides when it is painted.
+ */
+.markLabel {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  z-index: 2;
+  display: none;
+  white-space: nowrap;
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  line-height: 1.4;
+  color: var(--paper);
+  background: var(--ink);
+  padding: var(--s-1) var(--s-2);
+}
+
+.mark:hover .markLabel,
+.mark:focus-visible .markLabel { display: block; }
+
+.bandCount {
+  margin: 0;
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+/*
+ * Below the one breakpoint the site has, a five-band rail to scale becomes five
+ * slivers. It stacks instead, and each band keeps its span label — the proportions
+ * are carried by the numbers rather than by the widths.
+ */
+@media (max-width: 860px) {
+  .track {
+    flex-direction: column;
+    gap: 1px;
+  }
+
+  .band {
+    /* flex-basis is set inline for the to-scale layout; stacked, it must not apply. */
+    flex-basis: auto !important;
+  }
+
+  .plot { height: 1rem; }
+
+  .markLabel { white-space: normal; max-width: 60vw; }
+}

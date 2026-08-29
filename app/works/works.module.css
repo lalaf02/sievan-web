@@ -73,6 +73,17 @@
   margin: 0 0 var(--s-2);
 }
 
+.periodHeading {
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  line-height: 1.4;
+  color: var(--ink-faint);
+  margin: 0 0 var(--s-1);
+}
+
+.periodTitle a { text-decoration: none; }
+.periodTitle a:hover { text-decoration: underline; }
+
 .plateYears {
   font-family: var(--sans);
   font-size: var(--t-xs);
@@ -87,14 +98,6 @@
   line-height: 1.55;
   color: var(--ink-muted);
   margin: 0 0 var(--s-2);
-}
-
-.periodCaption {
-  font-family: var(--sans);
-  font-size: var(--t-xs);
-  line-height: 1.5;
-  color: var(--ink-faint);
-  margin: 0;
 }
 
 .subhead {
@@ -175,81 +178,8 @@
   font-variant-numeric: tabular-nums;
 }
 
-.entryList {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--s-4) var(--s-6);
-}
-
-/* Thumbnail beside the facts: a catalogue entry, not a gallery tile. */
-.entry {
-  display: grid;
-  grid-template-columns: 5.5rem minmax(0, 1fr);
-  gap: var(--s-4);
-  align-items: start;
-  padding-bottom: var(--s-4);
-  border-bottom: 1px dotted var(--rule);
-}
-
-.entryMedia {
-  display: block;
-  border: 1px solid var(--rule);
-  background: var(--paper-deep);
-  aspect-ratio: 4 / 5;
-  overflow: hidden;
-}
-
-.entryMedia img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  display: block;
-}
-
-.entryBody { min-width: 0; }
-
-.entryTitle {
-  margin: 0 0 var(--s-2);
-  font-size: var(--t-base);
-  font-weight: 500;
-  line-height: 1.3;
-}
-
-.entryFacts {
-  margin: 0;
-  font-family: var(--sans);
-  font-size: var(--t-xs);
-  color: var(--ink-muted);
-  line-height: 1.45;
-}
-
-.entryId {
-  font-family: var(--mono);
-  color: var(--ink-faint);
-}
-
-/* The signature, in the transcription's own words. */
-.entrySigned {
-  margin: var(--s-2) 0 0;
-  font-family: var(--mono);
-  font-size: var(--t-xs);
-  color: var(--ink-faint);
-  line-height: 1.4;
-}
-
-.entryRecords {
-  margin: var(--s-2) 0 0;
-  font-family: var(--sans);
-  font-size: var(--t-xs);
-  color: var(--oxide);
-}
-
 @media (max-width: 1020px) {
   .plateGrid { grid-template-columns: repeat(2, 1fr); }
-  .entryList { grid-template-columns: minmax(0, 1fr); }
 }
 
 @media (max-width: 560px) {

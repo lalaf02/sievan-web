@@ -1,0 +1,208 @@
+.back {
+  display: inline-block;
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  letter-spacing: 0.04em;
+  margin-bottom: var(--s-4);
+}
+
+.lede {
+  font-size: var(--t-md);
+  line-height: 1.5;
+  color: var(--ink-muted);
+  max-width: var(--measure);
+}
+
+/* The catalogue's heading, verbatim. Set apart from the archive's own words. */
+.heading {
+  font-family: var(--sans);
+  font-size: var(--t-sm);
+  color: var(--ink-muted);
+  margin: 0 0 var(--s-2);
+}
+
+.span {
+  font-family: var(--sans);
+  font-size: var(--t-sm);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--oxide);
+  margin: 0 0 var(--s-4);
+}
+
+/* Why this range and not the catalogue's overlapping one. */
+.rationale {
+  font-size: var(--t-base);
+  line-height: 1.6;
+  color: var(--ink-muted);
+  max-width: var(--measure);
+  margin: 0 0 var(--s-4);
+}
+
+.note {
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  line-height: 1.6;
+  color: var(--ink-faint);
+  max-width: var(--measure);
+  margin-top: var(--s-4);
+  border-left: 2px solid var(--rule);
+  padding-left: var(--s-4);
+}
+
+/* ------------------------------------------------ the catalogue page itself */
+
+.source {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+  gap: var(--s-6);
+  align-items: start;
+  padding: var(--s-5) 0 var(--s-6);
+  border-top: 1px solid var(--rule-strong);
+  border-bottom: 1px solid var(--rule);
+  margin-bottom: var(--s-7);
+}
+
+.sourceMedia {
+  display: block;
+  background: var(--paper-deep);
+  border: 1px solid var(--rule);
+}
+
+.sourceMedia img { display: block; width: 100%; height: auto; }
+.sourceMedia:hover { border-color: var(--oxide); }
+
+.sourceTitle {
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 500;
+  color: var(--ink-muted);
+  margin: 0 0 var(--s-4);
+}
+
+.sourceText {
+  font-size: var(--t-body);
+  line-height: 1.6;
+  margin: 0 0 var(--s-3);
+}
+
+.sourceCaption {
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  line-height: 1.5;
+  color: var(--ink-faint);
+  margin: var(--s-4) 0 0;
+}
+
+.sourceMeta {
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  line-height: 1.5;
+  color: var(--ink-faint);
+  margin: var(--s-3) 0 0;
+}
+
+/* ----------------------------------------------------- the four grades of evidence */
+
+.evidence {
+  margin-bottom: var(--s-7);
+}
+
+.evidenceTitle {
+  display: flex;
+  align-items: baseline;
+  gap: var(--s-4);
+  font-size: var(--t-lg);
+  border-bottom: 1px solid var(--rule-strong);
+  padding-bottom: var(--s-2);
+  margin-bottom: var(--s-4);
+}
+
+.evidenceCount {
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-weight: 400;
+  color: var(--ink-faint);
+  flex: none;
+}
+
+.plateGrid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--s-5);
+}
+
+/* ---------------------------------------------------------- prev / next */
+
+.walk {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--s-4);
+  margin-top: var(--s-7);
+  padding-top: var(--s-5);
+  border-top: 1px solid var(--rule-strong);
+}
+
+.walkPrev,
+.walkNext,
+.walkEnd {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-1);
+  padding: var(--s-4);
+  border: 1px solid var(--rule);
+  background: var(--paper-deep);
+  text-decoration: none;
+  margin: 0;
+}
+
+.walkNext { text-align: right; align-items: flex-end; }
+
+.walkPrev:hover,
+.walkNext:hover { border-color: var(--oxide); }
+
+/* The two ends of the career are stated, not left as a missing button. */
+.walkEnd { background: transparent; border-style: dashed; }
+
+.walkLabel {
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.walkName {
+  font-family: var(--serif);
+  font-size: var(--t-body);
+  color: var(--ink);
+}
+
+.walkEnd .walkName { font-size: var(--t-base); color: var(--ink-muted); }
+
+.walkSpan {
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  color: var(--ink-muted);
+}
+
+@media (max-width: 1020px) {
+  .plateGrid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 860px) {
+  .source { grid-template-columns: 1fr; gap: var(--s-5); }
+  .walk { grid-template-columns: 1fr; }
+  .walkNext { text-align: left; align-items: flex-start; }
+}
+
+@media (max-width: 560px) {
+  .plateGrid { grid-template-columns: 1fr; }
+}

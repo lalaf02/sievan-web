@@ -27,6 +27,15 @@ export interface AttestedGroup {
   cover: ScanPage | undefined;
   lead: string;
   works: AttestedWork[];
+  /**
+   * How many paintings the sheet names in total, when `works` is a subset of them.
+   *
+   * /works/attested/ shows every attestation on a sheet, so it omits this. A period
+   * page shows only the ones dated into that period — often one of six — and without
+   * this the meta line below would report the sheet as naming a single painting,
+   * which is a claim about the source that is not true.
+   */
+  namedOnSheet?: number;
 }
 
 /** "circa 1946 - 47", plus the doubt the source itself carried. */
@@ -75,7 +84,7 @@ function placeLine(w: AttestedWork) {
 export function AttestedWorkList({ groups }: { groups: AttestedGroup[] }) {
   return (
     <ol className={styles.sheets}>
-      {groups.map(({ object, cover, lead, works }) => {
+      {groups.map(({ object, cover, lead, works, namedOnSheet }) => {
         const href = `/archive/objects/${object.id}/`;
         return (
           <li key={object.id} className={styles.sheet} id={object.id}>
@@ -93,7 +102,9 @@ export function AttestedWorkList({ groups }: { groups: AttestedGroup[] }) {
               <p className={styles.sheetMeta}>
                 <Link href={href}>{object.id}</Link>
                 {' · '}
-                {works.length} painting{works.length === 1 ? '' : 's'} named
+                {namedOnSheet && namedOnSheet !== works.length
+                  ? <>{works.length} of {namedOnSheet} paintings named here</>
+                  : <>{works.length} painting{works.length === 1 ? '' : 's'} named</>}
               </p>
             </div>
 

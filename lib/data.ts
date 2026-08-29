@@ -8,6 +8,10 @@ import type {
   Person, Place, PlaceRole, PlaceUsage, Publication, ScanPage, TranscriptPage,
   VideoAsset,
 } from './types';
+import { PERIODS, pageForPeriod } from './periods';
+import type { Period } from './periods';
+import { PLATES } from './plates';
+import type { Plate } from './plates';
 
 // Runtime validation to catch corrupted bundles early
 function validateBundle(data: unknown): asserts data is Archive {
@@ -411,3 +415,91 @@ export const pageOf = (objectId: string, page: number): ScanPage | undefined => 
   const object = objects.get(objectId);
   return object ? pagesForObject(object)[page - 1] : undefined;
 };
+
+// ------------------------------------------------------- the five periods
+
+/*
+ * The artwork, placed in the retrospective catalogue's five periods.
+ *
+ * Four kinds of thing are placed, and they are kept apart on purpose because they are
+ * four different grades of evidence: a plate the catalogue printed, a reproduction a
+ * gallery printed, a sheet the estate physically holds, and a painting Sievan merely
+ * named. NEVER sum them into one number — it is the same rule that keeps
+ * counts.worksOnPaperCatalogued out of counts.paintings.
+ *
+ * Placement is on `date_earliest`, and only where the source stated the year. An
+ * inferred date is shown on its own record and labelled there, but it is not evidence
+ * and does not put a work in a period — the same line the chronology draws.
+ */
+
+/** Attested works carrying a year their source actually stated. */
+export const datedAttestedWorks = (): AttestedWork[] =>
+  allAttestedWorks.filter(
+    (w) => w.date_earliest != null && w.date_basis === 'stated_on_source',
+  );
+
+export interface PeriodContents {
+  /** Years printed beside the plates on the catalogue's own page for this period. */
+  catalogueYears: number[];
+  /** Free-standing gallery reproductions dated into this period. */
+  plates: Plate[];
+  /** Catalogued sheets the estate holds, dated into this period. */
+  worksOnPaper: ArchiveObject[];
+  /** Paintings named on a sheet but not held, dated into this period. */
+  attested: AttestedWork[];
+}
+
+const inPeriod = (period: Period, year: number | null | undefined): boolean =>
+  year != null && year >= period.from && year <= period.to;
+
+export function contentsForPeriod(period: Period): PeriodContents {
+  return {
+    catalogueYears: [...pageForPeriod(period).plateYears].sort((a, b) => a - b),
+    plates: PLATES.filter((p) => inPeriod(period, p.year)),
+    worksOnPaper: catalogueWorksOnPaper().filter((o) => inPeriod(period, o.date_earliest)),
+    attested: datedAttestedWorks().filter((w) => inPeriod(period, w.date_earliest)),
+  };
+}
+
+/**
+ * The artwork that carries no year, and so sits outside the chronology entirely.
+ *
+ * The larger half by far — 72 records against 26 — and the periods page is dishonest
+ * without it. A reader who sees five populated periods and no statement of what could
+ * not be placed comes away thinking the career is mapped.
+ */
+export function undatedArtwork(): {
+  plates: Plate[];
+  worksOnPaper: ArchiveObject[];
+  attested: AttestedWork[];
+} {
+  return {
+    plates: PLATES.filter((p) => p.year == null),
+    worksOnPaper: catalogueWorksOnPaper().filter((o) => o.date_earliest == null),
+    attested: allAttestedWorks.filter(
+      (w) => w.date_earliest == null || w.date_basis !== 'stated_on_source',
+    ),
+  };
+}
+
+/**
+ * How much of the artwork carries a year at all.
+ *
+ * Returned as parts, not a ratio, so a caller cannot render "26%" and lose which
+ * kinds of record the 26 are. The retrospective plates count once per plate: thirteen
+ * reproductions on five pages, each with its own printed year.
+ */
+export function artworkDatingCoverage(): { dated: number; undated: number; total: number } {
+  const cataloguePlates = PERIODS.reduce(
+    (n, p) => n + pageForPeriod(p).plateYears.length, 0,
+  );
+  const undated = undatedArtwork();
+  const dated = cataloguePlates
+    + PLATES.filter((p) => p.year != null).length
+    + catalogueWorksOnPaper().filter((o) => o.date_earliest != null).length
+    + datedAttestedWorks().length;
+  const undatedTotal = undated.plates.length
+    + undated.worksOnPaper.length
+    + undated.attested.length;
+  return { dated, undated: undatedTotal, total: dated + undatedTotal };
+}
