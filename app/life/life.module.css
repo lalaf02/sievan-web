@@ -233,3 +233,23 @@ a.venueName:hover { color: var(--oxide); }
   .witnessList { grid-template-columns: repeat(2, 1fr); }
   .museumList { grid-template-columns: 1fr; }
 }
+
+/*
+ * The CV at full length: one-man, group, and what the archive can actually
+ * document. Three columns because the section's argument is a comparison, and a
+ * comparison you have to scroll between is not one.
+ */
+.threeUp {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--s-6);
+  margin-top: var(--s-4);
+}
+
+@media (max-width: 1020px) {
+  .threeUp { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 860px) {
+  .threeUp { grid-template-columns: minmax(0, 1fr); }
+}

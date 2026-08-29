@@ -7,6 +7,8 @@
  * *exhibit* the record rather than characterise it: naming thirteen institutions
  * says more, and asks less to be taken on trust, than calling him important.
  */
+import { CV } from './retrospective';
+
 
 export interface Museum {
   name: string;
@@ -14,6 +16,8 @@ export interface Museum {
   location: string;
   /** Notable for display emphasis */
   notable?: boolean;
+  /** The verbatim CV line this was derived from. */
+  cvLine?: string;
   /**
    * Place.id, set ONLY where the archive independently points at the same
    * institution — which today means St. Lawrence University, named both here (from
@@ -33,90 +37,57 @@ export interface Critic {
   major?: boolean;
 }
 
-export interface ExhibitionVenue {
-  name: string;
-  location?: string;
-  years: string;
-  /** Major museum vs gallery */
-  type: 'museum' | 'gallery' | 'institution';
-}
-
 /**
- * Museums with Sievan works in their permanent collections.
- * Synthesized from CV.museumCollections with added metadata.
+ * Museums holding Sievan's work, DERIVED from the CV transcription rather than
+ * duplicating it.
+ *
+ * `CV.museumCollections` is the verbatim page-8 text and stays the source of truth;
+ * this adds the display metadata the UI needs. Keying on the exact CV string and
+ * throwing on a miss means correcting the transcription can never silently drop an
+ * institution from the site — which is what a second hand-maintained list would
+ * eventually have done. No import cycle: lib/retrospective.ts imports nothing.
  */
-export const MUSEUM_COLLECTIONS: Museum[] = [
-  {
-    name: 'Museum of Modern Art',
-    shortName: 'MoMA',
-    location: 'New York',
-    notable: true,
-  },
-  {
-    name: 'Hirshhorn Museum',
-    shortName: 'Hirshhorn',
-    location: 'Washington, DC',
-    notable: true,
-  },
-  {
-    name: 'Brooklyn Museum',
-    shortName: 'Brooklyn',
-    location: 'New York',
-    notable: true,
-  },
-  {
-    name: 'Baltimore Museum',
-    shortName: 'Baltimore',
-    location: 'Maryland',
-  },
-  {
-    name: 'Butler Institute of American Art',
-    shortName: 'Butler',
-    location: 'Youngstown, Ohio',
-  },
-  {
-    name: 'Walter Chrysler Museum',
-    shortName: 'Chrysler',
-    location: 'Norfolk, Virginia',
-  },
-  {
-    name: 'University of Arizona',
-    shortName: 'Arizona',
-    location: 'Tucson',
-  },
-  {
-    name: 'University of Georgia',
-    shortName: 'Georgia',
-    location: 'Athens',
-  },
-  {
-    name: 'Elmira College Art Collection',
-    shortName: 'Elmira',
-    location: 'New York',
-  },
-  {
-    name: 'Florida Southern College',
-    shortName: 'FSC',
-    location: 'Lakeland',
-  },
-  {
-    name: 'St. Lawrence University',
-    shortName: 'SLU',
-    location: 'Canton, NY',
-    // The one entry on this list the archive can corroborate from its own holdings.
-    placeId: 'st-lawrence-university',
-  },
-  {
-    name: 'Queens Museum',
-    shortName: 'Queens',
-    location: 'New York',
-  },
-  {
-    name: 'Wichita State University',
-    shortName: 'Wichita',
-    location: 'Kansas',
-  },
-];
+const MUSEUM_META: Record<string, Omit<Museum, 'cvLine'>> = {
+  'Museum of Modern Art, NYC':
+    { name: 'Museum of Modern Art', shortName: 'MoMA', location: 'New York', notable: true },
+  'Hirshhorn Museum, Washington, DC':
+    { name: 'Hirshhorn Museum', shortName: 'Hirshhorn', location: 'Washington, DC', notable: true },
+  'Brooklyn Museum, Brooklyn, NY':
+    { name: 'Brooklyn Museum', shortName: 'Brooklyn', location: 'New York', notable: true },
+  'Baltimore Museum':
+    { name: 'Baltimore Museum', shortName: 'Baltimore', location: 'Maryland' },
+  'Butler Institute of Amer. Art, Youngstown, Ohio':
+    { name: 'Butler Institute of American Art', shortName: 'Butler', location: 'Youngstown, Ohio' },
+  'Walter Chrysler Museum':
+    { name: 'Walter Chrysler Museum', shortName: 'Chrysler', location: 'Norfolk, Virginia' },
+  'Univ. of Arizona, Tucson, Ariz.':
+    { name: 'University of Arizona', shortName: 'Arizona', location: 'Tucson' },
+  'Univ. of Georgia, Athens, Ga.':
+    { name: 'University of Georgia', shortName: 'Georgia', location: 'Athens' },
+  'Elmira College Art Collection, NY':
+    { name: 'Elmira College Art Collection', shortName: 'Elmira', location: 'New York' },
+  'Florida Southern College, Lakeland':
+    { name: 'Florida Southern College', shortName: 'FSC', location: 'Lakeland' },
+  // The one entry on this list the archive can corroborate from its own holdings.
+  'St. Lawrence Univ., Canton, NY':
+    { name: 'St. Lawrence University', shortName: 'SLU', location: 'Canton, NY', placeId: 'st-lawrence-university' },
+  'Queens Museum, Flushing, NY':
+    { name: 'Queens Museum', shortName: 'Queens', location: 'New York' },
+  'Wichita State Univ., Wichita, Kan.':
+    { name: 'Wichita State University', shortName: 'Wichita', location: 'Kansas' },
+};
+
+export const MUSEUM_COLLECTIONS: Museum[] = CV.museumCollections.map((cvLine) => {
+  const meta = MUSEUM_META[cvLine];
+  if (!meta) {
+    throw new Error(
+      `lib/validation.ts: no metadata for CV museum line "${cvLine}". Add it to `
+      + 'MUSEUM_META — the CV transcription is the source of truth, and an '
+      + 'institution must never drop off the site because a line was corrected.',
+    );
+  }
+  return { ...meta, cvLine };
+});
 
 /**
  * Critics who wrote about or endorsed Sievan.
@@ -149,20 +120,6 @@ export const CRITICS: Critic[] = [
     note: 'Called his work "singular and remarkable"',
     major: true,
   },
-];
-
-/**
- * Major exhibition venues from the CV.
- */
-export const MAJOR_EXHIBITIONS: ExhibitionVenue[] = [
-  { name: 'Museum of Modern Art', years: '1943, 1956, 1964–65', type: 'museum' },
-  { name: 'Metropolitan Museum of Art', years: '1942, 1943', type: 'museum' },
-  { name: 'Whitney Museum', years: '1943', type: 'museum' },
-  { name: 'Brooklyn Museum', years: '1941, 1953, 1958', type: 'museum' },
-  { name: 'Carnegie Institute', location: 'Pittsburgh', years: '1943, 1944, 1945', type: 'museum' },
-  { name: 'Corcoran Gallery', location: 'Washington, DC', years: '1945', type: 'museum' },
-  { name: 'Art Institute of Chicago', years: '1941', type: 'museum' },
-  { name: 'Salon d\'Automne', location: 'Paris', years: '1931', type: 'institution' },
 ];
 
 /**

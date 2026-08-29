@@ -4,7 +4,9 @@ import {
   archive, counts, getVideo, allExhibitions, allPersons, clipForPerson, pageOf,
 } from '@/lib/data';
 import { getQuote } from '@/lib/quotes';
-import { MUSEUM_COLLECTIONS, MAJOR_EXHIBITIONS, CRITICS } from '@/lib/validation';
+import { MUSEUM_COLLECTIONS, CRITICS } from '@/lib/validation';
+import { CV } from '@/lib/retrospective';
+import { CVSource } from '@/components/CVSource';
 import { PullQuote } from '@/components/PullQuote';
 import { Chronology } from '@/components/Chronology';
 import { ClipTile, SheetTile } from '@/components/MediaTile';
@@ -53,6 +55,12 @@ export default function LifePage() {
           Born in Ukraine, raised in Brooklyn, trained in Paris, and at work in New York
           for sixty years. This is the record placed in order: the life, everything the
           archive can date, where the work was shown, and who was there to say so.
+        </p>
+        <p className={styles.lede}>
+          The paintings themselves, and the {counts.worksOnPaperCatalogued} works on paper
+          the estate holds, are in the{' '}
+          <Link href="/works/">Catalogue Raisonné</Link>. This page is about the man, the
+          record and its reception.
         </p>
       </header>
 
@@ -136,6 +144,12 @@ export default function LifePage() {
         </div>
 
         <div className={styles.quoteRail}>
+          {/*
+            Solman on the rehabilitation Sievan needs: reception, and the argument
+            this section makes. It had been sitting at the foot of the Catalogue
+            Raisonné, which is where the art goes, not the reading of it.
+          */}
+          <PullQuote quote={getQuote('solman-rehabilitation')} showSource />
           {rothko && (
             <SheetTile
               sheet={rothko}
@@ -168,27 +182,43 @@ export default function LifePage() {
       <section id="exhibitions" className={styles.section}>
         <h2>Where the work was shown</h2>
         <p className="measure muted">
-          Two records, and they do not match. The retrospective catalogue’s CV lists the
-          major museum surveys Sievan appeared in; the archive separately holds physical
-          evidence — a catalogue, a poster, a review — for {counts.exhibitions} shows. The
-          first is his own account, the second is what survives to prove it.
+          Two records, and they do not match. Sievan’s own CV lists{' '}
+          {CV.oneManExhibitions.length + CV.groupExhibitions.length} exhibitions; the
+          archive separately holds physical evidence — a catalogue, a poster, a review —
+          for {counts.exhibitions} of them. The first is his account of his career, the
+          second is what survives to prove it. The gap between the two numbers is the
+          honest shape of the record.
         </p>
 
-        <div className={styles.twoUp}>
+        <div className={styles.threeUp}>
           <div>
-            <h3 className={styles.subhead}>From the catalogue CV</h3>
+            <h3 className={styles.subhead}>
+              One-man exhibitions
+              <span className={styles.subheadCount}>{CV.oneManExhibitions.length}</span>
+            </h3>
             <ul className={styles.venueList}>
-              {MAJOR_EXHIBITIONS.map((v) => (
-                <li key={v.name}>
-                  <span className={styles.venueName}>{v.name}</span>
-                  <span className={styles.venueYears}>{v.years}</span>
+              {CV.oneManExhibitions.map(([venue, years]) => (
+                <li key={`${venue}-${years}`}>
+                  <span className={styles.venueName}>{venue}</span>
+                  <span className={styles.venueYears}>{years}</span>
                 </li>
               ))}
             </ul>
-            <p className={styles.railNote}>
-              Transcribed from the retrospective catalogue held in the archive. Not
-              independently verified against museum records.
-            </p>
+          </div>
+
+          <div>
+            <h3 className={styles.subhead}>
+              Group exhibitions
+              <span className={styles.subheadCount}>{CV.groupExhibitions.length}</span>
+            </h3>
+            <ul className={styles.venueList}>
+              {CV.groupExhibitions.map(([venue, years]) => (
+                <li key={`${venue}-${years}`}>
+                  <span className={styles.venueName}>{venue}</span>
+                  <span className={styles.venueYears}>{years}</span>
+                </li>
+              ))}
+            </ul>
           </div>
 
           <div>
@@ -213,19 +243,78 @@ export default function LifePage() {
             </p>
           </div>
         </div>
+
+        <CVSource>
+          Where the two records name the same place, and where Sievan&rsquo;s own sheets
+          name a town or a gallery, that is gathered in the{' '}
+          <Link href="/places/">gazetteer of {counts.places} places</Link>.
+        </CVSource>
       </section>
 
       {/* ------------------------------------------------------------- collections */}
       <section className={styles.section}>
         <h2>In permanent collections</h2>
-        <ul className={styles.museumList}>
-          {MUSEUM_COLLECTIONS.map((m) => (
-            <li key={m.name} className={m.notable ? styles.museumNotable : undefined}>
-              <span className={styles.museumName}>{m.name}</span>
-              <span className={styles.museumWhere}>{m.location}</span>
+        <div className={styles.twoUp}>
+          <div>
+            <h3 className={styles.subhead}>
+              Museums
+              <span className={styles.subheadCount}>{MUSEUM_COLLECTIONS.length}</span>
+            </h3>
+            <ul className={styles.museumList}>
+              {MUSEUM_COLLECTIONS.map((m) => (
+                <li key={m.name} className={m.notable ? styles.museumNotable : undefined}>
+                  {m.placeId
+                    ? (
+                      <Link href={`/places/${m.placeId}/`} className={styles.museumName}>
+                        {m.name}
+                      </Link>
+                    )
+                    : <span className={styles.museumName}>{m.name}</span>}
+                  <span className={styles.museumWhere}>{m.location}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div>
+            <h3 className={styles.subhead}>
+              Private collections
+              <span className={styles.subheadCount}>{CV.privateCollections.length}</span>
+            </h3>
+            <ul className={styles.museumList}>
+              {CV.privateCollections.map((n) => (
+                <li key={n}><span className={styles.museumName}>{n}</span></li>
+              ))}
+            </ul>
+            {/*
+              Stated as a lead, not an identification. Two of these names resemble
+              names Sievan wrote on his own sheets, and resemblance is not proof.
+            */}
+            <p className={styles.railNote}>
+              Two names here — <strong>I. David Orr</strong> and{' '}
+              <strong>Charles Zitner</strong> — resemble names Sievan wrote on his own
+              sheets, <em>&ldquo;sold to ORR&rdquo;</em> and{' '}
+              <em>&ldquo;Zitners House&rdquo;</em>. That is a lead, not an
+              identification, and the archive has not made it.
+            </p>
+          </div>
+        </div>
+
+        <h3 className={styles.subhead} style={{ marginTop: 'var(--s-5)' }}>
+          Awards
+          <span className={styles.subheadCount}>{CV.awards.length}</span>
+        </h3>
+        <ul className={styles.venueList}>
+          {CV.awards.map(([award, year]) => (
+            <li key={award}>
+              <span className={styles.venueName}>{award}</span>
+              <span className={styles.venueYears}>{year}</span>
             </li>
           ))}
         </ul>
+        <p className={styles.railNote}>He studied at {CV.studies}.</p>
+
+        <CVSource />
       </section>
 
       {/* ------------------------------------------------------------- the people */}

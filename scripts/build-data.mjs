@@ -120,6 +120,30 @@ for (const o of data.archiveObjects) {
 }
 
 /*
+ * `artwork` is what promotes an archive object into a catalogue entry, so it may
+ * only sit on a row that is actually a work of art — and everything it claims must
+ * still be readable in the row's own verbatim description. Same rule as
+ * check-quotes.mjs applies to attestations: a curated layer that cannot be checked
+ * against the source it summarises is just an assertion.
+ */
+const canonArtwork = (t) => t.normalize('NFKC')
+  .replace(/[\u2018\u2019\u201b]/g, "'").replace(/[\u201c\u201d]/g, '"')
+  .replace(/[\u2010-\u2015]/g, '-').replace(/\s+/g, ' ').trim().toLowerCase();
+
+for (const o of data.archiveObjects) {
+  if (!o.artwork) continue;
+  if (o.object_type !== 'work_on_paper') {
+    fail(`${o.id}: artwork is set but object_type is ${o.object_type} — only a row that `
+      + 'is itself a work of art may carry it');
+  }
+  if (o.artwork.signed
+    && !canonArtwork(o.raw_title_description).includes(canonArtwork(o.artwork.signed))) {
+    fail(`${o.id}: artwork.signed is not present in raw_title_description\n      wanted: `
+      + o.artwork.signed);
+  }
+}
+
+/*
  * An attestation may only carry a year if a source stated one, and may only claim a
  * Painting if a human says how the match was made. Both are the same rule twice: an
  * inference must be labelled as one, or it silently becomes a fact.
@@ -750,6 +774,11 @@ const bundle = {
         data.attestedWorks.filter((w) => w.dimensions_stated).length,
       attestedWorksWithPrice: data.attestedWorks.filter((w) => w.price_stated).length,
       sheetsCarryingAttestations: Object.keys(attestationsByObject).length,
+      // Works the estate physically holds. NEVER added to `paintings`, which stays 0
+      // and is the archive's one honest statement of what it does not have.
+      worksOnPaperCatalogued: data.archiveObjects.filter((o) => o.artwork).length,
+      worksOnPaperSheets: data.archiveObjects
+        .reduce((n, o) => n + (o.artwork ? (o.artwork.sheet_count ?? 1) : 0), 0),
       places: data.places.length,
       scholarship: data.scholarship.length,
       objectsWithScans: data.archiveObjects.filter((o) => (o.scan_files ?? []).length > 0).length,
@@ -818,8 +847,9 @@ console.log(
   `  build-data: ${c.archiveObjects} objects · ${c.newsArticles} articles · ` +
   `${c.publications} publications · ${c.persons} people · ${c.exhibitions} exhibitions · ` +
   `${c.videoAssets} videos · ${c.paintings} paintings\n` +
-  `              ${c.attestedWorks} attested works on ${c.sheetsCarryingAttestations} ` +
-  `sheets (${c.attestedWorksDated} dated, ${c.attestedWorksWithDimensions} sized) · ` +
+  `              ${c.worksOnPaperCatalogued} works on paper catalogued ` +
+  `(${c.worksOnPaperSheets} sheets) · ${c.attestedWorks} attested works on ` +
+  `${c.sheetsCarryingAttestations} sheets (${c.attestedWorksDated} dated) · ` +
   `${c.places} places\n` +
   `              ${c.objectsWithScans} objects with scans (${c.scanFiles} files) · ` +
   `${c.transcribedInterviews} transcripts (${c.transcriptWords.toLocaleString()} words) · ` +

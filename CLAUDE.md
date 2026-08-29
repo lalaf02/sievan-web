@@ -13,7 +13,17 @@ Outstanding work lives in [BACKLOG.md](./BACKLOG.md).
 ## Project overview
 
 A static website over the surviving archive of the American painter **Maurice Sievan
-(1898–1981)**, published by his estate. It exists so the record outlives any hosting
+(1898–1981)**, published by his estate.
+
+**The two content tabs divide by subject, and the division is load-bearing.**
+`/life/` is the man, the record and its **reception** — biography, chronology, the
+exhibition and collection record, the witnesses. `/works/` is **the art itself** — the
+25 catalogued works on paper, every surviving reproduction of a painting, and the 57
+paintings the sheets name. The site once had this backwards: `/life/retrospective/`
+described itself as *"the only place in [the archive] where the paintings themselves can
+be seen"*, and `/works/` said *"No works are catalogued yet"* while showing 25 of Sievan's
+drawings. Do not put artwork imagery on `/life/`, and do not put CV or reception material
+on `/works/`. It exists so the record outlives any hosting
 account: `output: 'export'` produces ~231 plain HTML pages that will open from a USB stick
 in twenty years.
 
@@ -243,6 +253,15 @@ never entries in it: separate id space (`MS-AW-#####`), separate URL space, and 
 are never added together. Each row carries the verbatim words it rests on, and
 `check-quotes.mjs` fails the build if a quote is not present in its source's own text.
 
+**`ArchiveObject.artwork` is what promotes a row into a catalogue entry.** Present on the
+25 box-2 drawings and nothing else; `build-data.mjs` fails if it sits on a row whose
+`object_type` is not `work_on_paper`, and fails if `artwork.signed` is not verbatim in that
+row's `raw_title_description`. These rows are works of art *and* archive objects — they get
+one canonical URL (`/archive/objects/<id>/`), which switches its title and back-link to the
+Catalogue Raisonné when `artwork` is set. `counts.worksOnPaperCatalogued` is 25;
+**`counts.paintings` stays 0** and is the archive's one honest statement of what it lacks.
+Never add the two together.
+
 `Place` is a gazetteer of the towns, rivers, galleries and institutions the evidence names.
 Slug ids, like `Person` and `Exhibition`, because it is an authority term the archive
 normalises rather than a thing it holds. **A place nothing points at fails `check-data.mjs`
@@ -313,6 +332,8 @@ Three of these are heuristics, not facts, and the UI says so:
 | `lib/quotes.ts` | 22 curated quotes, each with a verified transcript `page` and `anchor`. `quoteHref()` builds a link that opens the reader with the passage highlighted. |
 | `lib/citation.ts` | Formats archive records as footnote-ready references, explicit about missing headlines and bylines. |
 | `lib/contact.ts` | The estate's contact details, in one place. `mailtoHref(subject)`. |
+| `lib/retrospective.ts` `CV` + `CV_SOURCE` | The catalogue's page-8 CV, verbatim, and **the one caveat that must accompany every rendering of it** — render it with `components/CVSource.tsx`, never by writing the sentence again. It had been written out three times in three wordings. |
+| `lib/validation.ts` `MUSEUM_COLLECTIONS` | **Derived from `CV.museumCollections`**, not a parallel list — keyed on the exact CV string and throwing at module scope on a miss, so correcting the transcription can never silently drop an institution. |
 | `lib/validation.ts`, `lib/retrospective.ts` | Synthesised evidence (museums, critics, THESIS) and the retrospective catalogue's transcribed pages + CV. |
 | `components/Record.tsx` | The record-page vocabulary: `RecordHeader`, `Facts`, `Fact` (renders nothing when empty), `Verbatim`, `Absent`, `EditorialNote`, `Section`, `RecordList`. |
 | `components/Pending.tsx` | A stated gap at section scale, for anything not yet in the archive. `PendingLine` for a single empty fact. |
@@ -410,6 +431,13 @@ Minimum sweep before a commit that touches the UI:
 - [ ] One record page (`/archive/press/MS-AR-00003-C/`) — related sections render and are labelled
 - [ ] A drawing (`/archive/objects/MS-AR-00054/`) — recto **and** verso render the right way up
 - [ ] `/archive/objects/MS-AR-00076/` — states its scan is absent by decision, not by backlog
+- [ ] `/works/` — three plates render (confirm `MSAR00029-p01`, *Oombix*, is not rotated
+      and its printed caption is legible at tile size), 25 entries across 5 medium groups,
+      every entry title distinct
+- [ ] **Read `/works/` cold and ask: how many paintings does this archive have a catalogue
+      entry for?** The answer must be **none** — 25 works on paper are catalogued, no
+      paintings are. Every gate is green either way; this is the only check that catches it
+- [ ] `/life/` — no artwork imagery, the CV in three columns, one `CVSource` caveat
 - [ ] `/works/attested/` — 57 rows, quotes in mono, every row links to its sheet; and the
       opening paragraph still reads as "the catalogue has none of these"
 - [ ] `/places/` and the thinnest place page — a stub that says nothing should be folded
@@ -447,7 +475,7 @@ how that bug was found.
 
 **4. `check-export: OK — 231 pages`.**
 `MIN_PAGES` once defaulted to **60** against 205 actual pages: all 60 press pages could
-vanish and it still passed. The floor now tracks the real count (`252` against `258`,
+vanish and it still passed. The floor now tracks the real count (`256` against `258`,
 `scripts/check-export.mjs`) — *keep raising it* when a box is ingested or a route family is
 added, or the same blind spot reopens.
 

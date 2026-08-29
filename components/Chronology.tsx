@@ -167,9 +167,12 @@ export function Chronology({
       {undatedAttestations > 0 && (
         <p className={styles.undatedNote}>
           A further {undatedAttestations} paintings are named on Sievan’s own sheets
-          with no year attached, so they cannot be placed on this spine at all. They
-          are listed in the{' '}
-          <Link href="/works/attested/">catalogue raisonné</Link>.
+          with no year attached, so they cannot be placed on this spine at all. They are
+          listed separately as{' '}
+          <Link href="/works/attested/">
+            works he recorded but the archive does not hold
+          </Link>{' '}
+          — evidence toward the catalogue, not entries in it.
         </p>
       )}
 

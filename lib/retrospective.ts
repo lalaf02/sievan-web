@@ -152,6 +152,18 @@ export const RETROSPECTIVE_PAGES: RetrospectivePage[] = [
  * independently verified, so it is published as a transcription of that page
  * rather than merged into the exhibition records.
  */
+/**
+ * The one sentence that must accompany every rendering of the CV.
+ *
+ * Written once because it had been written out three times — in app/works/page.tsx,
+ * app/life/page.tsx and app/life/retrospective/page.tsx — in three different
+ * wordings. A caveat that drifts is a caveat nobody trusts.
+ */
+export const CV_SOURCE =
+  'Transcribed from page 8 of the retrospective catalogue, MS-AR-00026. It is '
+  + 'Sievan\u2019s own account of his career and has not been independently verified '
+  + 'against museum or gallery records.';
+
 export const CV = {
   oneManExhibitions: [
     ['Contemporary Arts', '1939, 1941'],

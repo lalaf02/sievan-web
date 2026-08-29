@@ -37,8 +37,10 @@ export default function RetrospectivePage() {
         <p className="muted">
           A fifteen-page typescript held in the archive box: a signed cover, an illustrated
           account of Sievan’s career in five periods, and a full list of exhibitions,
-          collections and awards. It is the single richest document in the archive — and
-          the only place in it where the paintings themselves can be seen.
+          collections and awards. It is the single richest document in the archive: thirteen
+          of its plates are reproductions of paintings, and they are read as works in the{' '}
+          <Link href="/works/">Catalogue Raisonné</Link>. This page publishes the document
+          itself, page by page, as the archive holds it.
         </p>
         <p className="muted">
           It is a working draft rather than a published book. One page carries a pasted

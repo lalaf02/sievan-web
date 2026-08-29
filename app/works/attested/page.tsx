@@ -96,8 +96,9 @@ export default function AttestedWorksPage() {
           painting — sold, consigned, offered, returned or given. Those notes name
           collectors and dealers the archive has no other record of, and the places
           they went are gathered in the{' '}
-          <Link href="/places/">gazetteer</Link>. The catalogue of paintings itself
-          remains empty: <Link href="/works/">see why</Link>.
+          <Link href="/places/">gazetteer</Link>. The catalogue of paintings itself is
+          still empty, though the {counts.worksOnPaperCatalogued} works on paper are now
+          catalogued: <Link href="/works/">see what is and is not in it</Link>.
         </p>
       </section>
 

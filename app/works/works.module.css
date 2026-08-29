@@ -38,33 +38,9 @@
   gap: var(--s-4);
 }
 
-/* The drawings are small, wide sheets — cards and envelopes — so four across at a
-   landscape aspect, rather than the five portrait columns the periods use. */
-.sketchGrid {
-  list-style: none;
-  margin: var(--s-5) 0 0;
-  padding: 0;
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: var(--s-5) var(--s-4);
-  align-items: start;
-}
-
 @media (max-width: 1020px) {
   .sketchGrid { grid-template-columns: repeat(3, 1fr); }
 }
-
-/* Matches .tileLead on the archive index: the caption is a quiet label on the
-   sheet, not a run of underlined link text across every tile. */
-.sketchLead {
-  color: var(--ink);
-  text-decoration: none;
-  font-family: var(--serif);
-  font-size: var(--t-sm);
-  line-height: 1.35;
-}
-
-.sketchLead:hover { color: var(--oxide); }
 
 .period {
   display: flex;
@@ -121,19 +97,6 @@
   margin: 0;
 }
 
-/* ------------------------------------------------------------------------ CV */
-
-.cvGrid {
-  display: grid;
-  /*
-   * The one-man exhibitions list runs fourteen rows; the museums and awards beside it
-   * run seventeen between them. Weight the tracks rather than splitting evenly.
-   */
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
-  gap: var(--s-6);
-  align-items: start;
-}
-
 .subhead {
   font-family: var(--sans);
   font-size: var(--t-xs);
@@ -152,41 +115,6 @@
   color: var(--ink-faint);
 }
 
-.cvList {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  border-top: 1px solid var(--rule);
-}
-
-.cvList li {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: var(--s-4);
-  font-size: var(--t-sm);
-  padding: var(--s-2) 0;
-  border-bottom: 1px solid var(--rule);
-}
-
-.cvYears {
-  font-family: var(--sans);
-  font-size: var(--t-xs);
-  color: var(--ink-faint);
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-}
-
-/* ---------------------------------------------------------------- what next */
-
-.meanwhile {
-  display: grid;
-  grid-template-columns: 1.2fr 1fr;
-  gap: var(--s-6);
-  align-items: start;
-  margin-top: var(--s-5);
-}
-
 @media (max-width: 1020px) {
   .periods { grid-template-columns: repeat(3, 1fr); }
 }
@@ -203,4 +131,127 @@
 @media (max-width: 560px) {
   .periods { grid-template-columns: 1fr; }
   .sketchGrid { grid-template-columns: 1fr; }
+}
+
+/* ------------------------------------------------------------ the plates */
+
+/*
+ * The three free-standing reproductions. Given real size, because they are the
+ * only images of finished paintings the archive has and the page's whole claim is
+ * that this is where you see the work.
+ */
+.plateGrid {
+  list-style: none;
+  margin: 0 0 var(--s-4);
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--s-5);
+}
+
+/* ------------------------------------------------- works on paper entries */
+
+.mediumGroup {
+  margin-top: var(--s-5);
+}
+
+.mediumName {
+  display: flex;
+  align-items: baseline;
+  gap: var(--s-3);
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  font-weight: 400;
+  color: var(--ink-faint);
+  border-bottom: 1px solid var(--rule);
+  padding-bottom: var(--s-2);
+  margin: 0 0 var(--s-3);
+}
+
+.mediumCount {
+  color: var(--ink-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.entryList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--s-4) var(--s-6);
+}
+
+/* Thumbnail beside the facts: a catalogue entry, not a gallery tile. */
+.entry {
+  display: grid;
+  grid-template-columns: 5.5rem minmax(0, 1fr);
+  gap: var(--s-4);
+  align-items: start;
+  padding-bottom: var(--s-4);
+  border-bottom: 1px dotted var(--rule);
+}
+
+.entryMedia {
+  display: block;
+  border: 1px solid var(--rule);
+  background: var(--paper-deep);
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+}
+
+.entryMedia img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.entryBody { min-width: 0; }
+
+.entryTitle {
+  margin: 0 0 var(--s-2);
+  font-size: var(--t-base);
+  font-weight: 500;
+  line-height: 1.3;
+}
+
+.entryFacts {
+  margin: 0;
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  color: var(--ink-muted);
+  line-height: 1.45;
+}
+
+.entryId {
+  font-family: var(--mono);
+  color: var(--ink-faint);
+}
+
+/* The signature, in the transcription's own words. */
+.entrySigned {
+  margin: var(--s-2) 0 0;
+  font-family: var(--mono);
+  font-size: var(--t-xs);
+  color: var(--ink-faint);
+  line-height: 1.4;
+}
+
+.entryRecords {
+  margin: var(--s-2) 0 0;
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  color: var(--oxide);
+}
+
+@media (max-width: 1020px) {
+  .plateGrid { grid-template-columns: repeat(2, 1fr); }
+  .entryList { grid-template-columns: minmax(0, 1fr); }
+}
+
+@media (max-width: 560px) {
+  .plateGrid { grid-template-columns: 1fr; }
 }

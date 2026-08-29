@@ -57,6 +57,52 @@ export const allVideos = archive.videoAssets;
 export const allPaintings = archive.paintings;
 export const allScholarship = archive.scholarship;
 
+// ------------------------------------------------------- the catalogue itself
+
+/**
+ * Rows that are themselves works of art, not documents about them — box 2's
+ * drawings today, box 3's when it arrives. The presence of `artwork` is what
+ * promotes an archive object into a catalogue entry.
+ */
+export const catalogueWorksOnPaper = (): ArchiveObject[] =>
+  allObjects.filter((o) => o.artwork && hasImagery(o.id)).sort(byDateUndatedLast);
+
+/**
+ * The heading for a catalogued sheet.
+ *
+ * These carry no title — Sievan gave them none — so each is named by what it
+ * records, derived from its attestations and never invented. `objectLead` is wrong
+ * here: it returns the raw first line, which is "Graphite sketch on paper of a
+ * painting with notes." on fifteen of the twenty-five.
+ */
+export function entryTitle(object: ArchiveObject): string {
+  const works = attestationsForObject(object.id);
+  const first = works.find((w) => w.title_stated)?.title_stated;
+  // MS-AR-00051 records no painting — it is a landscape drawn for its own sake, so
+  // it is named by what it is. The signature clause is dropped because the entry
+  // prints the signature verbatim on its own line directly beneath.
+  if (!first) return objectLead(object).replace(/,?\s*Signed\b.*$/i, '').replace(/\.$/, '');
+  if (works.length === 1) return `Sheet recording ${first}`;
+  if (works.length === 2 && works[1].title_stated) {
+    return `Sheet recording ${first} and ${works[1].title_stated}`;
+  }
+  // Count works, not titles: MS-AR-00068 has 8 attestations but only 5 titles.
+  return `Sheet recording ${first} and ${works.length - 1} others`;
+}
+
+/** Catalogue entries grouped by medium, the only spine 1-of-25 dated rows can support. */
+export function worksOnPaperByMedium(): { medium: string; works: ArchiveObject[] }[] {
+  const groups = new Map<string, ArchiveObject[]>();
+  for (const o of catalogueWorksOnPaper()) {
+    const m = o.artwork!.medium_stated;
+    if (!groups.has(m)) groups.set(m, []);
+    groups.get(m)!.push(o);
+  }
+  return [...groups.entries()]
+    .map(([medium, works]) => ({ medium, works }))
+    .sort((a, b) => b.works.length - a.works.length || a.medium.localeCompare(b.medium));
+}
+
 // ------------------------------------------------- attested works and places
 
 /*

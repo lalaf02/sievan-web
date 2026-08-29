@@ -48,16 +48,6 @@
   font-weight: 500;
 }
 
-.pending {
-  font-size: var(--t-xs);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--ink-faint);
-  border: 1px solid var(--rule);
-  border-radius: 2px;
-  padding: 0.05em 0.35em;
-  white-space: nowrap;
-}
 
 /* Visible only on keyboard focus */
 .skip {

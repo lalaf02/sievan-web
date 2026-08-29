@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import {
-  allObjects, articleTitle, articlesForObject, attestationsForObject,
+  allObjects, articleTitle, articlesForObject, attestationsForObject, entryTitle,
   exhibitionsForObject, getObject, getPerson, getPublication, objectLead,
   OBJECT_TYPE_LABELS,
 } from '@/lib/data';
@@ -40,11 +40,17 @@ export default async function ObjectPage({ params }: Props) {
 
   return (
     <div className="page" style={{ paddingTop: 'var(--s-6)', maxWidth: '52rem' }}>
+      {/*
+        A row carrying `artwork` is a catalogue entry, so it is headed like one and
+        sends the reader back to the Catalogue Raisonné rather than to the archive.
+        Every other object keeps the archival framing. The box link in Facts below
+        preserves the archival path either way.
+      */}
       <RecordHeader
-        backHref="/archive/"
-        backLabel="The archive"
-        eyebrow={`${OBJECT_TYPE_LABELS[object.object_type]}${object.date_text ? ` · ${object.date_text}` : ''}`}
-        title={object.id}
+        backHref={object.artwork ? '/works/' : '/archive/'}
+        backLabel={object.artwork ? 'Catalogue Raisonné' : 'The archive'}
+        eyebrow={`${object.id} · ${OBJECT_TYPE_LABELS[object.object_type]}${object.date_text ? ` · ${object.date_text}` : ''}`}
+        title={object.artwork ? entryTitle(object) : object.id}
       />
 
       <p className="measure" style={{ marginTop: 'calc(-1 * var(--s-3))' }}>
@@ -58,9 +64,15 @@ export default async function ObjectPage({ params }: Props) {
       />
 
       <Facts>
+        <Fact label="Medium">{object.artwork?.medium_stated}</Fact>
+        <Fact label="Support">{object.artwork?.support}</Fact>
+        <Fact label="Signed">{object.artwork?.signed}</Fact>
+        <Fact label="Sheets">{object.artwork?.sheet_count}</Fact>
         <Fact label="Type">{OBJECT_TYPE_LABELS[object.object_type]}</Fact>
         <Fact label="Date">{object.date_text}</Fact>
-        <Fact label="Medium">{object.medium_raw?.replace(/\s+/g, ' ')}</Fact>
+        <Fact label="Catalogued as">
+          {object.artwork ? undefined : object.medium_raw?.replace(/\s+/g, ' ')}
+        </Fact>
         <Fact label="Condition">{object.condition}</Fact>
         <Fact label="Copies held">{object.copies_count}</Fact>
         {/* Folder is a string because the manifest uses compound values like "4,5". */}

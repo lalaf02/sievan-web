@@ -309,3 +309,12 @@
   font-size: var(--t-sm);
   margin: var(--s-5) 0 0;
 }
+
+/* Provenance for the collections list — it is the CV's claim, not the site's. */
+.tileSource {
+  margin: var(--s-3) 0 0;
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  color: var(--ink-faint);
+  line-height: 1.45;
+}

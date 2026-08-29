@@ -9,12 +9,14 @@ import styles from './SiteHeader.module.css';
  * the apparatus. Exhibitions, people, the chronology and the retrospective are
  * reached from within Life and Work rather than competing at the top level.
  *
- * Works keeps its "in preparation" badge until seed_paintings.json has rows —
- * naming the gap is more useful than a nav item that changes meaning silently.
+ * Works carried an "in preparation" badge while it was empty. It is not empty:
+ * twenty-five works on paper are catalogued there. The gap that remains — no
+ * painting photographed — is stated in that page's own scope note, where it can be
+ * said accurately, rather than compressed into two words in the nav.
  */
 const NAV = [
   { href: '/life/', label: 'Life and Work' },
-  { href: '/works/', label: 'Catalogue Raisonné', pending: true },
+  { href: '/works/', label: 'Catalogue Raisonné' },
   { href: '/archive/', label: 'Archives' },
   { href: '/research/', label: 'Research' },
 ];
@@ -41,11 +43,6 @@ export function SiteHeader() {
                     className={`${styles.link} ${isActive ? styles.active : ''}`}
                   >
                     {item.label}
-                    {item.pending && (
-                      <span className={styles.pending} title="In preparation">
-                        in preparation
-                      </span>
-                    )}
                   </Link>
                 </li>
               );

@@ -56,6 +56,41 @@ rows, not code. The attested works and the box-2 sheets stay on the page either 
   "Charles Zitner", which is a lead, not an identification. `counterparty_person_id` is null
   on all 57 rows and should stay null until someone can actually make the link.
 
+### The gallery checklists — ~50 more paintings, from printed sources
+**The highest-value ingest the archive can do without anyone supplying anything new.**
+Nine exhibition catalogues are already scanned (27 pages) and at least three carry printed
+checklists of named paintings — better evidence than box 2's sketches, because a gallery
+set them in type:
+
+- **`MS-AR-00028`** (Passedoit) — *"OIL PAINTINGS 1952-1954"*, **19 works with dimensions**:
+  Pine Hill Road 28 x 32 · Woodland Forest 20 x 24 · Provincetown Sands · Earth and Sky ·
+  The Orchard · Lawnscape · The Brook · **Birchland (REPRODUCED) 20 x 24** · Terrestria ·
+  Saugerties · Woodland · Esopus Creek · Rhythmic Landscape · Eventide ·
+  **The Etude, *loaned by Mr. and Mrs. Charles Zitner*** · Woodstock Retreat · Red Earth ·
+  Shinnecock Bay · The White House.
+- **`MS-AR-00023`** (Salpeter) — *"Recent Oils"*, **16 works**, incl. Provincetown Harbor
+  (illustrated), Street Scene in Flushing, Head of a Poet, Inlet at Peconic Bay,
+  Suburban Retreat, Montauk Point, At Sag Harbor, In Hollis, A Corner in Flushing,
+  The Breakwater—Provincetown, Sag Harbor Bay.
+- **`MS-AR-00030`** (Passedoit 1957) — a checklist, not yet transcribed.
+- `MS-AR-00021`, `00022`, `00025`, `00027`, `00029` — unexamined for lists.
+
+**Two corroborations are already visible** and are the reason to do this:
+`BIRCHLAND (REPRODUCED) 20 x 24` matches `MS-AW-00014` from `MS-AR-00057`
+(*"Birchland #1"*, 20 x 24) — a gallery printed what Sievan sketched; and
+`THE ETUDE ... CHARLES ZITNER` is a **third** independent source on Zitner, beside the CV's
+`privateCollections` and `MS-AR-00074`'s *"Zitners House"*.
+
+**Ingest as `AttestedWork` rows** (`source_type: 'archive_object'`), not `Painting` rows —
+a checklist proves a painting was exhibited under a title, not where it is now.
+**First** transcribe each checklist into that object's `raw_title_description`, because
+`check-quotes.mjs` verifies every quote against it; editing a description afterwards breaks
+every quote already drawn from it. Separate commit, its own `npm run data`.
+
+**Resolve while there:** `MS-AR-00023` is recorded as 1957 but its checklist reads
+*"April 16 — May 5"* with **1951** pencilled at the foot. `/works/` currently gives
+*Provincetown Harbor* no year because of it.
+
 ### Boxes 3–6 — four physical boxes still outside the archive
 `DataModel/Archive Master Sheet.xlsx` has six tabs, one per box. Two are ingested.
 

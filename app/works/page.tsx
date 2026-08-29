@@ -1,14 +1,13 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import {
-  allPaintings, attestationsForObject, byDateUndatedLast, counts, coverFor,
-  hasImagery, objectLead, objectsForCollection,
+  allPaintings, attestationsForObject, counts, entryTitle, pageOf,
+  worksOnPaperByMedium,
 } from '@/lib/data';
+import type { ArchiveObject, ScanPage } from '@/lib/types';
 import { SheetTile } from '@/components/MediaTile';
 import { WorksBrowser } from '@/components/WorksBrowser';
-import { RETROSPECTIVE_PAGES, CV } from '@/lib/retrospective';
-import { getQuote } from '@/lib/quotes';
-import { PullQuote } from '@/components/PullQuote';
+import { RETROSPECTIVE_PAGES } from '@/lib/retrospective';
 import { Pending } from '@/components/Pending';
 import { CONTACT, mailtoHref } from '@/lib/contact';
 import styles from './works.module.css';
@@ -16,141 +15,234 @@ import styles from './works.module.css';
 export const metadata: Metadata = {
   title: 'Catalogue Raisonné',
   description:
-    'The catalogue of Maurice Sievan’s paintings — in preparation. The five periods of '
-    + 'the work, the 57 paintings named in his own hand, the exhibition and collection '
-    + 'record, and what is known so far.',
+    'Everything the estate holds of Maurice Sievan’s work and everything the record '
+    + 'names: 25 works on paper catalogued in full, every surviving reproduction of '
+    + 'the paintings, and 57 more canvases he named himself.',
 };
 
 /**
- * Sievan's own drawings, and the paintings they record.
+ * A reproduction of a finished painting, printed inside somebody else's catalogue.
  *
- * Rendered in BOTH branches below. When the catalogue opens, the browser must not
- * become the whole page — these sheets are the evidence the catalogue was built
- * from, and dropping them the day the first painting lands would quietly delete
- * the archive's account of its own working.
+ * Titles, dates, media and sizes are the galleries' own, set in type beneath the
+ * plate — not the estate's, and not verified against the canvas. `year` is null
+ * where the source document's own date is in doubt.
+ */
+const PLATES: {
+  objectId: string; page: number; title: string; year: string | null;
+  detail: string | null; source: string;
+}[] = [
+  {
+    objectId: 'MS-AR-00029', page: 3, title: 'Eebak', year: '1962',
+    detail: 'Oil on canvas, 86″ × 69″',
+    source: 'Reproduced in the Vanderwoude Tananbaum catalogue, 1986',
+  },
+  {
+    objectId: 'MS-AR-00029', page: 1, title: 'Oombix', year: '1962',
+    detail: 'Oil on canvas, 69½″ × 60″',
+    source: 'Reproduced in the Vanderwoude Tananbaum catalogue, 1986',
+  },
+  {
+    // No year: the archive records the catalogue as 1957, its own checklist reads
+    // "April 16 — May 5" with 1951 pencilled at the foot. Until that is resolved
+    // the archive does not choose between them.
+    objectId: 'MS-AR-00023', page: 1, title: 'Provincetown Harbor', year: null,
+    detail: null,
+    source: 'Cover of the Salpeter Gallery catalogue; its checklist lists the picture '
+      + 'as “PROVINCETOWN HARBOR (illustrated)”',
+  },
+];
+
+/** One catalogue entry. Module scope — a component defined in render remounts. */
+function Entry({ object }: { object: ArchiveObject }) {
+  const art = object.artwork!;
+  const cover = pageOf(object.id, 1);
+  const records = attestationsForObject(object.id).length;
+  const href = `/archive/objects/${object.id}/`;
+  return (
+    <li className={styles.entry}>
+      {cover && (
+        <Link href={href} className={styles.entryMedia}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={cover.thumb} alt={entryTitle(object)} loading="lazy" decoding="async" />
+        </Link>
+      )}
+      <div className={styles.entryBody}>
+        <h4 className={styles.entryTitle}>
+          <Link href={href}>{entryTitle(object)}</Link>
+        </h4>
+        <p className={styles.entryFacts}>
+          <span className={styles.entryId}>{object.id}</span>
+          {/* "Graphite on an envelope", not "Graphite on An envelope". */}
+          {' · '}{art.medium_stated} on{' '}
+          {art.support.charAt(0).toLowerCase() + art.support.slice(1)}
+          {art.sheet_count ? ` · ${art.sheet_count} sheets` : ''}
+          {object.date_text ? ` · ${object.date_text}` : ''}
+        </p>
+        {art.signed && <p className={styles.entrySigned}>{art.signed}</p>}
+        {records > 0 && (
+          <p className={styles.entryRecords}>
+            Records {records} painting{records === 1 ? '' : 's'}
+          </p>
+        )}
+      </div>
+    </li>
+  );
+}
+
+/**
+ * The catalogue proper: the works the estate physically holds.
+ *
+ * Rendered in BOTH branches below. When the painting catalogue opens these do not
+ * stop being works, and dropping them would delete the archive's account of its own
+ * holdings on the day the first photograph arrives.
  */
 function WorksOnPaper() {
-  // Only sheets with a scan can be shown; the one without is a retired folder and
-  // belongs on the archive page, not here.
-  const sketches = objectsForCollection('MS-CS-002')
-    .filter((o) => o.object_type === 'work_on_paper' && hasImagery(o.id))
-    .sort(byDateUndatedLast);
-
-  if (!sketches.length) return null;
+  const groups = worksOnPaperByMedium();
+  if (!groups.length) return null;
 
   return (
-    <section className={styles.section}>
-      <h2>Sievan’s own record of his paintings</h2>
+    <section className={styles.section} id="works-on-paper">
+      <h2>Works on paper</h2>
       <p className={styles.lede}>
-        The archive holds {sketches.length} works in Sievan’s own hand: drawings and
-        sketches on envelopes, index cards and note paper, catalogued as box{' '}
-        <Link href="/archive/">MS-CS-002</Link>.
+        {counts.worksOnPaperCatalogued} entries, {counts.worksOnPaperSheets} sheets, held
+        by the estate in box <Link href="/archive/">MS-CS-002</Link>. These are the only
+        works by Sievan the archive physically holds.
       </p>
       <p className={styles.lede}>
-        Most of them are drawings <em>of</em> paintings. Sievan sketched a work he had
-        finished and wrote its title, size, medium and asking price beside it, and
-        sometimes where it went. Read across the box, these sheets name{' '}
-        <strong>{counts.attestedWorks} paintings</strong> —{' '}
-        {counts.attestedWorksWithDimensions} of them with a size,{' '}
-        {counts.attestedWorksWithPrice} with a price — that exist nowhere else in the
-        record. They are the strongest evidence the archive has toward the catalogue.
-        They are not that catalogue: a sketch records a painting, it does not
-        establish one.
+        Twenty-four of them are drawings <em>of</em> paintings. Sievan sketched a canvas he
+        had finished and wrote its title, size, medium and asking price beside it, sometimes
+        where it went. That documentary purpose is not incidental to what these sheets are —
+        it is what they are for, and it is why each entry is headed by the paintings it
+        records rather than by a title it does not have. The twenty-fifth, a graphite
+        landscape on the back of an envelope, records nothing but itself, and is the only
+        sheet in the box that carries a date.
+      </p>
+      <p className={styles.note}>
+        <strong>What these entries do not carry.</strong> None has a title — Sievan gave the
+        sheets none, and the archive does not supply one. None has been measured.
+        Twenty-four of the twenty-five are undated. Where a line is missing below, the
+        record is missing, not the page. A catalogue raisonné is normally ordered by year;
+        this one cannot be, so it is ordered by medium.
       </p>
 
-      <ol className={styles.sketchGrid}>
-        {sketches.map((o) => {
-          const cover = coverFor(o.id);
-          const named = attestationsForObject(o.id).length;
-          const href = `/archive/objects/${o.id}/`;
-          return (
-            <li key={o.id}>
-              {cover && (
-                <SheetTile
-                  sheet={cover}
-                  href={href}
-                  aspect="4 / 3"
-                  alt={`${objectLead(o)} — ${o.id}`}
-                  caption={
-                    <Link href={href} className={styles.sketchLead}>
-                      {objectLead(o)}
-                    </Link>
-                  }
-                  meta={
-                    named
-                      ? `${o.id} · ${named} painting${named === 1 ? '' : 's'} named`
-                      : `${o.id} · ${o.date_text ?? 'undated'}`
-                  }
-                />
-              )}
-            </li>
-          );
-        })}
+      {groups.map(({ medium, works }) => (
+        <div key={medium} className={styles.mediumGroup}>
+          <h3 className={styles.mediumName}>
+            {medium}
+            <span className={styles.mediumCount}>{works.length}</span>
+          </h3>
+          <ol className={styles.entryList}>
+            {works.map((o) => <Entry key={o.id} object={o} />)}
+          </ol>
+        </div>
+      ))}
+    </section>
+  );
+}
+
+/** The paintings, as they survive — in other people's catalogues. */
+function Reproductions() {
+  const plates = PLATES
+    .map((p) => ({ ...p, sheet: pageOf(p.objectId, p.page) }))
+    .filter((p): p is typeof p & { sheet: ScanPage } => !!p.sheet);
+  const periods = RETROSPECTIVE_PAGES.filter((p) => p.plateYears.length > 0);
+  const platesKnown = periods.reduce((n, p) => n + p.plateYears.length, 0);
+
+  return (
+    <section className={styles.section} id="paintings">
+      <h2>The paintings, as they survive in reproduction</h2>
+      <p className={styles.lede}>
+        No photograph of a Sievan painting exists in this archive. What survives instead is{' '}
+        {plates.length + platesKnown} reproductions, made by galleries who had the work in
+        front of them: {plates.length} are plates in their own right, and the other{' '}
+        {platesKnown} are printed inside the pages of a single retrospective catalogue,
+        where they cannot be lifted out of the page.
+      </p>
+
+      <ol className={styles.plateGrid}>
+        {plates.map((p) => (
+          <li key={`${p.objectId}-${p.page}`}>
+            <SheetTile
+              sheet={p.sheet}
+              href={`/archive/objects/${p.objectId}/`}
+              aspect="4 / 5"
+              alt={`${p.title}${p.year ? `, ${p.year}` : ''}, by Maurice Sievan`}
+              caption={
+                <>
+                  <em>{p.title}</em>{p.year ? `, ${p.year}` : ''}
+                  {p.detail ? `. ${p.detail}.` : ''}
+                </>
+              }
+              meta={`${p.source} · ${p.objectId}`}
+            />
+          </li>
+        ))}
       </ol>
       <p className={styles.note}>
-        Every sheet is transcribed verbatim on its record page, including the
-        annotations on the reverse.{' '}
-        <Link href="/works/attested/">
-          Read the {counts.attestedWorks} paintings they name
-        </Link>{' '}
-        — each beside the words that name it — or{' '}
-        <Link href="/archive/">see the box in full</Link>.
+        Titles, dates, media and sizes here are the galleries’ own, printed beneath the
+        plate — not the estate’s, and not verified against the canvas. The Salpeter
+        catalogue is undated on its face: the archive records it as 1957, its checklist
+        reads “April 16 — May 5” with <span className="tnum">1951</span> pencilled at the
+        foot, so no year is given for <em>Provincetown Harbor</em> until that is resolved.
+      </p>
+
+      <h3 className={styles.subhead}>
+        Inside the retrospective catalogue
+        <span className={styles.subheadCount}>{platesKnown}</span>
+      </h3>
+      <ol className={styles.periods}>
+        {periods.map((p) => (
+          <li key={p.page} className={styles.period}>
+            {/* The plate itself, not a link out of the tab: the full-size page image. */}
+            <a href={p.image} className={styles.periodMedia}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={p.image} alt={`Retrospective catalogue page ${p.page}: ${p.heading}`} />
+            </a>
+            <div className={styles.periodBody}>
+              <h4 className={styles.periodTitle}>{p.heading}</h4>
+              <p className={styles.plateYears}>
+                {p.plateYears.length} plate{p.plateYears.length === 1 ? '' : 's'} ·{' '}
+                <span className="tnum">{p.plateYears.join(', ')}</span>
+              </p>
+              {p.text && <p className={styles.periodText}>{p.text[0]}</p>}
+              {p.caption && <p className={styles.periodCaption}>{p.caption}</p>}
+            </div>
+          </li>
+        ))}
+      </ol>
+      <p className={styles.note}>
+        These are photographs of paintings reproduced on a photocopier inside a fifteen-page
+        typescript, so the colour is unreliable throughout — one page carries Sievan’s own
+        pasted note, <em>“This page is way off color.”</em> They cannot be separated into
+        individual images: each plate exists only as part of the page it is printed on, which
+        is exactly the gap this catalogue will close. Titles, media and dimensions for these
+        particular works are recorded nowhere in the archive; the years beside them are all
+        that is known. The document itself is published in full as{' '}
+        <Link href="/life/retrospective/">the retrospective catalogue</Link>.
       </p>
     </section>
   );
 }
 
-/** The CV, and where the gazetteer picks it up. */
-function WhereThePaintingsWent() {
+/** The 57 paintings the sheets name but the archive does not hold. */
+function AttestedSummary() {
   return (
     <section className={styles.section}>
-      <h2>Where the paintings went</h2>
-      <div className={styles.cvGrid}>
-        <div>
-          <h3 className={styles.subhead}>
-            One-man exhibitions
-            <span className={styles.subheadCount}>{CV.oneManExhibitions.length}</span>
-          </h3>
-          <ul className={styles.cvList}>
-            {CV.oneManExhibitions.map(([venue, years]) => (
-              <li key={`${venue}-${years}`}>
-                <span>{venue}</span>
-                <span className={styles.cvYears}>{years}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-        <div>
-          <h3 className={styles.subhead}>
-            Museum collections
-            <span className={styles.subheadCount}>{CV.museumCollections.length}</span>
-          </h3>
-          <ul className={styles.cvList}>
-            {CV.museumCollections.map((m) => (
-              <li key={m}><span>{m}</span></li>
-            ))}
-          </ul>
-          <h3 className={styles.subhead} style={{ marginTop: 'var(--s-5)' }}>
-            Awards
-            <span className={styles.subheadCount}>{CV.awards.length}</span>
-          </h3>
-          <ul className={styles.cvList}>
-            {CV.awards.map(([award, year]) => (
-              <li key={award}>
-                <span>{award}</span>
-                <span className={styles.cvYears}>{year}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
+      <h2>Paintings Sievan recorded, that the archive does not hold</h2>
+      <p className={styles.lede}>
+        Read across the drawings above, Sievan’s annotations name{' '}
+        <strong>{counts.attestedWorks} further paintings</strong> —{' '}
+        {counts.attestedWorksWithDimensions} of them with a size,{' '}
+        {counts.attestedWorksWithPrice} with a price — that exist nowhere else in the
+        record. Nobody has seen them. They are the strongest evidence the archive has
+        toward the catalogue of paintings, and they are not that catalogue: a sketch
+        records a painting, it does not establish one.
+      </p>
       <p className={styles.note}>
-        Transcribed from the CV page of the retrospective catalogue. It is Sievan’s own
-        account, not independently verified — the archive separately holds physical
-        evidence for {counts.exhibitions} exhibitions, which{' '}
-        <Link href="/life/#exhibitions">can be compared against this list</Link>. Where
-        the two records name the same place, and where his sheets name a town or a
-        gallery, that is gathered in the{' '}
+        <Link href="/works/attested/">
+          Read all {counts.attestedWorks}, each beside the words that name it
+        </Link>{' '}
+        — or see where they went, in the{' '}
         <Link href="/places/">gazetteer of {counts.places} places</Link>.
       </p>
     </section>
@@ -160,75 +252,58 @@ function WhereThePaintingsWent() {
 export default function WorksPage() {
   const paintings = allPaintings;
 
-  /*
-   * The browser is fully built; it simply has nothing to list yet. When
-   * seed_paintings.json fills, this page turns on with no code change — and the
-   * two sections below it stay, because the evidence does not stop mattering the
-   * day the catalogue opens.
-   */
-  if (paintings.length > 0) {
-    return (
-      <div className="page" style={{ paddingTop: 'var(--s-6)' }}>
-        <header style={{ marginBottom: 'var(--s-5)' }}>
-          <h1>Catalogue Raisonné</h1>
-          <p className="measure muted">
-            {paintings.length} works. Each one carries what is known about it — date,
-            medium, dimensions, where it is now — and links to everything the archive
-            holds about it.
-          </p>
-        </header>
-        <WorksBrowser paintings={paintings} />
-        <WorksOnPaper />
-        <WhereThePaintingsWent />
-      </div>
-    );
-  }
-
-  /*
-   * With no painting records, the honest thing is not a greyed-out filter rail —
-   * that dresses an absence up as a loading state. What the archive does hold is
-   * the retrospective catalogue's own account of the work, Sievan's own sheets
-   * naming fifty-seven paintings, and a CV of where the work went.
-   */
-  const periods = RETROSPECTIVE_PAGES.filter((p) => p.plateYears.length > 0);
-  const platesKnown = periods.reduce((n, p) => n + p.plateYears.length, 0);
-
   return (
     <div className="page" style={{ paddingTop: 'var(--s-6)' }}>
       <header className="measure" style={{ marginBottom: 'var(--s-6)' }}>
-        <p className="eyebrow">In preparation</p>
         <h1>Catalogue Raisonné</h1>
         <p className={styles.lede}>
-          The complete catalogue of Sievan’s paintings is being assembled now — the works
-          photographed, measured and dated one at a time. It is not open yet, and this
-          page does not pretend otherwise.
+          Everything the estate holds of the work itself, and everything the record names.{' '}
+          <strong>
+            {counts.worksOnPaperCatalogued} works on paper are catalogued here in full.
+          </strong>{' '}
+          The paintings are not: none has been photographed, measured or located. Every
+          image of a Sievan painting this archive contains is on this page — every one of
+          them printed inside somebody else’s catalogue.
         </p>
         <p className={styles.lede}>
-          What follows is everything the archive can say about the body of work without
-          it: five periods drawn from the retrospective catalogue with {platesKnown}{' '}
-          dated plates, {counts.attestedWorks} paintings named in Sievan’s own
-          handwriting, and the record of where the work went.
+          Where a field is empty below, the record is empty. Nothing here is estimated.
         </p>
       </header>
 
-      {/* ------------------------------------------------------------ the catalogue */}
       {/*
-        Moved up from last to first. This is what the page is named for; burying it
-        under three sections of secondary material was defensible when there was
-        nothing else to show, and stops being so now that there is.
+        The browser is fully built and turns on with no code change when
+        seed_paintings.json has rows — but see the note on the Pending panel first:
+        filling that table also requires flipping app/works/[paintingId]/ from
+        generated-and-gitignored to committed, or the Vercel deploy 404s.
       */}
-      <section className={styles.section}>
-        <h2>The entries themselves</h2>
+      {paintings.length > 0 && (
+        <section className={styles.section}>
+          <h2>Paintings</h2>
+          <p className={styles.lede}>
+            {paintings.length} works. Each carries what is known about it — date, medium,
+            dimensions, where it is now — and links to everything the archive holds about it.
+          </p>
+          <WorksBrowser paintings={paintings} />
+        </section>
+      )}
 
+      <Reproductions />
+      <WorksOnPaper />
+      <AttestedSummary />
+
+      <section className={styles.section}>
+        <h2>The catalogue of paintings</h2>
         {/*
-          The shape of a record, not an example of one. Naming the fields tells a
-          visitor exactly what the catalogue will answer without inventing a
-          painting to demonstrate it — and in a catalogue raisonné a fabricated
-          entry is indistinguishable from provenance.
+          Do NOT fill seed_paintings.json to "turn the catalogue on".
+          app/works/[paintingId]/ is written by build-data.mjs and gitignored, and
+          build-data.mjs exits early on Vercel because DataModel/ is absent — so the
+          route would never be written there and every /works/MS-PA-…/ link would
+          404, failing check-export. Flipping it to committed, as
+          app/places/[placeId]/ already is, is a separate change.
         */}
         <Pending
-          eyebrow="Awaiting photography"
-          title="No works are catalogued yet."
+          eyebrow="The gap this catalogue still has"
+          title="Not one painting has been photographed, measured or located."
           fields={[
             { name: 'Title', note: 'As the estate records it; “Untitled” where there is none.' },
             { name: 'Date', note: 'Year, or the range the evidence supports.' },
@@ -247,70 +322,19 @@ export default function WorksPage() {
           }
         >
           <p>
-            The paintings are being photographed, measured and dated now. Until that
-            work arrives this page can describe the body of work only at second hand.
+            The works on paper above are catalogued. The paintings are not, and the reason is
+            simple: nobody has photographed them. The reproductions above are all the
+            images this archive holds, and a reproduction is not a record — it
+            gives no provenance, no condition, no present whereabouts, and in thirteen cases
+            no title.
           </p>
           <p>
-            The {counts.attestedWorks} paintings Sievan recorded on his own sheets are
-            listed separately, as what they are:{' '}
-            <Link href="/works/attested/">evidence toward this catalogue, not entries
-            in it</Link>. Nobody has seen those paintings; what survives is the artist
-            writing down what he had made and what he wanted for it.
-          </p>
-          <p>
-            When the entries land, each one will also carry what was written and said about
-            it: the press notices, the exhibitions it hung in, and the passages of interview
-            that discuss it. Those connections are already built and waiting on rows.
+            When the entries land, each will also carry what was written and said about it:
+            the press notices, the exhibitions it hung in, and the passages of interview that
+            discuss it. Those connections are already built and waiting on rows.
           </p>
         </Pending>
       </section>
-
-      {/* ------------------------------------------------------------ the periods */}
-      <section className={styles.section}>
-        <h2>Five periods</h2>
-        <ol className={styles.periods}>
-          {periods.map((p) => (
-            <li key={p.page} className={styles.period}>
-              <Link href={`/life/retrospective/#page-${p.page}`} className={styles.periodMedia}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={p.image} alt={`Retrospective catalogue page ${p.page}: ${p.heading}`} />
-              </Link>
-              <div className={styles.periodBody}>
-                <h3 className={styles.periodTitle}>{p.heading}</h3>
-                <p className={styles.plateYears}>
-                  {p.plateYears.length} plate{p.plateYears.length === 1 ? '' : 's'} ·{' '}
-                  <span className="tnum">{p.plateYears.join(', ')}</span>
-                </p>
-                {p.text && <p className={styles.periodText}>{p.text[0]}</p>}
-                {p.caption && <p className={styles.periodCaption}>{p.caption}</p>}
-              </div>
-            </li>
-          ))}
-        </ol>
-        <p className={styles.note}>
-          The plates are reproduced inside the catalogue’s scanned pages, not as separate
-          images — which is exactly the gap the catalogue raisonné will close. Titles,
-          media and dimensions for these particular works are recorded nowhere in the
-          archive.{' '}
-          <Link href="/life/retrospective/">Read the catalogue as scanned</Link>.
-        </p>
-      </section>
-
-      <WorksOnPaper />
-      <WhereThePaintingsWent />
-
-      <div className={styles.meanwhile}>
-        <p className="ui muted">
-          In the meantime the archive documents{' '}
-          <Link href="/exhibitions/">{counts.exhibitions} exhibitions</Link>,{' '}
-          <Link href="/archive/press/">{counts.newsArticles} press notices</Link>, and{' '}
-          <Link href="/life/interviews/">
-            {counts.transcriptWords.toLocaleString()} words
-          </Link>{' '}
-          of recollection from the people who knew him.
-        </p>
-        <PullQuote quote={getQuote('solman-rehabilitation')} showSource />
-      </div>
     </div>
   );
 }

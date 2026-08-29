@@ -81,6 +81,21 @@ export interface ArchiveObject {
   /** The count the description asserts ("four newspaper clippings"), used to verify the split. */
   stated_item_count: number | null;
   article_ids: string[];
+  /**
+   * Present only on rows that are themselves works of art. Its presence is what
+   * promotes an archive object into a catalogue entry — see lib/data.ts
+   * `catalogueWorksOnPaper`. No dimensions: none of these has been measured.
+   */
+  artwork?: Artwork | null;
+}
+
+export interface Artwork {
+  medium_stated: string;
+  support: string;
+  /** Verbatim from raw_title_description; build-data.mjs verifies it occurs there. */
+  signed: string | null;
+  /** Only where one entry is more than one sheet. */
+  sheet_count: number | null;
 }
 
 export interface NewsArticle {
@@ -404,6 +419,9 @@ export interface Counts {
   attestedWorksWithPrice: number;
   /** How many box-2 sheets carry at least one attestation. */
   sheetsCarryingAttestations: number;
+  /** Works the estate physically holds. Never added to `paintings`. */
+  worksOnPaperCatalogued: number;
+  worksOnPaperSheets: number;
   places: number;
   scholarship: number;
   objectsWithScans: number;

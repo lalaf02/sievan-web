@@ -106,6 +106,11 @@ export default function Home() {
               </li>
             ))}
           </ul>
+          {/* The homepage cited this list without ever saying where it came from. */}
+          <p className={styles.tileSource}>
+            As listed in Sievan’s own retrospective CV.{' '}
+            <Link href="/life/">See the record</Link>.
+          </p>
         </Tile>
 
         <Tile col={3}>
@@ -223,18 +228,19 @@ export default function Home() {
                 <span className={styles.doorTitle}>Life and Work</span>
                 <span className={styles.doorText}>
                   Exhibitions between {span}, the people who knew him, and{' '}
-                  {counts.transcriptWords.toLocaleString()} words of recorded testimony,
-                  placed on one timeline.
+                  {counts.transcriptWords.toLocaleString()} words of recorded testimony —
+                  the reception of the work, placed on one timeline.
                 </span>
               </Link>
             </li>
             <li>
               <Link href="/works/" className={styles.door}>
-                <span className={styles.doorNum}>5</span>
+                <span className={styles.doorNum}>{counts.worksOnPaperCatalogued}</span>
                 <span className={styles.doorTitle}>Catalogue Raisonné</span>
                 <span className={styles.doorText}>
-                  Five periods, from the Greenwich Village rooftops of the 1930s to the
-                  late miniatures. Being catalogued now.
+                  Works on paper in Sievan’s own hand, catalogued in full; every surviving
+                  reproduction of the paintings; and {counts.attestedWorks} more canvases he
+                  named himself. No painting has been photographed yet, and the page says so.
                 </span>
               </Link>
             </li>
