@@ -32,6 +32,9 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+# ...but the template is documentation: it names the two variables the build cannot
+# start without, and where to set them. It carries no secret.
+!.env.example
 
 # vercel
 .vercel
@@ -60,3 +63,8 @@ next-env.d.ts
 # them in silence, and they inflate check-export's page count when they land in out/.
 # Deliberately NOT ignored: an ignore rule hides them, and hidden is how thirteen of
 # them survived. Let them show up untracked, then delete them.
+
+# scripts/export-seeds.mjs writes the whole archive here as seed-shaped JSON — the copy
+# that needs no Supabase to read. Keep the ones that matter somewhere durable; they are
+# point-in-time dumps, not source, so they do not belong in git.
+/snapshot/

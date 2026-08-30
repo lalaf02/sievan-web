@@ -1,0 +1,1485 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sievan-archive.local/data_model.schema.json",
+  "title": "Maurice Sievan Time Capsule - Data Model",
+  "description": "A full dataset. In the seed/ folder each entity is stored in its own file; this object describes them assembled together.",
+  "$defs": {
+    "partialDate": {
+      "description": "ISO-8601 date truncated to whatever precision the source supports: YYYY, YYYY-MM, or YYYY-MM-DD.",
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[0-9]{4}(-[0-9]{2}(-[0-9]{2})?)?$"
+    },
+    "reviewStatus": {
+      "description": "Curatorial review state. Records produced by heuristic parsing must never ship as reviewed_confirmed.",
+      "enum": [
+        "unreviewed",
+        "needs_review",
+        "reviewed_confirmed",
+        "reviewed_corrected"
+      ]
+    },
+    "Collection": {
+      "type": "object",
+      "description": "A physical archive box or asset grouping. MS-CS-00N are the paper boxes, one per tab of the Archive Master Sheet; MS-VA-001 is the video archive.",
+      "required": [
+        "id",
+        "label_raw",
+        "material_type"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^MS-(CS|VA)-[0-9]{3}$"
+        },
+        "label_raw": {
+          "type": "string",
+          "description": "Verbatim box label or folder name."
+        },
+        "material_type": {
+          "enum": [
+            "paper_archive",
+            "video_archive",
+            "mixed"
+          ]
+        },
+        "location": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "ArchiveObject": {
+      "type": "object",
+      "description": "One catalogued row of the Archive Master Sheet - a single physical item, which may bundle several clippings (box 1) or be a single drawing (box 2). collection_id names the box it sits in.",
+      "required": [
+        "id",
+        "collection_id",
+        "raw_title_description",
+        "object_type",
+        "scan_files"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^MS-AR-[0-9]{5}$"
+        },
+        "collection_id": {
+          "type": "string"
+        },
+        "seq": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "folder_no": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "String, not integer: the manifest uses compound values such as \"4,5\"."
+        },
+        "raw_title_description": {
+          "type": "string",
+          "description": "Verbatim Title/Description cell including newlines. Source of truth for any re-parse."
+        },
+        "date_text": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "date_earliest": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "date_latest": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "copies_count": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "medium": {
+          "enum": [
+            "photocopy",
+            "original",
+            "other"
+          ]
+        },
+        "medium_raw": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "condition": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "digital_record_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Column exists in the Archive Master Sheet but is unpopulated on every row of every box; retained for future DAMS integration."
+        },
+        "scan_files": {
+          "type": "array",
+          "description": "Zero-to-many: MS-AR-00003 has two scans (I/II); box-1 rows 31-50 have none on disk, and MS-AR-00076 is a retired folder the curator recorded as deliberately not scanned.",
+          "items": {
+            "type": "object",
+            "required": [
+              "filename"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "filename": {
+                "type": "string"
+              },
+              "part_label": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            }
+          }
+        },
+        "object_type": {
+          "enum": [
+            "news_clipping_bundle",
+            "single_article",
+            "exhibition_catalog",
+            "exhibition_poster",
+            "promotional_material",
+            "book",
+            "work_on_paper",
+            "other"
+          ]
+        },
+        "stated_item_count": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "description": "The count asserted by the description text (\"four newspaper clippings\"), used to verify the split."
+        },
+        "article_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "artwork": {
+          "description": "Present ONLY on rows that are themselves works of art rather than documents about them - box 2's drawings today, box 3's when it arrives. Its presence is what promotes a row from an archive object into a catalogue entry. Hand-curated by reading the sheet; raw_title_description stays the source of truth, and build-data.mjs enforces that `signed` actually occurs in it. Deliberately carries no dimensions: none of these has been measured, and a field that is null everywhere invites a guess.",
+          "type": ["object", "null"],
+          "additionalProperties": false,
+          "required": ["medium_stated", "support"],
+          "properties": {
+            "medium_stated": {
+              "description": "As the description states it: \"Graphite\", \"Graphite and coloured pencil\", \"Ink and watercolour\".",
+              "type": "string"
+            },
+            "support": {
+              "description": "What it is drawn on: \"Paper\", \"An envelope\", \"A fragment of an envelope\".",
+              "type": "string"
+            },
+            "signed": {
+              "description": "Verbatim from raw_title_description, position included. Null where the sheet carries no signature note.",
+              "type": ["string", "null"]
+            },
+            "sheet_count": {
+              "description": "Only where one entry is more than one sheet - 4 on MS-AR-00065, 2 on MS-AR-00067. Null otherwise.",
+              "type": ["integer", "null"]
+            }
+          }
+        }
+      }
+    },
+    "NewsArticle": {
+      "type": "object",
+      "description": "One individual clipping split out of an ArchiveObject. Fields other than raw_source_text are heuristically parsed - see parse_confidence.",
+      "required": [
+        "id",
+        "archive_object_id",
+        "raw_source_text",
+        "parse_confidence",
+        "review_status"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^MS-AR-[0-9]{5}-[A-Z]$"
+        },
+        "archive_object_id": {
+          "type": "string",
+          "pattern": "^MS-AR-[0-9]{5}$"
+        },
+        "raw_source_text": {
+          "type": "string",
+          "description": "Verbatim clipping line. Never discarded, so any parse can be redone or corrected."
+        },
+        "publication_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "publication_raw": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "headline": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "author_person_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Null for initials-only bylines (e.g. \"P.B.R.\") - those stay in author_raw until a human attributes them."
+        },
+        "author_raw": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "date_text": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "date_normalized": {
+          "$ref": "#/$defs/partialDate"
+        },
+        "date_earliest": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "date_latest": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "date_uncertain": {
+          "type": "boolean",
+          "description": "True when the source itself hedges the date, e.g. \"February (1941?)\"."
+        },
+        "exhibition_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Left null unless a human confirms which show the review covers."
+        },
+        "parse_confidence": {
+          "enum": [
+            "high",
+            "medium",
+            "low"
+          ]
+        },
+        "continuation_joined": {
+          "type": "boolean",
+          "description": "True when the item was assembled across a line break, which may have merged a byline into the headline."
+        },
+        "review_status": {
+          "$ref": "#/$defs/reviewStatus"
+        },
+        "reviewer": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "reviewed_at": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "Publication": {
+      "type": "object",
+      "description": "A newspaper or magazine, deduplicated across clippings.",
+      "required": [
+        "id",
+        "name"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "aliases": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "type": {
+          "enum": [
+            "newspaper",
+            "magazine",
+            "other",
+            "unknown"
+          ]
+        }
+      }
+    },
+    "Person": {
+      "type": "object",
+      "description": "Anyone who creates or is the subject of commentary: critics, journalists, interviewees, the artist himself.",
+      "required": [
+        "id",
+        "name",
+        "roles"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Lowercase-hyphenated slug, e.g. dore-ashton."
+        },
+        "name": {
+          "type": "string"
+        },
+        "aliases": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "roles": {
+          "type": "array",
+          "description": "Multi-valued: a person can be both an interview subject and a cited critic.",
+          "items": {
+            "enum": [
+              "critic",
+              "journalist",
+              "gallery_owner",
+              "curator",
+              "artist",
+              "interview_subject",
+              "historical_figure",
+              "family",
+              "other"
+            ]
+          }
+        },
+        "notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "Exhibition": {
+      "type": "object",
+      "description": "A show. Populated only where a catalog, poster or promotional item names the venue outright; not inferred from reviews.",
+      "required": [
+        "id",
+        "gallery_or_venue",
+        "confidence"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "gallery_or_venue": {
+          "type": "string"
+        },
+        "venue_city": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "venue_place_id": {
+          "description": "Place.id for gallery_or_venue. Additive and nullable: venue_city stays exactly as the source wrote it, and this only says which gazetteer entry it corresponds to.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "start_date": {
+          "$ref": "#/$defs/partialDate"
+        },
+        "end_date": {
+          "$ref": "#/$defs/partialDate"
+        },
+        "date_earliest": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "date_latest": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "exhibition_type": {
+          "enum": [
+            "solo",
+            "group",
+            "unknown"
+          ]
+        },
+        "confidence": {
+          "enum": [
+            "confirmed",
+            "inferred"
+          ]
+        },
+        "source_archive_object_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "source_article_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "Painting": {
+      "type": "object",
+      "description": "The hub of the model. Carries no relationship arrays - every link runs through a join entity so the kind of relationship is never lost. Currently zero rows: no painting catalog exists yet.",
+      "required": [
+        "id",
+        "catalog_status"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^MS-PA-[0-9]{5}$"
+        },
+        "title": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "date_text": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "date_earliest": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "date_latest": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "medium": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "dimensions": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "current_location": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "image_ref": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "catalog_status": {
+          "enum": [
+            "uncatalogued",
+            "catalogued",
+            "verified"
+          ]
+        },
+        "notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "AttestedWork": {
+      "type": "object",
+      "description": "A painting that a source in the archive NAMES but the archive does not hold. Box 2 is Sievan's own sketches of paintings he had finished, annotated with title, size, medium, price and sometimes the buyer - around fifty works recorded in his handwriting and nowhere else. This is deliberately NOT a Painting: a drawing records that a work existed and what Sievan called it, which is not the same as establishing the work, its whereabouts, or that the title stuck. Every row carries the verbatim words that support it and the id of the source they come from, so any claim here can be checked against a scan in one click. Curated by hand, one sheet at a time; never generated by a parser.",
+      "required": [
+        "id",
+        "source_type",
+        "source_id",
+        "quote",
+        "review_status"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^MS-AW-[0-9]{5}$"
+        },
+        "source_type": {
+          "description": "Polymorphic, like Commentary. Every row today is archive_object (box 2), but a press notice or an interview naming a work is the same kind of claim and must not need a schema change.",
+          "enum": [
+            "archive_object",
+            "news_article",
+            "video_asset"
+          ]
+        },
+        "source_id": {
+          "description": "ArchiveObject.id / NewsArticle.id / VideoAsset.id, per source_type.",
+          "type": "string"
+        },
+        "source_page": {
+          "description": "1-indexed into the source object's rasterised sheets, so the record can link the exact image. Null where the sheet is unscanned or the claim spans pages.",
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "sheet_position": {
+          "description": "Where on the sheet the claim sits, in the transcription's own words: \"Top left\", \"Verso\", \"Page #2\". Makes the quote findable by eye on the scan.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "quote": {
+          "description": "VERBATIM, and gated: scripts/check-quotes.mjs fails the build unless this string occurs inside the source's own recorded text. Nothing here may claim words the source does not contain.",
+          "type": "string",
+          "minLength": 4
+        },
+        "title_stated": {
+          "description": "The title exactly as the source writes it, including Sievan's spelling and casing (\"SOUTHAMPTON LANDSCAPE\", \"In my Naborhood\"). Null where the source gives no title. Never normalise; never invent.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "artist_number": {
+          "description": "Sievan's own inventory number where he wrote one: \"925\", \"#180\", circled \"118\". String, not integer - some are circled, some prefixed. The best available handle for matching a surviving canvas to this record.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "dimensions_stated": {
+          "description": "Verbatim, unparsed: \"20 x 24\", \"10 3/4 x 12\". Deliberately NOT split into height and width. Sievan wrote \"measure Hight first\" to himself on MS-AR-00075, which is a note on one sheet and not a convention established across the box - naming the first figure 'height' everywhere would be an unlabelled inference.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "medium_stated": {
+          "description": "Verbatim: \"oil on canvas board\", \"water color\", \"PASTEL\", \"gouache\".",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "date_text": {
+          "description": "Verbatim: \"painted (1955)\", \"circa 1946 - 47\", \"Apr 21 1970\".",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "date_earliest": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "date_latest": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "date_uncertain": {
+          "description": "True when the source itself hedges, as \"circa 1946 - 47\" does.",
+          "type": "boolean"
+        },
+        "date_basis": {
+          "description": "Required (enforced in build-data.mjs) whenever date_earliest is set. Only stated_on_source may reach the chronology; an inferred year is shown on the record, labelled, but never plotted as if it were evidence.",
+          "enum": [
+            "stated_on_source",
+            "inferred",
+            null
+          ]
+        },
+        "price_stated": {
+          "description": "Verbatim, including the hedge: \"$250\", \"350\", \"approx $150\", \"quoted 350\". What he thought a canvas was worth, and when, is a real research signal.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "price_usd": {
+          "description": "The curator's numeric reading, null wherever the source is hedged or gives a range. The raw string is always kept, so the parse can be redone.",
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "dispositions": {
+          "description": "What the source says happened to the work. Multi-valued: MS-AR-00058 is both exhibited and donated. An EMPTY array means the source says nothing - there is deliberately no 'unknown' member, because a sentinel would be rendered as a fact.",
+          "type": "array",
+          "items": {
+            "enum": [
+              "sold",
+              "consigned",
+              "offered",
+              "returned",
+              "retained",
+              "exhibited",
+              "donated"
+            ]
+          }
+        },
+        "counterparty_raw": {
+          "description": "The other party, in the source's own words: \"ORR\", \"Irving Cohn\", \"Kassner\", \"Zitners House\", \"ETHELS\". Many are a surname or a first name and cannot be identified; that is the record.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "counterparty_person_id": {
+          "description": "Person.id, only where a human has identified them. Null on every row today. The retrospective CV's privateCollections lists 'I. David Orr' and 'Charles Zitner', which is a lead, not an identification.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "place_refs": {
+          "description": "How this work touches geography. Multi-valued and role-typed, because a Woodstock landscape shown at Kay's in Woodstock is two different relations to the same place.",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "place_id",
+              "role"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "place_id": {
+                "type": "string"
+              },
+              "role": {
+                "description": "depicted = the title names it as subject. made_at = the source says it was painted there. shown_at = exhibited or offered there. held_at = it entered a collection there.",
+                "enum": [
+                  "depicted",
+                  "made_at",
+                  "shown_at",
+                  "held_at"
+                ]
+              },
+              "certain": {
+                "description": "False where the source itself hedges - MS-AR-00068 writes \"croton?\". Rendered as the doubt it is.",
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        "painting_id": {
+          "description": "The bridge to the catalogue, pointing ONE WAY only: an attestation may name a catalogued Painting; a Painting never lists its attestations, because Painting carries no relationship arrays. Null on every row until a curator matches a photographed canvas to a sheet. Setting it does not merge the two - the attestation stays visible as the evidence for the entry.",
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^MS-PA-[0-9]{5}$"
+        },
+        "identification_basis": {
+          "description": "Required (enforced in build-data.mjs) whenever painting_id is set. What made the match, so the match can be argued with.",
+          "enum": [
+            "title_and_dimensions",
+            "artist_number",
+            "photograph",
+            "curator_judgement",
+            null
+          ]
+        },
+        "review_status": {
+          "$ref": "#/$defs/reviewStatus"
+        },
+        "notes": {
+          "description": "The curator's caveat. Where the same title appears on two sheets, say so here - do not merge the rows.",
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "Place": {
+      "type": "object",
+      "description": "A gazetteer entry. Places exist here ONLY because something in the archive points at one - check-data.mjs fails on an orphan - so this is a record of where the evidence goes, not a directory of geography. No coordinates: the archive has no map, adding no dependencies is a hard rule, and a lat/long would assert a precision that \"croton?\" does not support.",
+      "required": [
+        "id",
+        "name",
+        "kind"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "description": "A slug, not an MS-XX-##### id, matching how the model already treats authority terms it normalises (Person, Publication, Exhibition) as against things the archive holds.",
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+        },
+        "name": {
+          "description": "The standard modern form, e.g. \"Southampton, New York\". The archive's own spellings live in aliases and are always shown alongside.",
+          "type": "string"
+        },
+        "kind": {
+          "description": "venue and institution are places too - a gallery sits inside a city, and parent_id says so. Splitting them into a second entity would break the one question the gazetteer exists to answer: everything the archive records about this spot.",
+          "enum": [
+            "settlement",
+            "neighbourhood",
+            "region",
+            "landmark",
+            "waterway",
+            "venue",
+            "institution",
+            "country"
+          ]
+        },
+        "parent_id": {
+          "description": "The containing place. Kay's -> Woodstock; Passedoit Gallery -> New York. Self-reference and cycles are rejected by check-data.mjs.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "region": {
+          "description": "Grouping label for the index: \"New York\", \"New England\", \"France\".",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "aliases": {
+          "description": "Every spelling that occurs in a source, verbatim: \"SOUTHHAMPTON\", \"ProvenceTown\". These make a place findable in search, and showing them is how the site declares that it normalised something.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "VideoAsset": {
+      "type": "object",
+      "description": "An interview or process-footage reel from the video archive.",
+      "required": [
+        "id",
+        "collection_id",
+        "subject_type",
+        "title",
+        "media_files",
+        "review_status"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^MS-VI-[0-9]{5}$"
+        },
+        "collection_id": {
+          "type": "string"
+        },
+        "subject_type": {
+          "enum": [
+            "interview",
+            "process_footage",
+            "other"
+          ]
+        },
+        "subject_person_ids": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "title": {
+          "type": "string"
+        },
+        "physical_tape_no": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Tape number from the filename (#010, #028). Kept separate from id because the numbering is non-contiguous - a fuller tape log likely exists off-disk."
+        },
+        "interview_date": {
+          "$ref": "#/$defs/partialDate"
+        },
+        "date_text": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "date_earliest": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "date_latest": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "location": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "media_files": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "filename",
+              "variant",
+              "path"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "filename": {
+                "type": "string"
+              },
+              "variant": {
+                "enum": [
+                  "raw",
+                  "edited",
+                  "subtitled"
+                ]
+              },
+              "path": {
+                "type": "string",
+                "description": "Relative to the project root."
+              },
+              "size_bytes": {
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              }
+            }
+          }
+        },
+        "transcript_source_file": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "transcript_text_file": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Path to extracted plain text. Kept out-of-line: ~24k words total would otherwise swamp the seed file."
+        },
+        "transcript_word_count": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "transcript_page_count": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "duration_seconds": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "description": "Null for all assets: no ffprobe/mediainfo available to measure it."
+        },
+        "topics": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "review_status": {
+          "enum": [
+            "catalogued_only",
+            "transcribed",
+            "content_tagged"
+          ]
+        },
+        "notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "HistoricalEvent": {
+      "type": "object",
+      "description": "An art-world, world-history or biographical event used to situate a painting in its time. Currently zero rows.",
+      "required": [
+        "id",
+        "title",
+        "category"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^MS-HE-[0-9]{5}$"
+        },
+        "title": {
+          "type": "string"
+        },
+        "date_text": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "date_earliest": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "date_latest": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "category": {
+          "enum": [
+            "art_world",
+            "world_history",
+            "personal_biography",
+            "other"
+          ]
+        },
+        "description": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "source_refs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "Commentary": {
+      "type": "object",
+      "description": "What someone said, and what they said it about. The connective layer between every source and the Painting hub. Scope is explicit because commentary is often about a group of works or about Sievan himself rather than one catalogued painting.",
+      "required": [
+        "id",
+        "source_type",
+        "source_id",
+        "subject_scope",
+        "review_status"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^MS-CM-[0-9]{5}$"
+        },
+        "source_type": {
+          "enum": [
+            "news_article",
+            "video_asset"
+          ]
+        },
+        "source_id": {
+          "type": "string",
+          "description": "Polymorphic FK: a NewsArticle.id or VideoAsset.id per source_type."
+        },
+        "commentator_person_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "subject_scope": {
+          "enum": [
+            "specific_painting",
+            "painting_group",
+            "artist_biographical",
+            "general_context",
+            "other"
+          ],
+          "description": "Which of these a remark is about. Prevents group or biographical commentary being misattributed to a single work."
+        },
+        "painting_ids": {
+          "type": "array",
+          "description": "Empty unless the work(s) resolve to catalogued Paintings.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "subject_person_id": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Used when subject_scope is artist_biographical - usually maurice-sievan."
+        },
+        "subject_description_raw": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Free text for an unresolved reference such as \"seven canvasses\", so the content survives while it is un-linkable."
+        },
+        "commentary_type": {
+          "enum": [
+            "review",
+            "critique",
+            "biographical_anecdote",
+            "technical_note",
+            "historical_context",
+            "influence_note",
+            "other"
+          ]
+        },
+        "excerpt": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "stance": {
+          "enum": [
+            "positive",
+            "negative",
+            "neutral",
+            "mixed",
+            null
+          ]
+        },
+        "confidence": {
+          "enum": [
+            "high",
+            "medium",
+            "low"
+          ]
+        },
+        "review_status": {
+          "$ref": "#/$defs/reviewStatus"
+        },
+        "notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "CommentaryRelation": {
+      "type": "object",
+      "description": "How two pieces of commentary interact - one critic corroborating another, two reviews contradicting each other, an interview elaborating on a passing mention.",
+      "required": [
+        "id",
+        "commentary_a_id",
+        "commentary_b_id",
+        "relation_type"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "commentary_a_id": {
+          "type": "string"
+        },
+        "commentary_b_id": {
+          "type": "string"
+        },
+        "relation_type": {
+          "enum": [
+            "corroborates",
+            "contradicts",
+            "responds_to",
+            "elaborates_on",
+            "references_same_event",
+            "other"
+          ]
+        },
+        "notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "PaintingHistoricalContext": {
+      "type": "object",
+      "description": "Links a painting to an event in either direction: how the era shaped the work, or how the work went on to affect society.",
+      "required": [
+        "id",
+        "painting_id",
+        "historical_event_id",
+        "direction",
+        "confidence"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "painting_id": {
+          "type": "string"
+        },
+        "historical_event_id": {
+          "type": "string"
+        },
+        "direction": {
+          "enum": [
+            "event_shaped_painting",
+            "painting_shaped_event_or_society"
+          ]
+        },
+        "description": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The specific causal claim. Curatorial and interpretive - always written by a human, never inferred silently."
+        },
+        "source_refs": {
+          "type": "array",
+          "description": "Commentary ids backing the claim.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "confidence": {
+          "enum": [
+            "documented",
+            "inferred",
+            "speculative"
+          ]
+        },
+        "notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "PaintingExhibition": {
+      "type": "object",
+      "description": "Factual \"this work hung in that show\" link, kept separate from Commentary because it is a fact rather than an opinion.",
+      "required": [
+        "id",
+        "painting_id",
+        "exhibition_id"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "painting_id": {
+          "type": "string"
+        },
+        "exhibition_id": {
+          "type": "string"
+        },
+        "confidence": {
+          "enum": [
+            "confirmed",
+            "inferred"
+          ]
+        },
+        "notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "Scholarship": {
+      "type": "object",
+      "description": "Secondary literature: published writing about Sievan or his circle. Distinct from NewsArticle, which is the contemporaneous press record held in the archive box.",
+      "required": [
+        "id",
+        "citation",
+        "kind"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^MS-SC-[0-9]{5}$"
+        },
+        "citation": {
+          "type": "string",
+          "description": "Full formatted citation as it should be displayed."
+        },
+        "kind": {
+          "enum": [
+            "book",
+            "chapter",
+            "journal_article",
+            "thesis",
+            "catalogue_essay",
+            "review",
+            "web",
+            "other"
+          ]
+        },
+        "authors": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "title": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "container": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Journal, book or catalogue the piece appears in."
+        },
+        "year": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "url": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "doi": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "about": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Person ids the work is principally about."
+        },
+        "notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    }
+  },
+  "type": "object",
+  "properties": {
+    "collections": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Collection"
+      }
+    },
+    "archive_objects": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/ArchiveObject"
+      }
+    },
+    "news_articles": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/NewsArticle"
+      }
+    },
+    "publications": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Publication"
+      }
+    },
+    "persons": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Person"
+      }
+    },
+    "exhibitions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Exhibition"
+      }
+    },
+    "paintings": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Painting"
+      }
+    },
+    "attested_works": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/AttestedWork"
+      }
+    },
+    "places": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Place"
+      }
+    },
+    "video_assets": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/VideoAsset"
+      }
+    },
+    "historical_events": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/HistoricalEvent"
+      }
+    },
+    "commentary": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Commentary"
+      }
+    },
+    "commentary_relations": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/CommentaryRelation"
+      }
+    },
+    "painting_historical_context": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/PaintingHistoricalContext"
+      }
+    },
+    "painting_exhibitions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/PaintingExhibition"
+      }
+    }
+  }
+}

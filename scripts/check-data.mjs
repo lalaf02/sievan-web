@@ -12,13 +12,26 @@ import { fileURLToPath } from 'node:url';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const WEB = join(HERE, '..');
-// DataModel/, the MS-CS-00N/ box directories and Video Archive/ live inside the repo,
-// not beside it.
+// Video Archive/ lives inside the repo, not beside it.
 const ROOT = WEB;
-const DM = join(ROOT, 'DataModel');
 
-// On Vercel (no DataModel), skip file existence checks - scans are in public/scans/
-const SKIP_FILE_CHECKS = !existsSync(DM);
+/*
+ * There used to be a single SKIP_FILE_CHECKS = !existsSync(DataModel), and it was a trap.
+ * When DataModel/ was absent this gate printed
+ *
+ *     check-data: OK - all references resolve, all scan/media/transcript files present
+ *
+ * having checked no files at all. Once the archive moved to Supabase and DataModel/ was
+ * deleted, that flag would have been true forever: a permanently green gate over nothing.
+ *
+ * So the checks are split by what each file actually is.
+ *   · Scans, page images and clips are DOWNLOADED by build-data.mjs into public/, on a
+ *     laptop and on Vercel alike. They are checked unconditionally — the site renders them.
+ *   · The video masters are 25 GB, live only on the curator's machine, and are not part of
+ *     anything deployable. media_files[].path RECORDS where a master is; it is not a link
+ *     the site follows. Check it only where the masters actually are.
+ */
+const LOCAL_MASTERS = existsSync(join(ROOT, 'Video Archive'));
 
 const bundlePath = join(WEB, 'data', 'archive.generated.json');
 if (!existsSync(bundlePath)) {
@@ -65,13 +78,11 @@ for (const o of d.archiveObjects) {
     need(!art || art.archive_object_id === o.id, `${o.id}: ${aid} does not back-reference it`);
   }
   for (const s of o.scan_files ?? []) {
-    // One scan directory per physical box, named for the collection — MS-CS-001/,
-    // MS-CS-002/, ... Same resolution as build-data.mjs.
-    need(SKIP_FILE_CHECKS || existsSync(join(ROOT, o.collection_id, s.filename)),
-      `${o.id}: scan ${s.filename} missing from ${o.collection_id}/`);
-    // The rasterised pages are committed to public/, so unlike the source PDF they
-    // exist on Vercel too — check them unconditionally. This is the one file check
-    // in here that is not disabled by a missing DataModel/.
+    // The PDF is downloaded out of Supabase Storage into public/scans/ by build-data.mjs,
+    // so it is present wherever the build ran and this is checked everywhere. It used to
+    // be read from the box directory MS-CS-00N/, which existed on exactly one machine.
+    need(existsSync(join(WEB, 'public', 'scans', s.filename)),
+      `${o.id}: scan ${s.filename} missing from public/scans/`);
     for (const pg of s.pages ?? []) {
       need(existsSync(join(WEB, 'public', pg.page)), `${o.id}: page image ${pg.page} missing on disk`);
       need(existsSync(join(WEB, 'public', pg.thumb)), `${o.id}: thumb ${pg.thumb} missing on disk`);
@@ -85,10 +96,18 @@ for (const v of d.videoAssets) {
     need(PE.has(pid), `${v.id}: subject_person_ids -> ${pid} not found`);
   }
   for (const m of v.media_files ?? []) {
-    need(SKIP_FILE_CHECKS || existsSync(join(ROOT, m.path)), `${v.id}: media ${m.path} missing on disk`);
+    need(!LOCAL_MASTERS || existsSync(join(ROOT, m.path)), `${v.id}: media ${m.path} missing on disk`);
   }
-  for (const key of ['transcript_source_file', 'transcript_text_file']) {
-    if (v[key]) need(SKIP_FILE_CHECKS || existsSync(join(ROOT, v[key])), `${v.id}: ${key} ${v[key]} missing on disk`);
+  /*
+   * transcript_text_file names the extract a transcript was made from — provenance, and
+   * the text itself now lives in the transcript_texts table. So the useful assertion is
+   * no longer "that file is on this disk" but "the transcript this video claims actually
+   * came through the build", which holds on Vercel too and is what the reader sees.
+   */
+  if (v.transcript_text_file) {
+    need(existsSync(join(WEB, 'data', 'transcripts', `${v.id}.json`)),
+      `${v.id}: declares transcript_text_file ${v.transcript_text_file} but no parsed `
+      + `transcript reached data/transcripts/${v.id}.json`);
   }
 }
 

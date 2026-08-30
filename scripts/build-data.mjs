@@ -1,55 +1,58 @@
 #!/usr/bin/env node
 /**
- * The single seam between DataModel/ (source of record) and the website.
+ * The single seam between Supabase (source of record) and the website.
  *
- * Reads the seed files, validates every record against data_model.schema.json,
- * derives the indexes the UI needs, and emits one JSON bundle plus per-interview
- * transcript files. Runs on predev/prebuild, so a hand-edit to any seed file that
- * violates the schema fails the build immediately rather than rendering wrong.
+ * Reads the archive out of the api.v_* views, validates every record against
+ * schema/data_model.schema.json, derives the indexes the UI needs, and emits one JSON
+ * bundle plus per-interview transcript files. Runs on predev/prebuild, so a curator's
+ * edit that violates the schema fails the build immediately rather than rendering wrong.
+ *
+ * It used to read DataModel/seed/*.json off one laptop, and to exit 0 with
+ * "skipping (DataModel not found, using committed data)" when that laptop was not the
+ * machine building — a green terminal that had tested nothing. That guard is gone. There
+ * is no local source and no fallback: without credentials this fails and says why.
  */
 import {
-  readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync, statSync, copyFileSync,
-  rmSync,
+  readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync, statSync, rmSync,
 } from 'node:fs';
 import { join, dirname, basename, normalize } from 'node:path';
 import { fileURLToPath } from 'node:url';
 // The schema is draft 2020-12; ajv's default export is draft-07.
 import Ajv from 'ajv/dist/2020.js';
 import addFormats from 'ajv-formats';
+import { requireCredentials } from './supabase.mjs';
+import { fetchArchive, fetchMediaManifest, VIEWS } from './fetch-data.mjs';
+import { syncMedia } from './media.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const WEB = join(HERE, '..');
-// DataModel/, MS-CS-001/ and Video Archive/ live inside the repo, not beside it.
-const ROOT = WEB;
-const DM = join(ROOT, 'DataModel');
-const SEED = join(DM, 'seed');
 const OUT = join(WEB, 'data');
+// The JSON Schema is the contract, not data: it lives in the repo, and it had to, because
+// DataModel/ is gone.
+const SCHEMA = join(WEB, 'schema', 'data_model.schema.json');
 
-// Skip generation if data already exists and DataModel is missing (e.g., on Vercel)
-if (!existsSync(DM) && existsSync(join(OUT, 'archive.generated.json'))) {
-  console.log('  build-data: skipping (DataModel not found, using committed data)');
-  process.exit(0);
-}
+// Fail here rather than anywhere later, and say what is missing. Nothing about this build
+// can proceed without the database.
+requireCredentials();
 
-/** seed file -> [schema $def, dataset key] */
-const SEEDS = {
-  'seed_collections.json': ['Collection', 'collections'],
-  'seed_publications.json': ['Publication', 'publications'],
-  'seed_persons.json': ['Person', 'persons'],
-  'seed_exhibitions.json': ['Exhibition', 'exhibitions'],
-  'seed_video_assets.json': ['VideoAsset', 'videoAssets'],
-  'seed_paintings.json': ['Painting', 'paintings'],
-  // Places load before attestations, which reference them.
-  'seed_places.json': ['Place', 'places'],
-  'seed_attested_works.json': ['AttestedWork', 'attestedWorks'],
-  'seed_commentary.json': ['Commentary', 'commentary'],
-  'seed_commentary_relations.json': ['CommentaryRelation', 'commentaryRelations'],
-  'seed_painting_historical_context.json': ['PaintingHistoricalContext', 'paintingHistoricalContext'],
-  'seed_painting_exhibitions.json': ['PaintingExhibition', 'paintingExhibitions'],
-  'seed_historical_events.json': ['HistoricalEvent', 'historicalEvents'],
-  'seed_scholarship.json': ['Scholarship', 'scholarship'],
-  'seed_archive_objects.json': ['ArchiveObject', 'archiveObjects'],
-  'seed_news_articles.json': ['NewsArticle', 'newsArticles'],
+/** dataset key -> schema $def. The view each key comes from is VIEWS in fetch-data.mjs. */
+const DEFS = {
+  collections: 'Collection',
+  publications: 'Publication',
+  persons: 'Person',
+  exhibitions: 'Exhibition',
+  videoAssets: 'VideoAsset',
+  paintings: 'Painting',
+  places: 'Place',
+  attestedWorks: 'AttestedWork',
+  commentary: 'Commentary',
+  commentaryRelations: 'CommentaryRelation',
+  paintingHistoricalContext: 'PaintingHistoricalContext',
+  paintingExhibitions: 'PaintingExhibition',
+  historicalEvents: 'HistoricalEvent',
+  scholarship: 'Scholarship',
+  archiveObjects: 'ArchiveObject',
+  newsArticles: 'NewsArticle',
 };
 
 const fail = (msg) => {
@@ -67,7 +70,7 @@ const read = (p) => {
 
 // ---------------------------------------------------------------- validation
 
-const schema = read(join(DM, 'data_model.schema.json'));
+const schema = read(SCHEMA);
 const ajv = new Ajv({ allErrors: true, strict: false });
 addFormats(ajv);
 ajv.addSchema(schema, 'model');
@@ -88,33 +91,70 @@ function validate(defName, rows, file) {
   }
 }
 
-// ---------------------------------------------------------------- load seeds
+// ---------------------------------------------------------------- load from Supabase
 
-const data = {};
-for (const [file, [defName, key]] of Object.entries(SEEDS)) {
-  const rows = read(join(SEED, file));
-  if (!Array.isArray(rows)) fail(`${file} should be an array`);
-  validate(defName, rows, file);
-  data[key] = rows;
+/*
+ * The validation stays exactly as it was, and matters more now than it did. Against a
+ * hand-edited seed file it caught a curator's typo. Against the database it also catches
+ * a view that leaks a column: schema/data_model.schema.json sets additionalProperties
+ * false on every entity, so one stray created_at fails every row of that table at once
+ * and names the field. That is the schema working, not a bug in it.
+ */
+const { data, transcripts: transcriptText } = await fetchArchive();
+
+/**
+ * A column is null; the record means the field is absent. Reconcile the two.
+ *
+ * Postgres has one way to say "no value" and JSON Schema has two, and the difference is
+ * load-bearing in exactly one direction. AttestedWork.date_uncertain is declared
+ * `type: boolean` — NOT nullable — and is optional, so the only way the model can say
+ * "this source does not hedge its date" is to omit the key. 56 of 57 seed rows do. Read
+ * straight out of a nullable column it arrives as null and fails ajv on every one of them.
+ *
+ * So drop a null wherever the schema says the field is optional AND cannot itself be null.
+ * That is narrow on purpose: a field the schema declares nullable (date_basis, artwork,
+ * every date_text) keeps its null, and a REQUIRED field that arrives null is left alone so
+ * validate() still fails on it. This corrects a representation mismatch and hides nothing.
+ */
+function dropImpossibleNulls(defName, rows) {
+  const def = schema.$defs[defName];
+  const required = new Set(def.required ?? []);
+  const optionalNonNullable = Object.entries(def.properties ?? {})
+    .filter(([name, spec]) => {
+      if (required.has(name)) return false;
+      const type = spec.type ?? (spec.enum ? (spec.enum.includes(null) ? ['null'] : []) : null);
+      if (type == null) return false;
+      return !(Array.isArray(type) ? type.includes('null') : type === 'null');
+    })
+    .map(([name]) => name);
+  if (!optionalNonNullable.length) return rows;
+  for (const row of rows) {
+    for (const name of optionalNonNullable) if (row[name] === null) delete row[name];
+  }
+  return rows;
+}
+
+for (const [viewName, key] of Object.entries(VIEWS)) {
+  const rows = data[key];
+  if (!Array.isArray(rows)) fail(`api.${viewName} did not return an array`);
+  validate(DEFS[key], dropImpossibleNulls(DEFS[key], rows), `api.${viewName}`);
 }
 
 /**
- * Archive objects used to live inside seed_news_articles.json as
- * {archive_objects, news_articles}. They now have their own seed, because boxes 2
- * onward hold drawings rather than press and filing them under "news articles" was
- * only ever an accident of which box was catalogued first.
+ * A duplicate object id used to be reachable: the seeds were JSON files, and re-running
+ * parse_manifest.py could restore all 50 box-1 objects a second time. It sailed through
+ * every other check, because ajv validates each row alone and every derived index keys by
+ * id — the bundle looked fine and rendered each object twice.
  *
- * parse_manifest.py still writes the old combined shape, so guard against a re-run
- * silently reintroducing all 50 box-1 objects a second time. A duplicate id would
- * otherwise sail through: ajv validates each row on its own and every derived index
- * keys by id, so the bundle would look fine and render each object twice.
+ * archive_objects.id is a primary key now, so the database refuses it at the source. This
+ * stays as a cheap assertion that the view is returning rows and not, say, a cartesian
+ * product from a future join.
  */
 const seenObjectIds = new Set();
 for (const o of data.archiveObjects) {
   if (seenObjectIds.has(o.id)) {
-    fail(`duplicate archive object id ${o.id} in seed_archive_objects.json — if `
-      + 'parse_manifest.py was re-run it may have restored archive_objects into '
-      + 'seed_news_articles.json; that file must now hold news articles only');
+    fail(`api.v_archive_objects returned ${o.id} twice — the primary key makes that `
+      + 'impossible in the table, so the view is duplicating rows');
   }
   seenObjectIds.add(o.id);
 }
@@ -208,32 +248,28 @@ function parseTranscript(text) {
 }
 
 /*
- * Real runtimes, measured off the masters by DataModel/work/timecode/. Every
- * VideoAsset ships duration_seconds: null, and the interviews are the one part of
- * the archive with no sense of scale attached — "4,769 words" tells a reader
- * nothing about whether that is ten minutes or an hour.
- *
- * The edited cut is the canonical one; the subtitled variant is the same film and
- * differs by hundredths of a second.
+ * Runtimes measured off the masters by DataModel/work/timecode/ used to be back-filled
+ * here from a local durations.json. They are now a column on video_assets, written once
+ * by scripts/seed-supabase.mjs, so the value is in the record rather than in a scratch
+ * file that only existed on one machine.
  */
-const durationsPath = join(DM, 'work', 'durations.json');
-if (existsSync(durationsPath)) {
-  const durations = read(durationsPath);
-  for (const v of data.videoAssets) {
-    if (v.duration_seconds != null) continue;
-    for (const variant of ['edited', 'subtitled', 'raw']) {
-      const d = durations[`${v.id}:${variant}`];
-      if (d != null) { v.duration_seconds = Math.round(d); break; }
-    }
-  }
-}
 
+/*
+ * The transcripts arrive as the verbatim extracted text and are parsed here, not in the
+ * database. parseTranscript() above holds the knowledge about the speaker column that PDF
+ * extraction dislocated to the end of each page and the ~100-char hard wrap; storing pages
+ * and paragraphs instead would bake one parse into the record and lose the artifact it
+ * was derived from.
+ */
 const transcripts = {};
 for (const v of data.videoAssets) {
   if (!v.transcript_text_file) continue;
-  const p = join(ROOT, v.transcript_text_file);
-  if (!existsSync(p)) fail(`missing transcript ${v.transcript_text_file}`);
-  transcripts[v.id] = parseTranscript(readFileSync(p, 'utf8'));
+  const text = transcriptText[v.id];
+  if (text == null) {
+    fail(`${v.id} declares transcript_text_file ${v.transcript_text_file} but no row in `
+      + 'transcript_texts carries its text');
+  }
+  transcripts[v.id] = parseTranscript(text);
 }
 
 // ---------------------------------------------------------------- derivations
@@ -531,27 +567,23 @@ timeline.sort((a, b) =>
   a.kind.localeCompare(b.kind) ||
   a.title.localeCompare(b.title));
 
-// ---------------------------------------------------------------- scans
+// ---------------------------------------------------------------- media
 
 /**
- * Scans live in one directory per physical box, named for the collection:
- * MS-CS-001/, MS-CS-002/, ... So resolve them from the object's own collection_id
- * rather than a hardcoded path, and every further box works without an edit here.
- * Each directory is read once, not once per object.
+ * Everything the site renders comes out of Supabase Storage into public/ first, and only
+ * then is resolved by the phases below. Doing the transfer in one step up front means the
+ * page-resolution logic that follows still just reads the filesystem, exactly as it did
+ * when the boxes were local directories.
+ *
+ * Only what is missing or the wrong size is fetched. Without that, every deploy would pull
+ * ~182 MB against a 5 GB monthly allowance — roughly 27 builds — so the skip is not an
+ * optimisation, it is the difference between working and not.
  */
-const scanDirs = new Map();
-const boxScans = (collectionId) => {
-  if (!scanDirs.has(collectionId)) {
-    const dir = join(ROOT, collectionId);
-    scanDirs.set(collectionId, {
-      dir,
-      files: new Set(existsSync(dir) ? readdirSync(dir) : []),
-    });
-  }
-  return scanDirs.get(collectionId);
-};
 const publicScans = join(WEB, 'public', 'scans');
 mkdirSync(publicScans, { recursive: true });
+
+const mediaManifest = await fetchMediaManifest();
+const synced = await syncMedia(mediaManifest, { root: WEB });
 
 /** Page count without a PDF library: count the page objects in the raw bytes. */
 function pdfPageCount(buf) {
@@ -575,31 +607,28 @@ function isValidFilename(filename) {
 }
 
 const missingScans = [];
-let copied = 0;
 for (const o of data.archiveObjects) {
-  const box = boxScans(o.collection_id);
   for (const s of o.scan_files ?? []) {
     if (!isValidFilename(s.filename)) {
       fail(`invalid scan filename in ${o.id}: ${s.filename}`);
     }
-    if (!box.files.has(s.filename)) {
-      missingScans.push(`${o.id} -> ${s.filename} (expected in ${o.collection_id}/)`);
+    // syncMedia has already put it here, or it is not in Storage at all. The message names
+    // the bucket path a curator would have to upload, not a directory on one laptop.
+    const file = join(publicScans, s.filename);
+    if (!existsSync(file)) {
+      missingScans.push(`${o.id} -> ${s.filename} (expected archive-scans/${o.collection_id}/${s.filename})`);
       continue;
     }
-    const src = join(box.dir, s.filename);
-    const dest = join(publicScans, s.filename);
     // Enrich the record so the viewer can decide between inlining and linking.
-    s.sizeBytes = statSync(src).size;
+    s.sizeBytes = statSync(file).size;
     s.pageCount = s.filename.toLowerCase().endsWith('.pdf')
-      ? pdfPageCount(readFileSync(src))
+      ? pdfPageCount(readFileSync(file))
       : 1;
-    if (!existsSync(dest) || statSync(dest).size !== s.sizeBytes) {
-      copyFileSync(src, dest);
-      copied++;
-    }
   }
 }
-if (missingScans.length) fail(`scan files referenced but not on disk:\n  ${missingScans.join('\n  ')}`);
+if (missingScans.length) {
+  fail(`scan files referenced by a record but absent from Storage:\n  ${missingScans.join('\n  ')}`);
+}
 
 // ------------------------------------------------------- rasterised scan pages
 
@@ -855,6 +884,9 @@ console.log(
   `${c.transcribedInterviews} transcripts (${c.transcriptWords.toLocaleString()} words) · ` +
   `${timeline.length} timeline entries\n` +
   `              ${publicationMergeGroups.length} publication merge groups · ` +
-  `${Object.keys(personMentions).length} people mentioned in object descriptions` +
-  (copied ? `\n              copied ${copied} scan file(s) into public/scans/` : '')
+  `${Object.keys(personMentions).length} people mentioned in object descriptions\n` +
+  // Say what came down the wire. A build that downloaded nothing is the normal, cached
+  // case; a build that downloaded everything is the first one after a media change.
+  `              media: ${synced.downloaded} of ${synced.total} file(s) fetched from Storage` +
+  (synced.downloaded ? ` (${(synced.bytes / 1e6).toFixed(1)} MB)` : ' (all cached)')
 );
