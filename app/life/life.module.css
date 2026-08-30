@@ -276,8 +276,13 @@ a.venueName:hover { color: var(--oxide); }
   margin-top: var(--s-1);
 }
 
+/*
+ * Off the 1020/860/620/560 scale on purpose, and the only stylesheet that is.
+ * /life/ is the one page laid out on --page-wide (1500px) rather than --page, so its
+ * two columns run out of room a tier earlier than everything else. The rail drops
+ * under the narrative before the prose column gets too narrow.
+ */
 @media (max-width: 1180px) {
-  /* The rail drops under the narrative before the prose column gets too narrow. */
   .split { grid-template-columns: 1fr; gap: var(--s-6); }
   .rail { position: static; }
 }

@@ -69,7 +69,7 @@ export default function ArchivePage() {
   const undigitised = rows.length - digitised;
 
   return (
-    <div className="page" style={{ paddingTop: 'var(--s-6)' }}>
+    <div className="page">
       <header style={{ marginBottom: 'var(--s-5)' }}>
         <p className="eyebrow">The documentary record</p>
         <h1>The archive</h1>
@@ -107,7 +107,7 @@ export default function ArchivePage() {
         </div>
       </div>
 
-      <p className="ui muted" style={{ marginBottom: 'var(--s-6)', maxWidth: '68ch' }}>
+      <p className="ui muted measure" style={{ marginBottom: 'var(--s-6)' }}>
         {undigitised} of these objects are catalogued but not photographed — twenty
         consecutive rows of the press record, which being consecutive suggests a batch
         that was never photographed rather than material that is lost. Their records are

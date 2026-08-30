@@ -28,7 +28,7 @@ export default function ExhibitionsPage() {
     shows.slice(i * perColumn, (i + 1) * perColumn));
 
   return (
-    <div className="page" style={{ paddingTop: 'var(--s-6)' }}>
+    <div className="page">
       <header className={styles.header}>
         <h1>Exhibitions</h1>
         <p className="measure muted">

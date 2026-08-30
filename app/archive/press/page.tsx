@@ -63,7 +63,7 @@ export default function PressPage() {
     });
 
   return (
-    <div className="page" style={{ paddingTop: 'var(--s-6)' }}>
+    <div className="page">
       <header style={{ marginBottom: 'var(--s-6)' }}>
         <p className="eyebrow">The Archive</p>
         <h1>Press</h1>

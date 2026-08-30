@@ -164,7 +164,7 @@ export default async function SearchPage() {
   const rows = await buildIndex();
 
   return (
-    <div className="page" style={{ paddingTop: 'var(--s-6)' }}>
+    <div className="page">
       <header style={{ marginBottom: 'var(--s-5)' }}>
         <p className="eyebrow">
           <Link href="/archive/">The Archive</Link>

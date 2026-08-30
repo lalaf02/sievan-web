@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import styles from './Prose.module.css';
+import styles from './Record.module.css';
 
 /** Props for RecordHeader component */
 export interface RecordHeaderProps {

@@ -232,7 +232,7 @@ export default function WorksPage() {
   const coverage = artworkDatingCoverage();
 
   return (
-    <div className="page" style={{ paddingTop: 'var(--s-6)' }}>
+    <div className="page">
       <header className="measure" style={{ marginBottom: 'var(--s-5)' }}>
         <h1>Catalogue Raisonné</h1>
         {/*

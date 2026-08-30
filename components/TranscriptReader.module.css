@@ -81,7 +81,7 @@
   scroll-margin-top: var(--s-6);
 }
 
-@media (max-width: 1080px) {
+@media (max-width: 1020px) {
   .pageMark {
     position: static;
     display: block;
@@ -95,7 +95,7 @@
 }
 
 .para {
-  font-size: 1.15rem;
+  font-size: var(--t-body);
   line-height: 1.65;
   margin: 0 0 var(--s-4);
 }

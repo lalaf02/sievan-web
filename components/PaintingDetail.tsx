@@ -27,7 +27,7 @@ export default async function PaintingDetail({ params }: Props) {
   if (!painting) notFound();
 
   return (
-    <div className="page" style={{ paddingTop: 'var(--s-6)', maxWidth: '52rem' }}>
+    <div className="record">
       <RecordHeader
         backHref="/works/"
         backLabel="Works"

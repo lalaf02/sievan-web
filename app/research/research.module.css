@@ -104,7 +104,7 @@
 
 .aside {
   position: sticky;
-  top: var(--s-4);
+  top: var(--s-5);
 }
 
 .toc {

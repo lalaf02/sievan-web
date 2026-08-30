@@ -78,7 +78,7 @@ export default async function PlacePage({ params }: Props) {
   }
 
   return (
-    <div className="record" style={{ paddingTop: 'var(--s-6)' }}>
+    <div className="record">
       <RecordHeader
         backHref="/places/"
         backLabel="Places"

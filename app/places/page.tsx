@@ -33,7 +33,7 @@ export default function PlacesPage() {
   );
 
   return (
-    <div className="page" style={{ paddingTop: 'var(--s-6)' }}>
+    <div className="page">
       <header className="measure" style={{ marginBottom: 'var(--s-6)' }}>
         <p className="eyebrow">The archive in space</p>
         <h1>Places</h1>

@@ -39,7 +39,7 @@ export default async function ObjectPage({ params }: Props) {
   const scans = object.scan_files as ScanInfo[];
 
   return (
-    <div className="page" style={{ paddingTop: 'var(--s-6)', maxWidth: '52rem' }}>
+    <div className="record">
       {/*
         A row carrying `artwork` is a catalogue entry, so it is headed like one and
         sends the reader back to the Catalogue Raisonné rather than to the archive.
@@ -48,6 +48,13 @@ export default async function ObjectPage({ params }: Props) {
         No box or folder number is shown. They are the archive's internal shelving,
         they mean nothing to a reader, and `collection_id` in particular reads as a
         second identifier competing with the object's own.
+
+        An object with no `artwork` is headed by its own accession id, and that is
+        deliberate — it is the identifier the object actually has. Sievan gave these
+        none, the archive does not invent one, and `objectLead()` prints the
+        catalogue's own description immediately beneath. Do not substitute the
+        description for the heading: it is a transcription, often long, and on the
+        51 non-artwork objects it would read as a title the record does not have.
       */}
       <RecordHeader
         backHref={object.artwork ? '/works/' : '/archive/'}

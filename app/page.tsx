@@ -44,7 +44,7 @@ export default function Home() {
     .filter((p): p is typeof p & { sheet: NonNullable<typeof p.sheet> } => !!p.sheet);
 
   return (
-    <div className="page">
+    <div className="page pageFlush">
 
       {/* ═══════════════════════════════════════════════ hero: the man, painting */}
       <section className={styles.hero} aria-labelledby="name">

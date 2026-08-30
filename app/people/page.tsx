@@ -28,7 +28,7 @@ export default function PeoplePage() {
   }));
 
   return (
-    <div className="page" style={{ paddingTop: 'var(--s-6)', maxWidth: 'var(--page)' }}>
+    <div className="page">
       <header style={{ marginBottom: 'var(--s-6)' }}>
         <h1>People</h1>
         <p className="measure muted">

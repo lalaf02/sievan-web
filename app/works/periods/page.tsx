@@ -48,7 +48,7 @@ export default function PeriodsPage() {
   const undated = undatedArtwork();
 
   return (
-    <div className="page" style={{ paddingTop: 'var(--s-6)' }}>
+    <div className="page">
       <header className="measure" style={{ marginBottom: 'var(--s-6)' }}>
         <Link href="/works/" className={styles.back}>← Catalogue Raisonné</Link>
         <h1>The five periods</h1>

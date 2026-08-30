@@ -38,7 +38,7 @@ export default function WorkSearchPage() {
   const periodLabels = Object.fromEntries(PERIODS.map((p) => [p.id, p.name]));
 
   return (
-    <div className="page" style={{ paddingTop: 'var(--s-6)' }}>
+    <div className="page">
       <header className="measure" style={{ marginBottom: 'var(--s-5)' }}>
         <p className="eyebrow">Catalogue Raisonné</p>
         <h1>Find a work</h1>

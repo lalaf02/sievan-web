@@ -55,5 +55,8 @@ next-env.d.ts
 /MS-CS-002/
 /Video Archive/
 
-# Stray duplicate created by an editor.
-/.gitignore 2
+# NOTE, not a rule: OneDrive syncs this Desktop and leaves conflict copies named
+# "<file> 2.<ext>" — stale snapshots, not edits. They compile, so tsc and eslint pass
+# them in silence, and they inflate check-export's page count when they land in out/.
+# Deliberately NOT ignored: an ignore rule hides them, and hidden is how thirteen of
+# them survived. Let them show up untracked, then delete them.

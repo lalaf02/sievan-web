@@ -31,7 +31,7 @@ export default function RetrospectivePage() {
   const described = RETROSPECTIVE_PAGES.filter((p) => p.text || p.caption);
 
   return (
-    <div className="page" style={{ paddingTop: 'var(--s-6)' }}>
+    <div className="page">
       <header className="measure" style={{ marginBottom: 'var(--s-6)' }}>
         <p className="eyebrow">Life and Work · MS-AR-00026</p>
         <h1>The retrospective catalogue</h1>

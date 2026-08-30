@@ -21,7 +21,7 @@ export default function InterviewsPage() {
   const other = allVideos.filter((v) => v.subject_type !== 'interview');
 
   return (
-    <div className="page" style={{ paddingTop: 'var(--s-6)' }}>
+    <div className="page">
       <header style={{ marginBottom: 'var(--s-6)' }}>
         <p className="eyebrow">Life and Work</p>
         <h1>Interviews</h1>

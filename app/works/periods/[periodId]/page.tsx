@@ -110,7 +110,7 @@ export default async function PeriodPage({ params }: Props) {
     });
 
   return (
-    <div className="page" style={{ paddingTop: 'var(--s-6)' }}>
+    <div className="page">
       <header className="measure" style={{ marginBottom: 'var(--s-6)' }}>
         <Link href="/works/periods/" className={styles.back}>← The five periods</Link>
         <p className="eyebrow">Period {PERIODS.indexOf(period) + 1} of {PERIODS.length}</p>
