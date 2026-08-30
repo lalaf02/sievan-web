@@ -1,29 +1,7 @@
 -- The Sievan archive's entity model, mirroring schema/data_model.schema.json 1:1.
---
 -- Replaces the simplified six-table model of 2026-08-29, which collapsed ArchiveObject,
--- AttestedWork and Painting into one `artworks` table with artwork_type in
--- (painting, drawing). That distinction is load-bearing: an attested work is a painting a
--- source NAMES, evidence toward a catalogue that does not yet exist, and it must never
--- share an id space or a row count with a work the archive holds.
---
--- Conventions, all deliberate and all documented in CLAUDE.md:
---   · ids are text primary keys carrying the JSON Schema's own patterns. collections is
---     MS-(CS|VA)-### with THREE digits; everything the archive holds is five. Authority
---     terms (persons, publications, exhibitions) are free slugs; places is a slug pattern.
---   · enums are CHECK constraints, not Postgres ENUM types - cheaper to alter as boxes
---     arrive, and ajv already enforces the same vocabulary at build time.
---   · partial dates are text with a precision-preserving CHECK, never `date`. "1941" and
---     "1941-03-08" are different claims and lib/dates.ts is built on the difference.
---   · plain string and id arrays are text[], which preserves order natively. Only arrays
---     of OBJECTS get child tables.
---   · verbatim columns are never normalised, and several are text where a number looks
---     natural: folder_no holds "4,5", artist_number holds "#180".
+-- AttestedWork and Painting into one `artworks` table. That distinction is load-bearing.
 
-
--- ---------------------------------------------------------------- drop the old model
--- media_assets is dropped with them: its foreign keys point at the discarded tables, and
--- the entity model below carries the filenames itself. profiles and private.is_curator()
--- survive - they are the curator's auth path, not part of the archive.
 drop table if exists public.artwork_mentions cascade;
 drop table if exists public.media_assets   cascade;
 drop table if exists public.interviews     cascade;
@@ -31,22 +9,18 @@ drop table if exists public.artworks       cascade;
 drop table if exists public.articles       cascade;
 drop table if exists public.people         cascade;
 
--- ---------------------------------------------------------------- shared constraints
 -- ISO-8601 truncated to whatever precision the source supports: YYYY, YYYY-MM, YYYY-MM-DD.
 create domain public.partial_date as text
   check (value is null or value ~ '^[0-9]{4}(-[0-9]{2}(-[0-9]{2})?)?$');
 
--- Curatorial review state. Records produced by heuristic parsing must never ship as
--- reviewed_confirmed.
 create domain public.review_status as text
   check (value in ('unreviewed', 'needs_review', 'reviewed_confirmed', 'reviewed_corrected'));
 
 create or replace function public.touch_updated_at() returns trigger
-language plpgsql as $$
+language plpgsql as $fn$
 begin new.updated_at = now(); return new; end;
-$$;
+$fn$;
 
--- ---------------------------------------------------------------- collections
 create table public.collections (
   id            text primary key check (id ~ '^MS-(CS|VA)-[0-9]{3}$'),
   label_raw     text not null,
@@ -57,7 +31,6 @@ create table public.collections (
   updated_at    timestamptz not null default now()
 );
 
--- ---------------------------------------------------------------- publications
 create table public.publications (
   id         text primary key,
   name       text not null,
@@ -67,7 +40,6 @@ create table public.publications (
   updated_at timestamptz not null default now()
 );
 
--- ---------------------------------------------------------------- persons
 create table public.persons (
   id         text primary key,
   name       text not null,
@@ -81,7 +53,6 @@ create table public.persons (
   updated_at timestamptz not null default now()
 );
 
--- ---------------------------------------------------------------- places
 -- A gazetteer of the towns, rivers, galleries and institutions the evidence names.
 -- No coordinates and no map: "croton?", Sievan's own note, is not a thing you can pin.
 create table public.places (
@@ -89,7 +60,6 @@ create table public.places (
   name       text not null,
   kind       text not null check (kind in ('settlement','neighbourhood','region','landmark',
                                            'waterway','venue','institution','country')),
-  -- The containing place. Kay's -> Woodstock; Passedoit Gallery -> New York.
   -- Self-reference and longer cycles are rejected by scripts/check-data.mjs, which a
   -- foreign key cannot express.
   parent_id  text references public.places(id),
@@ -102,7 +72,6 @@ create table public.places (
   constraint places_no_self_parent check (parent_id is null or parent_id <> id)
 );
 
--- ---------------------------------------------------------------- exhibitions
 create table public.exhibitions (
   id                        text primary key,
   name                      text,
@@ -122,7 +91,6 @@ create table public.exhibitions (
   updated_at                timestamptz not null default now()
 );
 
--- ---------------------------------------------------------------- paintings
 -- The declared hub of the model, and deliberately empty: the archive holds no painting.
 -- counts.paintings staying 0 is the archive's one honest statement of what it lacks.
 create table public.paintings (
@@ -141,7 +109,6 @@ create table public.paintings (
   updated_at       timestamptz not null default now()
 );
 
--- ---------------------------------------------------------------- archive_objects
 create table public.archive_objects (
   id                    text primary key check (id ~ '^MS-AR-[0-9]{5}$'),
   collection_id         text not null references public.collections(id),
@@ -163,17 +130,14 @@ create table public.archive_objects (
                           'work_on_paper','other')),
   stated_item_count     integer,
   -- ArchiveObject.artwork, inlined. Its PRESENCE is what promotes a row from an archive
-  -- object into a catalogue entry, so these four are a unit: a 1:0..1 child table would
-  -- let a row exist with every half null and mean nothing. Deliberately carries no
-  -- dimensions - none of these has been measured, and a field that is null everywhere
-  -- invites a guess.
+  -- object into a catalogue entry, so these four are a unit. Deliberately carries no
+  -- dimensions - none of these has been measured, and a field null everywhere invites a guess.
   artwork_medium_stated text,
   artwork_support       text,
   artwork_signed        text,
   artwork_sheet_count   integer,
   created_at            timestamptz not null default now(),
   updated_at            timestamptz not null default now(),
-  -- Only a work of art may carry artwork_*, and medium_stated/support are jointly required.
   constraint archive_objects_artwork_is_work_on_paper check (
     artwork_medium_stated is null or object_type = 'work_on_paper'),
   constraint archive_objects_artwork_complete check (
@@ -192,7 +156,6 @@ create table public.archive_object_scans (
   primary key (archive_object_id, ordinal)
 );
 
--- ---------------------------------------------------------------- news_articles
 create table public.news_articles (
   id                  text primary key check (id ~ '^MS-AR-[0-9]{5}-[A-Z]$'),
   archive_object_id   text not null references public.archive_objects(id),
@@ -223,15 +186,14 @@ create table public.news_articles (
   updated_at          timestamptz not null default now()
 );
 
--- ---------------------------------------------------------------- attested_works
 -- A painting a source NAMES. The archive holds the sheet, not the painting, so these are
 -- evidence toward the catalogue and never entries in it: separate id space, separate URL
 -- space, and counts that are never added to worksOnPaperCatalogued.
 create table public.attested_works (
   id                     text primary key check (id ~ '^MS-AW-[0-9]{5}$'),
   -- Polymorphic, like commentary. Every row today is archive_object (the box-2 sheets),
-  -- but a press notice or an interview naming a work is the same kind of claim and must
-  -- not need a schema change. Referential integrity is checked by scripts/check-data.mjs.
+  -- but a press notice naming a work is the same kind of claim and must not need a schema
+  -- change. Referential integrity is checked by scripts/check-data.mjs.
   source_type            text not null check (source_type in ('archive_object','news_article','video_asset')),
   source_id              text not null,
   -- 1-indexed into the source's rasterised sheets, so the record links the exact image.
@@ -244,8 +206,8 @@ create table public.attested_works (
   -- ("SOUTHAMPTON LANDSCAPE", "In my Naborhood"). Never normalise; never invent.
   title_stated           text,
   artist_number          text,
-  -- Verbatim, unparsed: "20 x 24", "10 3/4 x 12". Deliberately NOT split into height and
-  -- width - nothing on the sheet records which figure is which.
+  -- Verbatim, unparsed: "20 x 24". Deliberately NOT split into height and width -
+  -- nothing on the sheet records which figure is which.
   dimensions_stated      text,
   medium_stated          text,
   date_text              text,
@@ -268,9 +230,8 @@ create table public.attested_works (
   notes                  text,
   created_at             timestamptz not null default now(),
   updated_at             timestamptz not null default now(),
-  -- Ported from scripts/build-data.mjs: an inferred year is shown on the record and
-  -- labelled there, but only stated_on_source may reach the chronology, so a year with no
-  -- basis is not a fact anyone can argue with.
+  -- Ported from scripts/build-data.mjs: only stated_on_source may reach the chronology,
+  -- so a year with no basis is not a fact anyone can argue with.
   constraint attested_works_date_basis_required check (date_earliest is null or date_basis is not null),
   -- Record what made the match, so the match can be argued with.
   constraint attested_works_identification_basis_required check (painting_id is null or identification_basis is not null)
@@ -286,7 +247,6 @@ create table public.attested_work_places (
   primary key (attested_work_id, ordinal)
 );
 
--- ---------------------------------------------------------------- video_assets
 create table public.video_assets (
   id                     text primary key check (id ~ '^MS-VI-[0-9]{5}$'),
   collection_id          text not null references public.collections(id),
@@ -335,10 +295,8 @@ create table public.transcript_texts (
   updated_at  timestamptz not null default now()
 );
 
--- ---------------------------------------------------------------- the dormant layer
 -- Seven tables with no rows. Everything downstream of them is dormant, not broken:
--- components/Relations.tsx renders three sections that return null today for exactly this
--- reason. They are created so the shape survives the migration.
+-- components/Relations.tsx renders three sections that return null today for this reason.
 create table public.historical_events (
   id            text primary key check (id ~ '^MS-HE-[0-9]{5}$'),
   title         text not null,
@@ -425,17 +383,10 @@ create table public.scholarship (
   updated_at timestamptz not null default now()
 );
 
--- ---------------------------------------------------------------- row-level security
---
 -- There is no anonymous surface. The published site is static HTML built ahead of time;
 -- it never queries this database, so `anon` needs nothing and gets nothing. This replaces
--- the `anon_full_access` policies of 2026-08-30, which granted ALL with USING (true) -
--- anyone holding the publishable key could rewrite the archive.
---
--- Reads happen at build time with the secret key, which bypasses RLS as service_role.
--- Writes happen through the curator's authenticated session.
-
-do $$
+-- the `anon_full_access` policies of 2026-08-30, which granted ALL with USING (true).
+do $rls$
 declare t text;
 begin
   foreach t in array array[
@@ -455,11 +406,8 @@ begin
                    'for each row execute function public.touch_updated_at()',
                    t || '_touch', t);
   end loop;
-end $$;
+end $rls$;
 
--- ---------------------------------------------------------------- indexes
--- The corpus is ~300 rows, so these serve the curator's editing views and the foreign
--- keys, not any query speed the site will ever need.
 create index on public.archive_objects      (collection_id);
 create index on public.archive_object_scans (archive_object_id);
 create index on public.news_articles        (archive_object_id);
@@ -470,4 +418,3 @@ create index on public.attested_work_places (place_id);
 create index on public.places               (parent_id);
 create index on public.exhibitions          (venue_place_id);
 create index on public.video_media_files    (video_id);
-
