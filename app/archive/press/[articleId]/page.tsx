@@ -47,7 +47,7 @@ export default async function ArticlePage({ params }: Props) {
   const onSheet = object ? articlesForObject(object.id).length : 0;
 
   return (
-    <div className="page" style={{ paddingTop: 'var(--s-6)' }}>
+    <div className="page">
       <RecordHeader
         backHref="/archive/press/"
         backLabel="Press archive"

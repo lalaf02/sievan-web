@@ -93,7 +93,7 @@ export default function LifePage() {
   const rothko = pageOf('MS-AR-00029', 4);
 
   return (
-    <div className="pageWide" style={{ paddingTop: 'var(--s-6)' }}>
+    <div className="pageWide">
       <header className="measure" style={{ marginBottom: 'var(--s-6)' }}>
         <p className="eyebrow">1898–1981</p>
         <h1>Life and Work</h1>

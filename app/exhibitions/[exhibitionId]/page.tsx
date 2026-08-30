@@ -33,7 +33,7 @@ export default async function ExhibitionPage({ params }: Props) {
     .filter((o): o is NonNullable<typeof o> => !!o);
 
   return (
-    <div className="page" style={{ paddingTop: 'var(--s-6)', maxWidth: '50rem' }}>
+    <div className="record">
       <RecordHeader
         backHref="/exhibitions/"
         backLabel="Exhibitions"

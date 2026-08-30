@@ -173,7 +173,7 @@
 /* Shown in place of a headline for the records that have none. */
 .rowRaw {
   font-family: var(--mono);
-  font-size: 0.8rem;
+  font-size: var(--t-sm);
   color: var(--ink-muted);
   margin: 0 0 var(--s-1);
 }
@@ -186,7 +186,7 @@
 
 .rowId {
   font-family: var(--mono);
-  font-size: 0.75rem;
+  font-size: var(--t-xs);
   color: var(--ink-faint);
 }
 

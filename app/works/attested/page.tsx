@@ -28,7 +28,7 @@ export default function AttestedWorksPage() {
   const sold = allAttestedWorks.filter((w) => w.dispositions.length > 0).length;
 
   return (
-    <div className="page" style={{ paddingTop: 'var(--s-6)' }}>
+    <div className="page">
       <header className="measure" style={{ marginBottom: 'var(--s-6)' }}>
         <p className="eyebrow">
           <Link href="/works/">Catalogue Raisonné</Link> · attested, not catalogued

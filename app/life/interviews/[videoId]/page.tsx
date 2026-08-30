@@ -39,8 +39,10 @@ export default async function InterviewPage({ params }: Props) {
   const totalBytes = video.media_files.reduce((n, m) => n + (m.size_bytes ?? 0), 0);
 
   return (
-    <div className="page" style={{ paddingTop: 'var(--s-6)' }}>
-      <div style={{ maxWidth: '52rem' }}>
+    <div className="page">
+      {/* Only the record header is held to the record measure; TranscriptReader
+          below runs the full page width, which is why this page is not .record. */}
+      <div style={{ maxWidth: 'var(--measure-record)' }}>
         <RecordHeader
           backHref="/life/interviews/"
           backLabel="Interviews"

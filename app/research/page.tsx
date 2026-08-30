@@ -31,7 +31,7 @@ export default function ResearchPage() {
   const incompleteCount = primary.filter((p) => p.incomplete).length;
 
   return (
-    <div className="page" style={{ paddingTop: 'var(--s-6)' }}>
+    <div className="page">
       <header className="measure" style={{ marginBottom: 'var(--s-6)' }}>
         <h1>Research</h1>
         <p className={styles.lede}>

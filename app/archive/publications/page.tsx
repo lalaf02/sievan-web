@@ -21,7 +21,7 @@ export default function PublicationsPage() {
     .sort((a, b) => b.articles.length - a.articles.length || a.pub.name.localeCompare(b.pub.name));
 
   return (
-    <div className="page" style={{ paddingTop: 'var(--s-6)', maxWidth: '48rem' }}>
+    <div className="record">
       <header style={{ marginBottom: 'var(--s-5)' }}>
         <p className="eyebrow">The Archive</p>
         <h1>Publications</h1>

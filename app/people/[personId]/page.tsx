@@ -41,7 +41,7 @@ export default async function PersonPage({ params }: Props) {
   const otherMentions = mentions.filter((m) => !bylineObjects.has(m.object.id));
 
   return (
-    <div className="page" style={{ paddingTop: 'var(--s-6)', maxWidth: '50rem' }}>
+    <div className="record">
       <RecordHeader
         backHref="/people/"
         backLabel="People"

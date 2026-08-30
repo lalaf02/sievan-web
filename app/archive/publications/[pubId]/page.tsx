@@ -35,7 +35,7 @@ export default async function PublicationPage({ params }: Props) {
   const years = articles.map((a) => a.date_earliest).filter((y): y is number => y !== null);
 
   return (
-    <div className="page" style={{ paddingTop: 'var(--s-6)', maxWidth: '48rem' }}>
+    <div className="record">
       <RecordHeader
         backHref="/archive/publications/"
         backLabel="Publications"

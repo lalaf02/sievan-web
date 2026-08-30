@@ -9,6 +9,13 @@
  * does not yet hold is a photographed, measured and located finished painting, and
  * that gap is being closed rather than merely confessed.
  *
+ * The WORD "reproduced" must never appear in IMAGE_SOURCE. It is a defined grade in
+ * this archive (lib/artworkGrades.ts): "a plate printed by a gallery that showed the
+ * work" — that is, an image someone else made. IMAGE_SOURCE described the estate's own
+ * photographs of originals it holds as "the works reproduced here", which is the exact
+ * confusion this file exists to prevent, and on /works/ it sat a few hundred pixels
+ * above a heading reading "The paintings, in other hands' reproductions".
+ *
  * The distinction between the two constants is the whole point and must not blur:
  * IMAGE_SOURCE covers work the estate holds and photographed itself; PLATE_CREDIT
  * covers the sixteen reproductions printed by other people, which the estate did not
@@ -18,7 +25,7 @@
 
 /** The works the estate holds and photographed itself. Rendered by components/ImageSource.tsx. */
 export const IMAGE_SOURCE =
-  'The works reproduced here were photographed by the estate, directly from the '
+  'The works shown here were photographed by the estate, directly from the '
   + 'originals in its care. Photography of the remainder is in progress; each work is '
   + 'published as its image arrives.';
 

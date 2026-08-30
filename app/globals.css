@@ -49,6 +49,20 @@
 
   --measure: 68ch;
   --page: 1400px;
+
+  /*
+   * The four breakpoints. These are documented rather than tokenised because CSS
+   * custom properties cannot be used in a media query. They are still the scale:
+   * a stylesheet uses one of these four values and no other.
+   *
+   *   1020px  the wide layouts give up their second column
+   *    860px  rails un-stick and grids collapse to one track
+   *    620px  small-screen type and padding
+   *    560px  the tightest tile grids go single-file
+   *
+   * Three one-off values (1180 / 1080 / 640) had drifted in, each within 60px of a
+   * tier and none of them justified. They were folded into the nearest one.
+   */
   /*
    * Wider than --page, for the one layout that is two real columns of content rather
    * than a prose measure with a rail beside it. /life/ sets a biography against the
@@ -74,9 +88,11 @@ html {
   -webkit-text-size-adjust: 100%;
   height: 100%;
   /*
-   * Load-bearing for .bleed: it reserves the scrollbar so 100vw equals the width of
-   * the visible page. Without it every full-bleed band overhangs by the scrollbar and
-   * the whole site scrolls sideways.
+   * Reserve the scrollbar gutter always, so a short page and a long one are laid out
+   * to the same width and navigating between them does not shift the type sideways.
+   * (This once existed to support a .bleed utility that ran media bands the full
+   * width of the window. That class was removed as dead code — nothing had used it
+   * for some time — but the property earns its place on its own.)
    */
   scrollbar-gutter: stable;
   /*
@@ -186,12 +202,24 @@ hr {
 .faint { color: var(--ink-faint); }
 .measure { max-width: var(--measure); }
 
+/*
+ * The standard page frame. `padding-top` lives here rather than at the call site:
+ * it had been written inline as `style={{ paddingTop: 'var(--s-6)' }}` on 23 of the
+ * 25 routes that use this class, which is a default wearing the costume of a choice.
+ * The two routes that genuinely differ override it below.
+ */
 .page {
   width: 100%;
   max-width: var(--page);
   margin: 0 auto;
-  padding: 0 var(--s-5);
+  padding: var(--s-6) var(--s-5) 0;
 }
+
+/* The home page opens on its hero; no rule of space above it. */
+.pageFlush { padding-top: 0; }
+
+/* 404 sits alone on the page and wants more air above it than a record does. */
+.pageDeep { padding-top: var(--s-8); }
 
 /*
  * A page whose content is genuinely two columns wide. Used by /life/, where the
@@ -201,33 +229,22 @@ hr {
   width: 100%;
   max-width: var(--page-wide);
   margin: 0 auto;
-  padding: 0 var(--s-5);
+  padding: var(--s-6) var(--s-5) 0;
 }
 
-/* A record page: the header, facts and prose of a single catalogued thing. */
+/*
+ * A record page: the header, facts and prose of a single catalogued thing.
+ *
+ * Use this for every record page. Seven of them used to set the width inline instead
+ * — 48rem twice, 50rem twice, 52rem three times — four widths for one class of page,
+ * which is the drift --measure-record was introduced to end and did not, because the
+ * class was never applied. Do not reintroduce a width at the call site.
+ */
 .record {
   width: 100%;
   max-width: var(--measure-record);
   margin: 0 auto;
-  padding: 0 var(--s-5);
-}
-
-/*
- * Break a media band out of .page and run it the full width of the window.
- *
- * The archive's imagery is the argument — clippings, catalogue covers, the only
- * moving picture of Sievan painting — and boxing it inside a text measure was what
- * made the site read as mostly paper. Prose stays at .measure; sheets do not.
- *
- * calc over 100vw rather than 100dvw: the scrollbar is already excluded because
- * html carries `scrollbar-gutter: stable`, so this cannot cause a horizontal scroll.
- */
-.bleed {
-  width: 100vw;
-  margin-left: calc(50% - 50vw);
-  margin-right: calc(50% - 50vw);
-  padding-left: var(--s-5);
-  padding-right: var(--s-5);
+  padding: var(--s-6) var(--s-5) 0;
 }
 
 /* Layout: rail + content. Used by every browser and the transcript reader. */
