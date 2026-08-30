@@ -1,7 +1,7 @@
 # Backlog
 
 Outstanding work on the Maurice Sievan archive. Architecture and conventions are in
-[CLAUDE.md](./CLAUDE.md).
+[CLAUDE.md](./CLAUDE.md) and the chapters in [docs/](./docs/).
 
 Grouped by **what is actually blocking each item**, because most of this is not waiting on
 engineering. Figures are from `data/archive.generated.json`; re-derive them rather than
@@ -221,7 +221,8 @@ Four transcription fixes landed in `seed_archive_objects.json`: `MS-AR-00053`
 *SOUTHHAMPTON* → **SOUTHAMPTON**; `MS-AR-00058` *FEIGN* → **FEIGIN** (Dorothy Feigin, a real
 painter); `MS-AR-00067` *Kasner* → **Kassner**, legible on the scan and matching
 `MS-AR-00071`'s own spelling; and `MS-AR-00067` #5 *oil on canvas* → **oil on canvas board**.
-Three rotation defects were found the same way — see the ROTATE note in CLAUDE.md.
+Three rotation defects were found the same way — see the ROTATE note in
+[docs/data-pipeline.md](./docs/data-pipeline.md).
 
 Still unproofed: the sheets that carry no attested work, and the sheets' finer details
 (`MS-AR-00058`'s *"Buds Budsworth"* is a guess at a courier's name). Corrections go in
@@ -245,7 +246,7 @@ tell you immediately if a correction broke a quote.
   Cloudflare Stream (paid, controlled), or the current answer — short committed excerpts.
 - **Should `.claude/` be tracked?** Currently untracked, deliberately left as a local decision.
 - **Raise `MIN_PAGES`.** It defaults to 60 against 205 real pages, so it only catches
-  catastrophic collapse. See gate #4 in CLAUDE.md.
+  catastrophic collapse. See trap #4 in [docs/verification.md](./docs/verification.md).
 
 ---
 
