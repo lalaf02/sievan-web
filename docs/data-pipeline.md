@@ -241,17 +241,36 @@ that return `null` today for exactly this reason: finished code waiting on rows.
 `facets` (decade / publication / author / objectType) · `articlesByObject` ·
 `articlesByPublication` · `articlesByAuthor` · `exhibitionsByObject` ·
 **`articlesByExhibition`** and **`exhibitionsByArticle`** (inferred — see below) ·
-`personMentions` · `attestationsByObject` · `attestationsByPlace` (role-typed) ·
+`personMentions` · **`personTranscriptMentions`** (heuristic — see below) ·
+`attestationsByObject` · `attestationsByPlace` (role-typed) ·
 `exhibitionsByPlace` · `placeChildren` · `placeUsage` · **`attestationsByTitleKey`**
 (heuristic — see below) · `undatedAttestations` · `publicationMergeGroups` ·
 `timeline` (136 events) · `undatedVideos` · `objectsWithImagery` · `coverByObject` ·
 `clips` · `clipsByVideo` · `counts`.
 
-Three of these are heuristics, not facts, and the UI says so:
+Four of these are heuristics, not facts, and the UI says so:
 
-- **`personMentions`** substring-matches each person's name and aliases against object
-  descriptions. Labelled *mentioned*, never *authored* — a string match cannot prove
-  authorship.
+- **`personMentions`** matches each person's name and aliases against object
+  descriptions, whole-word. Labelled *mentioned*, never *authored* — a string match cannot
+  prove authorship.
+- **`personTranscriptMentions`** runs the same matcher over the transcript paragraphs, and
+  is the weakest of the four because it is the only one over running speech. Two limits
+  keep it honest. **Full names and aliases only, never surnames** — surnames were tried and
+  all eight hits were wrong: "Klein" is Franz Kline, spelled Klein by whoever typed the
+  transcript, not the critic Ellen Lee Klein; "Paris" is the city in all four occurrences,
+  not Jeanne Paris; "Campbell" is Warhol's soup can. Full names lose nothing, finding Hilton
+  Kramer in the same sentence "Kramer" would have reached. And **paragraphs only, never
+  `page.speakers`** — that is the margin column PDF extraction dislocated to the foot of the
+  page and cannot be aligned to the text, so the claim is *named on this page* and never
+  *said this*. A person already carried as the interview's `subject_person_ids` is skipped.
+  Three people, seven interviews: Sievan across all five transcripts, Hilton Kramer in
+  Solman's, Ivan Karp in Barnet's.
+
+  Headlines were examined for the same treatment and deliberately left out. All 15 hits are
+  Sievan and every one already appears verbatim in the parent object's
+  `raw_title_description`, because `parse_manifest.py` builds both fields from the same
+  manifest line — so `personMentions` already carries them and a headline index would only
+  duplicate rows.
 - **`articlesByExhibition` / `exhibitionsByArticle`** connect press to shows, which are
   **disjoint in the source data**: `NewsArticle.exhibition_id` is set on 0 of 60 articles and
   `Exhibition.source_article_ids` on 0 of 15 exhibitions. A pair is made only when the notice

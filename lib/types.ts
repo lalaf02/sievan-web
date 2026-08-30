@@ -395,6 +395,20 @@ export interface PersonMention {
   matchedAs: string;
 }
 
+/**
+ * A person named in an interview transcript, and the pages naming them.
+ *
+ * `pages` are the transcript reader's own `#p{n}` anchors, so a mention is a link.
+ * It records that the name occurs on the page and nothing more — the speaker column
+ * cannot be aligned to paragraphs (see `TranscriptPage.speakers`), so the archive
+ * cannot say who said it.
+ */
+export interface TranscriptMention {
+  videoId: string;
+  pages: number[];
+  matchedAs: string;
+}
+
 export interface PlaceUsage {
   attestations: number;
   exhibitions: number;
@@ -473,6 +487,12 @@ export interface Derived {
   articlesByExhibition: Record<string, { articleId: string; matchedAs: string }[]>;
   exhibitionsByArticle: Record<string, { exhibitionId: string; matchedAs: string }[]>;
   personMentions: Record<string, PersonMention[]>;
+  /**
+   * HEURISTIC: whose name occurs in the recorded testimony, and where.
+   * Full names and aliases only — surnames were tried and every hit was a false
+   * positive. Labelled *named*, never *said*. See scripts/build-data.mjs.
+   */
+  personTranscriptMentions: Record<string, TranscriptMention[]>;
   /** Attested works keyed by the sheet that carries them. */
   attestationsByObject: Record<string, string[]>;
   attestationsByPlace: Record<string, { attestationId: string; role: PlaceRole; certain: boolean }[]>;

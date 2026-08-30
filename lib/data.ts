@@ -252,6 +252,19 @@ export const mentionsForPerson = (personId: string) =>
     .filter((m): m is { object: ArchiveObject; matchedAs: string } => !!m.object);
 
 /**
+ * Interviews whose transcript names this person, and the pages that do.
+ *
+ * Deliberately a second accessor rather than a widening of mentionsForPerson: a name
+ * on a page of running speech is weaker evidence than a name in a curated
+ * description, the two render differently, and the people index counts only the
+ * latter. Named, never said — see personTranscriptMentions in lib/types.ts.
+ */
+export const transcriptMentionsForPerson = (personId: string) =>
+  (archive.derived.personTranscriptMentions[personId] ?? [])
+    .map((m) => ({ video: videos.get(m.videoId), pages: m.pages, matchedAs: m.matchedAs }))
+    .filter((m): m is { video: VideoAsset; pages: number[]; matchedAs: string } => !!m.video);
+
+/**
  * Transcripts live in their own files so a reader page carries only its own text
  * rather than all 24,000 words. Read from disk at build time — a dynamic import
  * with a computed path is unreliable under static export.

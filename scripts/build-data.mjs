@@ -293,16 +293,74 @@ const publicationMergeGroups = Object.values(mergeGroups).filter((g) => g.length
  * dual-role case has nothing to render without this. Same mechanism catches
  * MS-AR-00036 -> maurice-sievan via the misspelling alias "Maurice Seivan".
  */
+const nameVariants = (person) => [person.name, ...(person.aliases ?? [])].filter(Boolean);
+
+/**
+ * The one matching rule, shared by both mention indexes below so they cannot drift.
+ *
+ * Whole-word, because the transcripts are running prose rather than 50 curated
+ * descriptions: an unanchored includes() finds "Orr" inside "corridor". It is a
+ * strict rule and returns the FIRST variant that matched, so `matchedAs` says which
+ * spelling the archive actually found. Against the object descriptions it reproduces
+ * the unanchored match exactly - 80 hits, no difference - so nothing already
+ * published moved when this replaced hay.includes(n).
+ */
+const namedIn = (hay, names) => names.find((n) => new RegExp(
+  `\\b${n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`,
+).test(hay ?? ''));
+
 const personMentions = {};
 for (const person of data.persons) {
-  const names = [person.name, ...(person.aliases ?? [])].filter(Boolean);
+  const names = nameVariants(person);
   const hits = [];
   for (const obj of data.archiveObjects) {
-    const hay = obj.raw_title_description ?? '';
-    const matched = names.find((n) => hay.includes(n));
+    const matched = namedIn(obj.raw_title_description, names);
     if (matched) hits.push({ objectId: obj.id, matchedAs: matched });
   }
   if (hits.length) personMentions[person.id] = hits;
+}
+
+/**
+ * Person -> the interviews whose transcript names them, and on which pages.
+ *
+ * HEURISTIC, and the weakest of the four, because this is the only index run over
+ * running speech rather than curated text. Two constraints keep it honest:
+ *
+ * FULL NAMES AND ALIASES ONLY, never surnames. Surnames were tried and are
+ * unusable: matching the last token of each person's name finds eight hits and every
+ * one is wrong. "Klein" is Franz Kline, spelled Klein by whoever typed the
+ * transcript, not Ellen Lee Klein; "Paris" is the city in all four of its
+ * occurrences, not Jeanne Paris; "Campbell" is Warhol's soup can, not Lawrence
+ * Campbell. Full names lose nothing that mattered - Hilton Kramer is found in the
+ * same sentence "Kramer" would have reached - and invent nothing.
+ *
+ * PARAGRAPHS ONLY, never page.speakers. That array is the margin column PDF
+ * extraction dislocated to the foot of each page; it cannot be aligned to the
+ * paragraphs (see TranscriptPage in lib/types.ts). Reading it would let the archive
+ * imply who said a name, which the source does not record.
+ *
+ * A video the person is already a subject of is skipped: videosForPerson() carries
+ * that edge structurally, and the hit is the title card on page 1.
+ *
+ * So the claim is only ever "this name occurs on this page" - named, never said.
+ */
+const personTranscriptMentions = {};
+for (const person of data.persons) {
+  const names = nameVariants(person);
+  const hits = [];
+  for (const video of data.videoAssets) {
+    if (video.subject_person_ids.includes(person.id)) continue;
+    const pages = [];
+    let matchedAs = null;
+    for (const page of transcripts[video.id] ?? []) {
+      const matched = namedIn(page.paragraphs.join(' '), names);
+      if (!matched) continue;
+      pages.push(page.page);
+      matchedAs ??= matched;
+    }
+    if (pages.length) hits.push({ videoId: video.id, pages, matchedAs });
+  }
+  if (hits.length) personTranscriptMentions[person.id] = hits;
 }
 
 /**
@@ -773,6 +831,7 @@ const bundle = {
     articlesByExhibition,
     exhibitionsByArticle,
     personMentions,
+    personTranscriptMentions,
     attestationsByObject,
     attestationsByPlace,
     exhibitionsByPlace,
@@ -884,7 +943,9 @@ console.log(
   `${c.transcribedInterviews} transcripts (${c.transcriptWords.toLocaleString()} words) · ` +
   `${timeline.length} timeline entries\n` +
   `              ${publicationMergeGroups.length} publication merge groups · ` +
-  `${Object.keys(personMentions).length} people mentioned in object descriptions\n` +
+  `${Object.keys(personMentions).length} people named in object descriptions · ` +
+  `${Object.keys(personTranscriptMentions).length} named in transcripts `+
+  `(${Object.values(personTranscriptMentions).flat().length} interviews)\n` +
   // Say what came down the wire. A build that downloaded nothing is the normal, cached
   // case; a build that downloaded everything is the first one after a media change.
   `              media: ${synced.downloaded} of ${synced.total} file(s) fetched from Storage` +

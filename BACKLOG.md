@@ -160,10 +160,6 @@ types and completely unimplemented.
 
 Buildable today.
 
-- **Extend `personMentions` to transcript text and headlines.** It currently substring-matches
-  names against object descriptions only. The same approach over the transcripts would connect
-  people to what was said about them, and the editorial framing (*mentioned*, not *authored*)
-  already exists.
 - **Populate `VideoAsset.topics`.** Empty on all 7 videos, and there are no subject tags
   anywhere else either, so **no topical linking is possible** until a curator tags them. The
   field is typed and wired; it needs values.
@@ -253,6 +249,19 @@ tell you immediately if a correction broke a quote.
 ## Recently completed
 
 For context on what the current shape of the site assumes:
+
+- **`personMentions` extended to the transcripts** (2026-08-30): `personTranscriptMentions`
+  connects three people to seven interviews — Sievan across all five transcripts (34 pages),
+  Hilton Kramer in Solman's, Ivan Karp in Barnet's, where Barnet says Sievan showed *"with
+  HCE, with Ivan Karp"*. Karp's page now carries all three of his roles at once: subject of
+  his own interview, named in another's, author of the Barone Gallery essay. **Full names
+  and aliases only.** Surnames were tried first and all eight hits were false positives —
+  "Klein" is Franz Kline, "Paris" is the city, "Campbell" is Warhol's soup can — and are
+  recorded as unusable in `build-data.mjs` so the next reader does not repeat the attempt.
+  **Headlines were dropped, and this is the measurement:** all 15 hits are Sievan and all 15
+  already appear verbatim in the parent object's description, because `parse_manifest.py`
+  builds both fields off the same manifest line. A headline index would have shipped empty
+  after deduplication, so it was not built.
 
 - **Supabase consolidated from 21 tables to 12** (2026-08-30): the seven-table core
   `artworks · artwork_mentions · articles · interviews · media_assets · people · events`,

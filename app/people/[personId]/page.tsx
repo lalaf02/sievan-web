@@ -3,7 +3,8 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import {
   allPersons, articleTitle, articlesForAuthor, getPerson, getPublication,
-  mentionsForPerson, objectLead, videosForPerson, OBJECT_TYPE_LABELS, ROLE_LABELS,
+  mentionsForPerson, objectLead, transcriptMentionsForPerson, videosForPerson,
+  OBJECT_TYPE_LABELS, ROLE_LABELS,
 } from '@/lib/data';
 import { formatArticleDate } from '@/lib/dates';
 import { EditorialNote, Fact, Facts, RecordHeader, RecordList, Section } from '@/components/Record';
@@ -35,6 +36,7 @@ export default async function PersonPage({ params }: Props) {
   );
   const interviews = videosForPerson(person.id);
   const mentions = mentionsForPerson(person.id);
+  const spoken = transcriptMentionsForPerson(person.id);
 
   // Objects already listed as an article byline shouldn't repeat under mentions.
   const bylineObjects = new Set(articles.map((a) => a.archive_object_id));
@@ -60,6 +62,7 @@ export default async function PersonPage({ params }: Props) {
             articles.length && `${articles.length} signed notice${articles.length === 1 ? '' : 's'}`,
             interviews.length && `${interviews.length} recorded interview${interviews.length === 1 ? '' : 's'}`,
             otherMentions.length && `${otherMentions.length} mention${otherMentions.length === 1 ? '' : 's'}`,
+            spoken.length && `named in ${spoken.length} interview${spoken.length === 1 ? '' : 's'}`,
           ]
             .filter(Boolean)
             .join(' · ') || null}
@@ -101,6 +104,34 @@ export default async function PersonPage({ params }: Props) {
                   ]
                     .filter(Boolean)
                     .join(' · ')}
+                </span>
+              </li>
+            ))}
+          </RecordList>
+        </Section>
+      )}
+
+      {/*
+        Derived by matching this person's full name and aliases against the transcript
+        paragraphs. Surnames alone were tried and every hit was wrong — "Klein" is Franz
+        Kline, "Paris" is the city, "Campbell" is a soup can — so this is full names only.
+
+        Labelled "named", never "said". The speaker labels sit in a margin column that PDF
+        extraction dislocated to the foot of each page, so nothing here can attribute a
+        sentence to a speaker; all the archive knows is that the name is on the page.
+      */}
+      {spoken.length > 0 && (
+        <Section title="Named in recorded testimony">
+          <RecordList>
+            {spoken.map(({ video, pages, matchedAs }) => (
+              <li key={video.id}>
+                <Link href={`/life/interviews/${video.id}/#p${pages[0]}`}>{video.title}</Link>
+                <br />
+                <span className="ui faint">
+                  {pages.length === 1
+                    ? `named on page ${pages[0]}`
+                    : `named on ${pages.length} pages`}
+                  {matchedAs !== person.name && ` · named as “${matchedAs}”`}
                 </span>
               </li>
             ))}
