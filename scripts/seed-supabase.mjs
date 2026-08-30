@@ -20,9 +20,9 @@
  * see uuidFor below.
  */
 import { readFileSync, existsSync } from 'node:fs';
-import { createHash } from 'node:crypto';
 import { join } from 'node:path';
 import { upsert, requireCredentials, fail } from './supabase.mjs';
+import { uuidFor } from './media.mjs';
 
 const args = process.argv.slice(2);
 const DRY = args.includes('--dry-run');
@@ -263,23 +263,10 @@ const interviewRows = videos.map((v) => ({
 }));
 
 // ------------------------------------------------------------------ media assets
-// media_assets has a generated uuid primary key, so a natural key has to be derived or
-// re-running this script would duplicate every file rather than correct it. A name-based
-// UUID (RFC 4122 v5, SHA-1 over a fixed namespace) makes the id a function of the row, so
-// the load stays idempotent like every other table here.
-// Standard RFC 4122 v5, not a private hashing scheme, so Postgres can compute the same id
-// with uuid_generate_v5(MEDIA_NS, key) -- which is how the migration backfilled the rows
-// this script now upserts over. If the two ever disagree, a restore doubles every file
-// instead of correcting it, and nothing else would notice.
-const MEDIA_NS = '6ee23f40-0276-5d37-9e2d-4b3aebe11e13';
-const uuidFor = (key) => {
-  const ns = Buffer.from(MEDIA_NS.replace(/-/g, ''), 'hex');
-  const h = createHash('sha1').update(ns).update(key, 'utf8').digest();
-  h[6] = (h[6] & 0x0f) | 0x50;   // version 5
-  h[8] = (h[8] & 0x3f) | 0x80;   // RFC 4122 variant
-  const s = h.subarray(0, 16).toString('hex');
-  return `${s.slice(0, 8)}-${s.slice(8, 12)}-${s.slice(12, 16)}-${s.slice(16, 20)}-${s.slice(20)}`;
-};
+// The ids are derived from the row itself, not generated, so re-running this corrects
+// rather than duplicates. uuidFor lives in media.mjs beside the bucket layout, because
+// upload-media.mjs registers the derived imagery with the same function and a second
+// copy that drifted would double every file on the next restore.
 
 // The archive-scans bucket keeps its MS-CS-00N/ prefix in Storage — provenance, and the
 // rule that makes the next box work without an edit. media.mjs owns that layout; this

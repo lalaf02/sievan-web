@@ -166,7 +166,7 @@ that still describes 21 tables.
 | `articles` | 111 | `archiveObjects` (the 51 documents) **and** `newsArticles` (60) |
 | `artwork_mentions` | 57 | `attestedWorks` |
 | `artwork_mention_places` | 37 | `attestedWorks[].place_refs` |
-| `media_assets` | 68 | `archiveObjects[].scan_files`, `videoAssets[].media_files` |
+| `media_assets` | 281 | `archiveObjects[].scan_files`, `videoAssets[].media_files` — the other 213 rows feed nothing, see below |
 | `interviews` | 7 | `videoAssets` + the transcripts |
 | `events` | 15 | `exhibitions` (+ `historicalEvents`, 0) |
 | `people` | 29 | `persons` |
@@ -174,6 +174,46 @@ that still describes 21 tables.
 | `places` | 25 | `places` |
 | `collections` | 3 | `collections` |
 | `profiles` | 1 | none — auth. Every RLS policy calls `private.is_curator()`, which reads it |
+
+### `media_assets` is a registry, not an input
+
+**The build does not read it.** Imagery reaches `public/` through `v_media_manifest`, which
+is a `select` straight off `storage.objects` — a bucket listing. `media_assets` answers a
+different question, and the one the estate actually gets asked: *what files does the archive
+hold*. So the right test of a change to it is that the bundle does not move.
+
+It held 68 rows against 270 Storage objects the site serves — only the 56 archival scans and
+the 12 offline video masters, both written by `seed-supabase.mjs` from the seeds. The 87 page
+images, 87 thumbs, 15 retrospective sheets, 12 clips and 12 posters were recorded nowhere.
+`upload-media.mjs` now registers them as it uploads them: 281 rows, and the four buckets the
+site reads are fully accounted for.
+
+Three things to know before touching it:
+
+- **Registration lives in `upload-media.mjs`, not the extractors.** A row's natural key is
+  `(storage_bucket, storage_path)` and that script is the only one that knows a storage path.
+  The extractors are offline one-offs needing `sips`, `ffmpeg` and the 25 GB of masters;
+  making them require credentials would be the wrong trade.
+- **`uuidFor` is in `media.mjs`**, imported by both writers. Every id is RFC 4122 v5 over the
+  row's own key, so a re-run corrects instead of duplicating. Two copies that drifted would
+  double every file on the next restore and nothing else would notice — which is why it sits
+  beside the bucket layout, in the file that exists to be the single definition.
+- **A page's owner is inherited, never recomputed.** Whether an object is an artwork or an
+  article is decided by `isArtwork()` in `seed-supabase.mjs`, off a field only the seed shape
+  carries. Pages and thumbs take the `artwork_id`/`article_id` of the scan they were
+  rasterised from, matched on filename stem; a stem matching no registered scan fails the
+  script rather than being guessed. The retrospective sheets are `MS-AR-00026`'s pages, not a
+  separate kind.
+
+Two deliberate omissions. `clips.json` is a manifest of the assets, not one of them. And the
+61 objects in the leftover `Articles and Media` and `Artwork` buckets stay unregistered —
+they are the reverted schema attempt of 2026-08-29 and are pending deletion, not adoption;
+see BACKLOG.md, and check before deleting.
+
+`npm run db:seed` writes only the 68 seed-derived rows. `upsert` merges and never deletes, so
+a restore leaves the other 213 alone — but on a *fresh* project it will not recreate them.
+`npm run db:media` is what puts those files in Storage in the first place, so the two stay
+paired: run it after a restore.
 
 Six bundle keys are now **typed empty views over no table at all**: `commentary`,
 `commentaryRelations`, `paintingExhibitions`, `paintingHistoricalContext`,

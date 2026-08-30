@@ -180,11 +180,6 @@ Buildable today.
   uses 270 objects across `archive-scans`, `scan-pages`, `retrospective` and `clips`.
   Someone should confirm they duplicate material already held and then delete them — **check
   before deleting**, because `Articles and Media` also held the interview transcript PDFs.
-- **`media_assets` registers 68 of the 331 Storage objects.** The 56 scans and 12 video
-  masters are in the table; the 174 page images, 25 clips and 15 retrospective sheets are
-  found by bucket listing in `scripts/media.mjs` and are recorded nowhere. That works, but it
-  means the registry is not yet the full answer to "what files does the archive hold". Wire
-  `extract-scans.mjs` and `extract-clips.mjs` to register what they produce.
 - **The Python ingest still writes `DataModel/seed/*.json`, which nothing reads.**
   `parse_master_sheet.py` predates the move of the source of record into Supabase, so
   ingesting box 3 by the documented recipe would write files the build ignores. It needs to
@@ -247,6 +242,19 @@ tell you immediately if a correction broke a quote.
 ## Recently completed
 
 For context on what the current shape of the site assumes:
+
+- **`media_assets` now registers everything the site serves** (2026-08-30): 68 rows to 281.
+  The 87 page images, 87 thumbs, 15 retrospective sheets, 12 clips and 12 posters were in
+  Storage and on the site but recorded nowhere, so the registry could not answer "what files
+  does the archive hold". Registration went into `upload-media.mjs` rather than the two
+  extractors the backlog named: a row's natural key is `(storage_bucket, storage_path)` and
+  that script is the only one that knows a storage path, while the extractors are offline
+  one-offs needing `sips`, `ffmpeg` and the 25 GB of masters. `uuidFor` moved to `media.mjs`
+  so both writers derive ids from the same function — a second copy that drifted would double
+  every file on the next restore. The build reads a bucket listing and not this table, so the
+  proof is that the bundle came out **byte-identical**; the export/restore round trip still
+  holds and the 213 new rows survive it. The 61 orphaned bucket objects stay unregistered —
+  they are pending deletion, and that item is still open above.
 
 - **`MIN_PAGES` now sits at the real count** (2026-08-30): 265, not 263 and long since not
   the 60-against-205 this file kept claiming. It is a floor on the exported page count and
