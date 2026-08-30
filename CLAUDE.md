@@ -156,27 +156,29 @@ its body lives in `components/PaintingDetail.tsx`.
 
 ## Backend architecture
 
-**There is no backend.** No server, no database, no API routes, no auth, no runtime data
-fetching. The word "backend" here means a build-time pipeline, and that pipeline is the part
-of this repo most worth understanding.
+**The published site has no backend.** No API routes, no auth, no runtime data fetching:
+`out/` is static HTML that never calls anything. But the archive itself now lives in a
+**Supabase project**, read once at build time, and that pipeline is the part of this repo
+most worth understanding.
 
 ```
-DataModel/Archive Master Sheet.xlsx       ─┐  (six tabs, one per physical box)
-MS-CS-001/Manifest/Manifest_MSCS001.xlsx  ─┤  DataModel/scripts/*.py
-Video Archive/**                          ─┤  (one-shot Python import — re-running
-                                           │   OVERWRITES curator corrections)
-                                           ▼
-                        DataModel/seed/*.json          ← THE SOURCE OF RECORD
+                    Supabase project `Sievan`  ← THE SOURCE OF RECORD
+                    12 tables + Storage           (curator edits here; no local fallback)
                                            │
-                                           │  ajv (draft 2020-12) against
-                                           │  DataModel/data_model.schema.json
-                                           │  additionalProperties: false everywhere
+                                           │  api.v_* views reshape the tables into the
+                                           │  seed shape — THE SEAM. See below.
+                                           ▼
+                        scripts/fetch-data.mjs  +  scripts/media.mjs
+                                           │  · sixteen small view reads, ~300 rows
+                                           │  · syncs Storage into public/, size-skipped
                                            ▼
                         scripts/build-data.mjs
+                                           │  · ajv (draft 2020-12) against
+                                           │    schema/data_model.schema.json
+                                           │    additionalProperties: false everywhere
                                            │  · validates every row, fails on the offending id
                                            │  · parses transcripts into pages/paragraphs
                                            │  · derives facets, timeline, cross-link indexes
-                                           │  · stats + copies scans into public/scans/
                                            │  · writes or deletes app/works/[paintingId]/
                                            ▼
         data/archive.generated.json  +  data/transcripts/*.json     ← COMMITTED
@@ -184,6 +186,41 @@ Video Archive/**                          ─┤  (one-shot Python import — re
                                            │  plain `import` at build time. Never fetched.
                                            ▼
                  lib/data.ts → Server Components → static HTML in out/
+```
+
+**`api.v_*` is the seam, and it is why the database can be restructured without touching
+the site.** `fetch-data.mjs` reads views, never base tables, and each view emits exactly the
+shape `build-data.mjs` and the JSON Schema expect. When the 21-table entity model was
+consolidated into today's twelve on 2026-08-30, not one line of `app/`, `lib/` or
+`components/` changed: the views absorbed the whole reshape and
+`scripts/check-parity.mjs` proved the emitted bundle byte-identical. **Run that gate on any
+schema change** — it walks every entity row and all 23 derived indexes:
+
+```bash
+cp data/archive.generated.json /tmp/baseline.json   # BEFORE
+npm run data                                        # after the migration
+node scripts/check-parity.mjs /tmp/baseline.json    # must report no difference
+```
+
+Two rules the views enforce that are easy to break:
+
+- **Never `select *`.** `additionalProperties: false` means one leaked `created_at` fails
+  ajv on every row of that table. Each view lists its columns. A `UNION` is the trap:
+  ordering one requires the sort column in the select list, so `api.v_archive_objects`
+  wraps the union in a subquery to keep `sort_order` out of the emitted row.
+- **`coalesce(jsonb_agg(...), '[]')` everywhere**, because `jsonb_agg` returns NULL for an
+  empty set and `scan_files` is required. `jsonb_strip_nulls` is used on `place_refs` and
+  nowhere else: `certain` is absent on 33 of 37 rows, which is not the same as false.
+
+**The escape hatch, and it must keep working.** `scripts/export-seeds.mjs` dumps the live
+database back out as seed-shaped JSON, and `scripts/seed-supabase.mjs` reads it back in.
+Between them the archive can leave this hosting account. They are inverses, so the test is
+the round trip — run it after touching either:
+
+```bash
+node scripts/export-seeds.mjs --out /tmp/a
+node scripts/seed-supabase.mjs --from /tmp/a/seed --transcripts /tmp/a/transcripts
+node scripts/export-seeds.mjs --out /tmp/b && diff -rq /tmp/a /tmp/b
 ```
 
 Then three gates, in order — `npm run data` runs the first two, `npm run build` the third:
@@ -244,20 +281,45 @@ Two things that will bite:
 
 ### The entity model
 
-16 entity tables in the bundle. **Seven are empty**, and everything downstream of them is
-dormant rather than broken:
+**The database and the bundle are shaped differently on purpose**, and `api.v_*` maps
+between them. Read this table left to right: it is also the map from any older document
+that still describes 21 tables.
 
-| Populated | | Empty | |
-|---|---:|---|---:|
-| `archiveObjects` | 76 | `paintings` | 0 |
-| `newsArticles` | 60 | `commentary` | 0 |
-| `attestedWorks` | 57 | `commentaryRelations` | 0 |
-| `publications` | 30 | `paintingExhibitions` | 0 |
-| `persons` | 29 | `paintingHistoricalContext` | 0 |
-| `places` | 25 | `historicalEvents` | 0 |
-| `exhibitions` | 15 | `scholarship` | 0 |
-| `videoAssets` | 7 | | |
-| `collections` | 3 | | |
+| Supabase table | Rows | The bundle keys it feeds |
+|---|---:|---|
+| `artworks` | 25 | `archiveObjects` (the 25 drawings) **and** `paintings` (0) |
+| `articles` | 111 | `archiveObjects` (the 51 documents) **and** `newsArticles` (60) |
+| `artwork_mentions` | 57 | `attestedWorks` |
+| `artwork_mention_places` | 37 | `attestedWorks[].place_refs` |
+| `media_assets` | 68 | `archiveObjects[].scan_files`, `videoAssets[].media_files` |
+| `interviews` | 7 | `videoAssets` + the transcripts |
+| `events` | 15 | `exhibitions` (+ `historicalEvents`, 0) |
+| `people` | 29 | `persons` |
+| `publications` | 30 | `publications` |
+| `places` | 25 | `places` |
+| `collections` | 3 | `collections` |
+| `profiles` | 1 | none — auth. Every RLS policy calls `private.is_curator()`, which reads it |
+
+Six bundle keys are now **typed empty views over no table at all**: `commentary`,
+`commentaryRelations`, `paintingExhibitions`, `paintingHistoricalContext`,
+`historicalEvents`, `scholarship`. They held 0 rows, and the tables were retired rather
+than kept as furniture. The keys survive so `DEFS` in `build-data.mjs` and the dormant
+sections of `components/Relations.tsx` resolve unchanged. When the archive actually has
+commentary or scholarship to record, the table comes back as a real one — introduced
+because content requires it, not in advance of it.
+
+**Two tables are partitioned, and the partitions are load-bearing.** `artworks.artwork_type`
+splits `'drawing'` (25, → `archiveObjects`) from `'painting'` (0, → `paintings`), and
+`articles.article_type` splits the containers from `'press_notice'`. That is what keeps
+`counts.worksOnPaperCatalogued = 25` and `counts.paintings = 0` from ever being added
+together — the merge into one table must not make summing them easy.
+
+**Do not "finish" the consolidation by deleting `publications`, `places` or `collections`.**
+A seven-table proposal in circulation says to; it has nowhere to put them and did not
+account for what the site renders. `/places/*` is 26 pages, `/archive/publications/*` is 31,
+`/archive/` groups by collection, and `artwork_mention_places` carries 37 role-typed
+attestations — a place a work *depicts* is not a place it was *shown*. `profiles` is not
+mentioned in that document at all, and dropping it locks every curator out.
 
 **`AttestedWork` is not `Painting`, and the distinction is the point.** An attested work is a
 painting a source *names* — box 2 is Sievan's own sketches of finished canvases, annotated

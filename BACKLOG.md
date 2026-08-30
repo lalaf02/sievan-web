@@ -178,6 +178,22 @@ Buildable today.
 - **OCR the scans.** They have no text layer, so search reaches catalogue records and
   transcripts but never the words printed inside a clipping. Every search box says so. This is
   the single change that would most improve the archive's usefulness to researchers.
+- **61 orphaned objects in Supabase Storage.** The `Articles and Media` (36) and `Artwork`
+  (25) buckets are left over from a schema attempt of 2026-08-29 that was reverted the next
+  day. Nothing in the database registers them and nothing in the build reads them; the site
+  uses 270 objects across `archive-scans`, `scan-pages`, `retrospective` and `clips`.
+  Someone should confirm they duplicate material already held and then delete them — **check
+  before deleting**, because `Articles and Media` also held the interview transcript PDFs.
+- **`media_assets` registers 68 of the 331 Storage objects.** The 56 scans and 12 video
+  masters are in the table; the 174 page images, 25 clips and 15 retrospective sheets are
+  found by bucket listing in `scripts/media.mjs` and are recorded nowhere. That works, but it
+  means the registry is not yet the full answer to "what files does the archive hold". Wire
+  `extract-scans.mjs` and `extract-clips.mjs` to register what they produce.
+- **The Python ingest still writes `DataModel/seed/*.json`, which nothing reads.**
+  `parse_master_sheet.py` predates the move of the source of record into Supabase, so
+  ingesting box 3 by the documented recipe would write files the build ignores. It needs to
+  write to the database — or to emit seeds that `scripts/seed-supabase.mjs` then loads,
+  which already works and is tested by the export/restore round trip.
 
 ---
 
@@ -236,6 +252,18 @@ tell you immediately if a correction broke a quote.
 ## Recently completed
 
 For context on what the current shape of the site assumes:
+
+- **Supabase consolidated from 21 tables to 12** (2026-08-30): the seven-table core
+  `artworks · artwork_mentions · articles · interviews · media_assets · people · events`,
+  plus `publications`, `places`, `collections` and `artwork_mention_places`, which the
+  proposal that prompted the work had nowhere to put and the site renders. `profiles` is
+  untouched. Every one of ~370 rows kept a home, the `api.v_*` views absorbed the entire
+  reshape, and no application code changed — `check-parity.mjs` reported the bundle
+  byte-identical and all 265 exported pages came out the same. Seven empty tables were
+  retired; six bundle keys survive as typed empty views. Two defects surfaced on the way:
+  the export/restore round trip was broken (transcripts were written under one filename and
+  looked for under another), and `media_assets` had no natural key, so restoring the
+  archive's own backup would have doubled every scan. Both fixed
 
 - **The catalogue's five periods** (`/works/periods/` + five committed period routes):
   the artwork ordered chronologically for the first time. Periods derive from
