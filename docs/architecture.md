@@ -133,9 +133,10 @@ scripts/                 the build pipeline and its gates
   extract-scans.mjs  extract-clips.mjs  extract-retrospective.mjs
 
 data/                    GENERATED, COMMITTED — archive.generated.json + transcripts/
-public/scans/            GENERATED, COMMITTED — 150 MB, 56 PDFs + 102 page images
+public/scans/            GENERATED, COMMITTED — 171 MB. 56 scans (55 PDFs and one
+                         JPG) + 87 page images + 87 thumbs
 public/retrospective/    committed — 15 catalogue page scans
-public/clips/            committed — 1.7 MB of silent video loops
+public/clips/            committed — 12 silent video loops (4.8 MB) + their posters
 
 DataModel/               staging + parsers — gitignored. NOT the source of record;
                          Supabase is. Only seed-supabase.mjs reads it, as its default

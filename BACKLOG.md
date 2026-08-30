@@ -241,14 +241,19 @@ tell you immediately if a correction broke a quote.
   YouTube/Vimeo (cheap, third-party dependency in an archive designed to outlive its host),
   Cloudflare Stream (paid, controlled), or the current answer — short committed excerpts.
 - **Should `.claude/` be tracked?** Currently untracked, deliberately left as a local decision.
-- **Raise `MIN_PAGES`.** It defaults to 60 against 205 real pages, so it only catches
-  catastrophic collapse. See trap #4 in [docs/verification.md](./docs/verification.md).
 
 ---
 
 ## Recently completed
 
 For context on what the current shape of the site assumes:
+
+- **`MIN_PAGES` now sits at the real count** (2026-08-30): 265, not 263 and long since not
+  the 60-against-205 this file kept claiming. It is a floor on the exported page count and
+  the only gate that catches a `generateStaticParams` returning `[]`, so trailing the truth
+  by two meant two route families could vanish unnoticed. **Raise it with any new route
+  family, and lower it deliberately** — a drop should have to be typed. Trap #4 in
+  [docs/verification.md](./docs/verification.md).
 
 - **`personMentions` extended to the transcripts** (2026-08-30): `personTranscriptMentions`
   connects three people to seven interviews — Sievan across all five transcripts (34 pages),

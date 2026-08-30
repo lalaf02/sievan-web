@@ -910,11 +910,15 @@ if (data.paintings.length > 0) {
 /*
  * app/places/[placeId]/ is COMMITTED, not generated like the painting route above.
  *
- * Its rows ship inside the committed bundle, so it is never empty on Vercel — where
- * this script exits early because DataModel/ is absent and would therefore never
- * write a generated route file at all, leaving every /places/ link a 404. The cost
- * of committing it is that an emptied seed becomes an opaque Next error, so fail
- * here instead, where the message can say what to do about it.
+ * Its rows ship inside the committed bundle, so the route is never empty on a machine
+ * that has the repo — which is the whole reason to commit it rather than generate it,
+ * since a generated route file would have to survive a checkout to be any use. The
+ * cost is that an emptied seed becomes an opaque Next error, so fail here instead,
+ * where the message can say what to do about it.
+ *
+ * This used to say the route was committed because the script "exits early on Vercel,
+ * where DataModel/ is absent". That branch is gone — see the header above, and trap 1
+ * in docs/verification.md. There is no build without Supabase, on Vercel or anywhere.
  */
 if (data.places.length === 0
   && existsSync(join(WEB, 'app', 'places', '[placeId]', 'page.tsx'))) {
