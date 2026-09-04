@@ -21,7 +21,7 @@
   width: 100%;
   height: auto;
   border: 1px solid var(--rule-strong);
-  background: var(--paper-deep);
+  background: var(--surface-raised);
   display: block;
 }
 
@@ -33,7 +33,7 @@
   justify-content: center;
   padding: var(--s-7) var(--s-5);
   border: 1px solid var(--rule-strong);
-  background: var(--paper-deep);
+  background: var(--surface-raised);
   text-decoration: none;
   font-family: var(--sans);
   text-align: center;

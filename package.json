@@ -15,9 +15,11 @@
     "db:seed": "node scripts/seed-supabase.mjs",
     "db:export": "node scripts/export-seeds.mjs",
     "db:media": "node scripts/upload-media.mjs",
-    "db:parity": "node scripts/check-parity.mjs"
+    "db:parity": "node scripts/check-parity.mjs",
+    "design:sync": "rsync -a --delete --exclude .git --exclude node_modules ../sievan-design/ node_modules/@sievan/design/"
   },
   "dependencies": {
+    "@sievan/design": "github:lalaf02/sievan-design#v1.0.0",
     "next": "16.2.12",
     "react": "19.2.4",
     "react-dom": "19.2.4"

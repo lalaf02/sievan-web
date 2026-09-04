@@ -1,8 +1,11 @@
 import type { Metadata } from 'next';
 import { Source_Serif_4, Inter } from 'next/font/google';
+import '@sievan/design/tokens.css';
+import '@sievan/design/primitives.css';
 import './globals.css';
 import { SiteHeader } from '@/components/SiteHeader';
 import { SiteFooter } from '@/components/SiteFooter';
+import { themeScript } from '@sievan/design';
 
 const serif = Source_Serif_4({
   variable: '--font-serif',
@@ -42,7 +45,16 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${serif.variable} ${sans.variable}`}>
+    <html lang="en" className={`${serif.variable} ${sans.variable}`} suppressHydrationWarning>
+      <head>
+        {/*
+          Restores an explicit light choice before first paint. Dark is the
+          default and carries no attribute, so the prerendered HTML is already
+          correct for everyone who has not chosen otherwise, and this only ever
+          runs to prevent a flash for those who have.
+        */}
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+      </head>
       <body>
         <SiteHeader />
         <main id="main" style={{ flex: 1, paddingBottom: 'var(--s-8)' }}>

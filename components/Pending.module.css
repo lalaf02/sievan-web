@@ -64,7 +64,7 @@
 /* ---------------------------------------------------- the shape of a record */
 
 .fields {
-  background: var(--paper);
+  background: var(--surface-ground);
   border: 1px dashed var(--rule-strong);
   padding: var(--s-4);
 }

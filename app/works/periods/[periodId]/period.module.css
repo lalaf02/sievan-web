@@ -68,7 +68,7 @@
 
 .sourceMedia {
   display: block;
-  background: var(--paper-deep);
+  background: var(--surface-raised);
   border: 1px solid var(--rule);
 }
 
@@ -181,7 +181,7 @@
   gap: var(--s-1);
   padding: var(--s-4);
   border: 1px solid var(--rule);
-  background: var(--paper-deep);
+  background: var(--surface-raised);
   text-decoration: none;
   margin: 0;
 }

@@ -20,7 +20,7 @@
   padding: var(--s-2) var(--s-3);
   border: 1px solid var(--rule-strong);
   border-radius: 2px;
-  background: var(--paper);
+  background: var(--surface-ground);
   color: var(--ink);
   margin-bottom: var(--s-5);
 }

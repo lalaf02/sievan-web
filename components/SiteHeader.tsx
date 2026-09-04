@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { ThemeToggle } from '@sievan/design';
 import styles from './SiteHeader.module.css';
 
 /**
@@ -66,6 +67,8 @@ export function SiteHeader() {
             autoComplete="off"
           />
         </form>
+
+        <ThemeToggle className={styles.theme} />
       </div>
     </header>
   );

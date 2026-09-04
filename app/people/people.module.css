@@ -1,7 +1,7 @@
 .subject {
   display: block;
   border: 1px solid var(--rule-strong);
-  background: var(--paper-deep);
+  background: var(--surface-raised);
   padding: var(--s-5);
   margin-bottom: var(--s-7);
   text-decoration: none;

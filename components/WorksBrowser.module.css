@@ -36,7 +36,7 @@
 
 .viewBtn:first-child { border-radius: 2px 0 0 2px; }
 .viewBtn:last-child { border-radius: 0 2px 2px 0; }
-.viewOn { background: var(--oxide); border-color: var(--oxide); color: var(--paper); }
+.viewOn { background: var(--oxide); border-color: var(--oxide); color: var(--surface-ground); }
 
 .table {
   width: 100%;
@@ -86,7 +86,7 @@
   width: 100%;
   height: auto;
   border: 1px solid var(--rule);
-  background: var(--paper-deep);
+  background: var(--surface-raised);
   display: block;
 }
 
@@ -96,7 +96,7 @@
   justify-content: center;
   aspect-ratio: 4 / 5;
   border: 1px dashed var(--rule-strong);
-  background: var(--paper-deep);
+  background: var(--surface-raised);
   font-family: var(--sans);
   font-size: var(--t-xs);
   color: var(--ink-faint);
@@ -119,7 +119,7 @@
   font-family: var(--sans);
   font-size: var(--t-xs);
   color: var(--ink);
-  background: var(--paper);
+  background: var(--surface-ground);
   border: 1px solid var(--rule);
   border-radius: 2px;
   padding: var(--s-1) var(--s-2);

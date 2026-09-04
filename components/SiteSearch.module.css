@@ -18,7 +18,7 @@
   font-family: var(--serif);
   font-size: var(--t-md);
   color: var(--ink);
-  background: var(--paper);
+  background: var(--surface-ground);
   border: 1px solid var(--rule-strong);
   border-radius: 2px;
   padding: var(--s-3) var(--s-4);

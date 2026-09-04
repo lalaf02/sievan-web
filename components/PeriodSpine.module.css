@@ -24,7 +24,7 @@
 .band {
   position: relative;
   min-width: 0;
-  background: var(--paper-deep);
+  background: var(--surface-raised);
   border: 1px solid var(--rule);
   /* Was --s-3 all round. Half the vertical padding, same horizontal. */
   padding: var(--s-2) var(--s-3);
@@ -42,7 +42,7 @@
 
 /* The period whose page you are on. */
 .current {
-  background: var(--paper-sunk);
+  background: var(--surface-sunk);
   border-color: var(--oxide);
 }
 
@@ -133,7 +133,7 @@
   font-family: var(--sans);
   font-size: var(--t-xs);
   line-height: 1.4;
-  color: var(--paper);
+  color: var(--surface-ground);
   background: var(--ink);
   padding: var(--s-1) var(--s-2);
 }

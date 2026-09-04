@@ -21,7 +21,7 @@
   gap: var(--s-2);
   height: 100%;
   border: 1px solid var(--rule-strong);
-  background: var(--paper-deep);
+  background: var(--surface-raised);
   padding: var(--s-4);
   text-decoration: none;
   color: inherit;

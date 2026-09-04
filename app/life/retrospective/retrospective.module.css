@@ -23,7 +23,7 @@
   width: 100%;
   height: auto;
   border: 1px solid var(--rule-strong);
-  background: var(--paper-deep);
+  background: var(--surface-raised);
   display: block;
 }
 
@@ -129,7 +129,7 @@
   display: block;
   position: relative;
   border: 1px solid var(--rule);
-  background: var(--paper-deep);
+  background: var(--surface-raised);
   transition: border-color 150ms;
 }
 
@@ -143,7 +143,7 @@
   right: 0;
   font-family: var(--sans);
   font-size: var(--t-xs);
-  background: var(--paper);
+  background: var(--surface-ground);
   border-top: 1px solid var(--rule);
   border-left: 1px solid var(--rule);
   padding: 0.1em 0.4em;

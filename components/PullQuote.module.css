@@ -3,7 +3,7 @@
 .quote {
   margin: 0;
   padding: var(--s-4);
-  background: var(--paper-deep);
+  background: var(--surface-raised);
   border-left: 3px solid var(--oxide);
 }
 

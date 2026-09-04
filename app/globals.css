@@ -1,158 +1,26 @@
 /*
- * Design tokens and base styles.
+ * App-level layout and the typographic utilities the route stylesheets compose.
  *
- * This is a typographic site: the archive has almost no photography, so the type
- * and the documents themselves carry the design. Colours are derived from paper
- * rather than a palette generator, and there is exactly one accent.
+ * Tokens, base element styles and the shared primitives live in @sievan/design
+ * and are imported ahead of this file in app/layout.tsx. Nothing here may
+ * declare a raw colour, size or duration — see the package's DESIGN.md.
  */
 
-:root {
-  /* Paper */
-  --paper: #f8f5ef;
-  --paper-deep: #efe9de;
-  --paper-sunk: #e7e0d2;
-  --ink: #17150f;
-  --ink-muted: #6b6455;
-  --ink-faint: #948b78;
-  --rule: #d8d0c0;
-  --rule-strong: #bcb2a0;
-
-  /* One accent, plus a flag colour used only for review markers */
-  --oxide: #8c3a22;
-  --oxide-soft: #b8563a;
-  --flag: #a67c00;
-
-  /* Type */
-  --serif: var(--font-serif), Iowan Old Style, Palatino, Georgia, serif;
-  --sans: var(--font-sans), -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif;
-  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-
-  /* 1.25 scale */
-  --t-xs: 0.7rem;
-  --t-sm: 0.8rem;
-  --t-base: 0.95rem;
-  --t-body: 1.1rem;
-  --t-md: 1.25rem;
-  --t-lg: 1.6rem;
-  --t-xl: 2.1rem;
-  --t-2xl: 2.8rem;
-
-  /* Space */
-  --s-1: 0.25rem;
-  --s-2: 0.5rem;
-  --s-3: 0.75rem;
-  --s-4: 1rem;
-  --s-5: 1.5rem;
-  --s-6: 2rem;
-  --s-7: 3rem;
-  --s-8: 4.5rem;
-
-  --measure: 68ch;
-  --page: 1400px;
-
-  /*
-   * The four breakpoints. These are documented rather than tokenised because CSS
-   * custom properties cannot be used in a media query. They are still the scale:
-   * a stylesheet uses one of these four values and no other.
-   *
-   *   1020px  the wide layouts give up their second column
-   *    860px  rails un-stick and grids collapse to one track
-   *    620px  small-screen type and padding
-   *    560px  the tightest tile grids go single-file
-   *
-   * Three one-off values (1180 / 1080 / 640) had drifted in, each within 60px of a
-   * tier and none of them justified. They were folded into the nearest one.
-   */
-  /*
-   * Wider than --page, for the one layout that is two real columns of content rather
-   * than a prose measure with a rail beside it. /life/ sets a biography against the
-   * record it rests on, and at 1400px the two columns crowd each other.
-   *
-   * Sized to what actually goes in it, not to the monitor: a ~64rem narrative column
-   * (a measure of prose plus room for a floated aside beside it), a 22rem rail, and
-   * the gutter between them. At 1680px the two tracks could not fill the width and
-   * left a 600px hole down the middle of the page.
-   */
-  --page-wide: 1500px;
-  --rail: 250px;
-  /*
-   * Record pages — one width for one class of page. They previously hardcoded
-   * 48/50/52/54rem inline, four widths for the same thing, none of them a token.
-   */
-  --measure-record: 52rem;
-}
-
-*, *::before, *::after { box-sizing: border-box; }
-
-html {
-  -webkit-text-size-adjust: 100%;
-  height: 100%;
-  /*
-   * Reserve the scrollbar gutter always, so a short page and a long one are laid out
-   * to the same width and navigating between them does not shift the type sideways.
-   * (This once existed to support a .bleed utility that ran media bands the full
-   * width of the window. That class was removed as dead code — nothing had used it
-   * for some time — but the property earns its place on its own.)
-   */
-  scrollbar-gutter: stable;
-  /*
-   * clip, not hidden. `overflow: hidden` would make html a scroll container and break
-   * every `position: sticky` on the site — the transcript rail, the research contents,
-   * the chronology's year labels. `clip` trims the overhang without that side effect.
-   */
-  overflow-x: clip;
-}
-
+/*
+ * The sticky-footer column. The package sets background, colour and type on
+ * body; this is the one app-specific thing about it.
+ */
 body {
-  margin: 0;
-  min-height: 100%;
   display: flex;
   flex-direction: column;
-  background: var(--paper);
-  color: var(--ink);
-  font-family: var(--serif);
-  font-size: var(--t-body);
-  line-height: 1.6;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
 }
 
-h1, h2, h3, h4 {
-  font-family: var(--serif);
-  font-weight: 600;
-  line-height: 1.2;
-  margin: 0 0 var(--s-4);
-  letter-spacing: -0.011em;
-}
-
-h1 { font-size: var(--t-xl); }
-h2 { font-size: var(--t-lg); }
-h3 { font-size: var(--t-md); }
-h4 { font-size: var(--t-base); }
-
-p { margin: 0 0 var(--s-4); }
-
-ul, ol { margin: 0 0 var(--s-4); padding-left: 1.2em; }
-
-a {
-  color: var(--oxide);
-  text-decoration-color: color-mix(in srgb, var(--oxide) 35%, transparent);
-  text-underline-offset: 0.16em;
-}
-a:hover { text-decoration-color: currentColor; }
-
-:focus-visible {
-  outline: 2px solid var(--oxide);
-  outline-offset: 2px;
-  border-radius: 2px;
-}
-
-hr {
-  border: 0;
-  border-top: 1px solid var(--rule);
-  margin: var(--s-6) 0;
-}
+/* ═════════════════════════════════════════════════════ typographic utilities
+ *
+ * These names are used by all 42 route and component stylesheets. They are the
+ * unprefixed, public-site spelling of the package's .sv-* primitives; a route
+ * stylesheet composes them and does not restate them.
+ */
 
 /* Interface type: filters, labels, counts, metadata */
 .ui {
@@ -176,11 +44,16 @@ hr {
   color: var(--ink-muted);
 }
 
+/*
+ * The small line above a heading. Now set in the package's label voice — small,
+ * heavy and opened up — which is one half of the type hierarchy.
+ */
 .eyebrow {
   font-family: var(--sans);
-  font-size: var(--t-xs);
+  font-size: var(--t-2xs);
+  font-weight: var(--w-bold);
   text-transform: uppercase;
-  letter-spacing: 0.09em;
+  letter-spacing: var(--tracking-label);
   color: var(--ink-faint);
   margin: 0 0 var(--s-2);
 }
@@ -202,11 +75,13 @@ hr {
 .faint { color: var(--ink-faint); }
 .measure { max-width: var(--measure); }
 
-/*
- * The standard page frame. `padding-top` lives here rather than at the call site:
- * it had been written inline as `style={{ paddingTop: 'var(--s-6)' }}` on 23 of the
- * 25 routes that use this class, which is a default wearing the costume of a choice.
- * The two routes that genuinely differ override it below.
+/* ═════════════════════════════════════════════════════════════════ page frames
+ *
+ * Use these; never set a width at the call site. `padding-top` lives here rather
+ * than at the call site: it had been written inline as
+ * `style={{ paddingTop: 'var(--s-6)' }}` on 23 of the 25 routes that use .page,
+ * which is a default wearing the costume of a choice. The two routes that
+ * genuinely differ override it below.
  */
 .page {
   width: 100%;
@@ -234,11 +109,9 @@ hr {
 
 /*
  * A record page: the header, facts and prose of a single catalogued thing.
- *
- * Use this for every record page. Seven of them used to set the width inline instead
- * — 48rem twice, 50rem twice, 52rem three times — four widths for one class of page,
- * which is the drift --measure-record was introduced to end and did not, because the
- * class was never applied. Do not reintroduce a width at the call site.
+ * Seven of them used to set the width inline — 48rem twice, 50rem twice, 52rem
+ * three times, four widths for one class of page. Do not reintroduce a width at
+ * the call site.
  */
 .record {
   width: 100%;
@@ -265,22 +138,4 @@ hr {
 @media (max-width: 860px) {
   .railLayout { grid-template-columns: 1fr; gap: var(--s-5); }
   .rail { position: static; }
-}
-
-/* Archives should feel still. */
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
-}
-
-::selection { background: color-mix(in srgb, var(--oxide) 22%, transparent); }
-
-mark {
-  background: color-mix(in srgb, var(--flag) 32%, transparent);
-  color: inherit;
-  padding: 0 0.1em;
-  border-radius: 2px;
 }
