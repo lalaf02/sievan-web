@@ -19,7 +19,7 @@
     "design:sync": "rsync -a --delete --exclude .git --exclude node_modules ../sievan-design/ node_modules/@sievan/design/"
   },
   "dependencies": {
-    "@sievan/design": "github:lalaf02/sievan-design#v1.0.0",
+    "@sievan/design": "github:lalaf02/sievan-design#v1.1.0",
     "next": "16.2.12",
     "react": "19.2.4",
     "react-dom": "19.2.4"

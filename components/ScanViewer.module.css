@@ -20,9 +20,10 @@
 .sheet {
   width: 100%;
   height: auto;
-  border: 1px solid var(--rule-strong);
-  background: var(--surface-raised);
   display: block;
+  background: var(--surface-sunk);
+  border-radius: var(--radius-frame);
+  box-shadow: var(--frame-glow);
 }
 
 .heavy {

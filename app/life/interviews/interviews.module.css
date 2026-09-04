@@ -22,6 +22,8 @@
   height: 100%;
   border: 1px solid var(--rule-strong);
   background: var(--surface-raised);
+  border-radius: var(--radius);
+  box-shadow: var(--elevation-1);
   padding: var(--s-4);
   text-decoration: none;
   color: inherit;

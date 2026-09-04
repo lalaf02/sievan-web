@@ -51,8 +51,10 @@
 
 .periodMedia {
   display: block;
-  background: var(--surface-raised);
-  border: 1px solid var(--rule);
+  background: var(--surface-sunk);
+  border-radius: var(--radius-frame);
+  box-shadow: var(--frame-glow);
+  transition: box-shadow var(--dur-standard) var(--ease-out);
 }
 
 .periodMedia img {
@@ -61,7 +63,7 @@
   height: auto;
 }
 
-.periodMedia:hover { border-color: var(--oxide); }
+.periodMedia:hover { box-shadow: var(--frame-glow), var(--elevation-2); }
 
 .periodBody { padding-top: var(--s-3); }
 

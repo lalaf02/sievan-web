@@ -85,10 +85,14 @@
 .card img {
   width: 100%;
   height: auto;
-  border: 1px solid var(--rule);
-  background: var(--surface-raised);
   display: block;
+  background: var(--surface-sunk);
+  border-radius: var(--radius-frame);
+  box-shadow: var(--frame-glow);
+  transition: box-shadow var(--dur-standard) var(--ease-out);
 }
+
+.card:hover img { box-shadow: var(--frame-glow), var(--elevation-2); }
 
 .noImage {
   display: flex;
@@ -96,7 +100,8 @@
   justify-content: center;
   aspect-ratio: 4 / 5;
   border: 1px dashed var(--rule-strong);
-  background: var(--surface-raised);
+  border-radius: var(--radius-frame);
+  background: var(--surface-sunk);
   font-family: var(--sans);
   font-size: var(--t-xs);
   color: var(--ink-faint);

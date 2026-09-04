@@ -64,8 +64,10 @@
   display: block;
   width: 100%;
   height: auto;
-  border: 1px solid var(--rule);
-  background: var(--surface-raised);
+  background: var(--surface-sunk);
+  border-radius: var(--radius-frame);
+  box-shadow: var(--frame-glow);
+  transition: box-shadow var(--dur-standard) var(--ease-out);
 }
 
 .pageNo {

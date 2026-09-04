@@ -65,9 +65,11 @@
 
 .cardMedia {
   display: block;
-  background: var(--surface-raised);
-  border: 1px solid var(--rule);
   aspect-ratio: 4 / 3;
+  background: var(--surface-sunk);
+  border-radius: var(--radius-frame);
+  box-shadow: var(--frame-glow);
+  transition: box-shadow var(--dur-standard) var(--ease-out);
   overflow: hidden;
 }
 
