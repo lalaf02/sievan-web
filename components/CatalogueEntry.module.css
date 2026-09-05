@@ -25,9 +25,11 @@
 
 .entryMedia {
   display: block;
-  border: 1px solid var(--rule);
-  background: var(--paper-deep);
   aspect-ratio: 4 / 5;
+  background: var(--surface-sunk);
+  border-radius: var(--radius-frame);
+  box-shadow: var(--frame-glow);
+  transition: box-shadow var(--dur-standard) var(--ease-out);
   overflow: hidden;
 }
 

@@ -15,7 +15,7 @@
   /* Bottom margin matters: the next Section's heading rule sat flush against it. */
   margin: var(--s-5) 0 var(--s-6);
   padding: var(--s-4) var(--s-5);
-  background: var(--paper-deep);
+  background: var(--surface-raised);
   border-left: 3px solid var(--oxide);
   max-width: var(--measure);
 }

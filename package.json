@@ -6,7 +6,7 @@
     "data": "node scripts/build-data.mjs && node scripts/check-data.mjs && node --no-warnings=MODULE_TYPELESS_PACKAGE_JSON scripts/check-quotes.mjs",
     "predev": "npm run data",
     "dev": "next dev",
-    "prebuild": "npm run data",
+    "prebuild": "node scripts/check-design.mjs && npm run data",
     "build": "next build",
     "postbuild": "node scripts/check-export.mjs",
     "start": "next start",
@@ -15,7 +15,9 @@
     "db:seed": "node scripts/seed-supabase.mjs",
     "db:export": "node scripts/export-seeds.mjs",
     "db:media": "node scripts/upload-media.mjs",
-    "db:parity": "node scripts/check-parity.mjs"
+    "db:parity": "node scripts/check-parity.mjs",
+    "design:sync": "node scripts/sync-design.mjs",
+    "design:check": "node scripts/check-design.mjs"
   },
   "dependencies": {
     "next": "16.2.12",

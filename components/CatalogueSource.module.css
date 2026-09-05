@@ -19,7 +19,7 @@
 }
 
 .panel {
-  background: var(--paper);
+  background: var(--surface-ground);
   border: 1px solid var(--rule-strong);
   max-height: 92vh;
   display: flex;
@@ -64,8 +64,10 @@
   display: block;
   width: 100%;
   height: auto;
-  border: 1px solid var(--rule);
-  background: var(--paper-deep);
+  background: var(--surface-sunk);
+  border-radius: var(--radius-frame);
+  box-shadow: var(--frame-glow);
+  transition: box-shadow var(--dur-standard) var(--ease-out);
 }
 
 .pageNo {

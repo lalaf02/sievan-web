@@ -1,6 +1,12 @@
 /*
  * The two things the archive can actually show: a scanned sheet, and a silent loop.
  * Both are used inside a Mosaic tile, so both fill the tile they are given.
+ *
+ * On the dark wall this is the mat a reproduction hangs in, and it is the object
+ * the redesign turns on. The picture sits on the sunk surface so the mat reads as
+ * recessed and the image as lit; --frame-glow is the hairline plus the spill
+ * around it, and it is defined per theme in the package so that light mode gets a
+ * real shadow rather than this one recoloured.
  */
 
 .frame {
@@ -13,9 +19,11 @@
    * the standard-definition footage.
    */
   aspect-ratio: var(--aspect, 720 / 486);
-  border: 1px solid var(--rule);
-  background: var(--paper-deep);
+  background: var(--surface-sunk);
+  border-radius: var(--radius-frame);
+  box-shadow: var(--frame-glow);
   overflow: hidden;
+  transition: box-shadow var(--dur-standard) var(--ease-out);
 }
 
 /* Sheets are documents: show the whole sheet, never crop the masthead off. */
@@ -42,9 +50,13 @@
   margin: 0;
 }
 
-/* A link tile darkens its sheet very slightly on hover — the only affordance needed. */
+/*
+ * A link tile lifts toward the reader. It used to only dim its own contents by 8%,
+ * which on paper was subtle and on a dark wall is invisible — dimming an image
+ * that is already the brightest thing in the room reads as nothing at all.
+ */
 a.frame { text-decoration: none; }
-a.frame:hover .sheet, a.frame:hover .footage { opacity: 0.92; }
+a.frame:hover { box-shadow: var(--frame-glow), var(--elevation-2); }
 
 @media (prefers-reduced-motion: reduce) {
   a.frame:hover .sheet, a.frame:hover .footage { opacity: 1; }
@@ -63,15 +75,17 @@ a.frame:hover .sheet, a.frame:hover .footage { opacity: 0.92; }
   gap: var(--s-1);
   padding: var(--s-4);
   border: 1px dashed var(--rule-strong);
-  background: transparent;
+  border-radius: var(--radius-frame);
+  background: var(--surface-sunk);
   text-align: center;
 }
 
 .absentTitle {
   font-family: var(--sans);
-  font-size: var(--t-xs);
+  font-size: var(--t-2xs);
+  font-weight: var(--w-bold);
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: var(--tracking-label);
   color: var(--ink-faint);
 }
 

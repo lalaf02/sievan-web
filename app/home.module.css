@@ -1,7 +1,11 @@
 /*
  * The front page: four movements, each a full-width band separated by a hairline.
  *
- * One accent colour (--oxide), no tinted panels, and no block that is only a shape.
+ * It now opens on a dark wall, and the rule that follows from that is: the art is
+ * the only lit thing here. Type recedes into the room — the name is set large and
+ * thin rather than large and heavy — and nothing but a frame carries elevation.
+ *
+ * One primary accent (--oxide), no tinted panels, and no block that is only a shape.
  * The page was a twelve-column mosaic of six independent tiles; the trouble with it
  * was not the grid but that each tile argued its own case, so the quotes sat at full
  * width between the pictures and read as punctuation rather than as evidence. Here a
@@ -15,19 +19,26 @@
   /* Footage left, words right — the brief's arrangement, and the right one: the one
      moving image of the man is the strongest thing the archive owns. */
   grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
-  gap: var(--s-7);
+  gap: var(--s-8);
   align-items: center;
-  padding: var(--s-7) 0 var(--s-8);
+  padding: var(--s-8) 0 var(--s-9);
 }
 
 .heroMedia { min-width: 0; }
 .heroText { min-width: 0; }
 
+/*
+ * The name, in the display voice: large, thin, pulled tight. The old setting was
+ * --t-2xl at the body weight, which made it merely the biggest of several things
+ * all set at weight 600. Half the hierarchy on this page is the distance between
+ * this and .eyebrow directly above it.
+ */
 .name {
-  font-size: var(--t-2xl);
-  letter-spacing: -0.03em;
-  line-height: 1.05;
-  margin: var(--s-2) 0 var(--s-4);
+  font-size: var(--t-4xl);
+  font-weight: var(--w-thin);
+  letter-spacing: var(--tracking-display);
+  line-height: var(--leading-display);
+  margin: var(--s-3) 0 var(--s-5);
 }
 
 .lede {
@@ -77,7 +88,9 @@
 }
 
 .bandTitle {
-  font-size: var(--t-lg);
+  font-size: var(--t-xl);
+  font-weight: var(--w-light);
+  letter-spacing: var(--tracking-tight);
   margin: 0;
 }
 
@@ -287,22 +300,44 @@
   gap: var(--s-5);
 }
 
+/*
+ * The four ways in. These were a border-top and a padding — the same hairline
+ * that separated everything else on the page, so they read as list items rather
+ * than as doors. They are now surfaces that lift toward the reader.
+ */
 .door {
   display: block;
   text-decoration: none;
   color: inherit;
-  border-top: 2px solid var(--rule-strong);
-  padding-top: var(--s-3);
   height: 100%;
+  padding: var(--s-4);
+  border-top: 2px solid var(--rule-strong);
+  border-radius: var(--radius);
+  background: var(--surface-raised);
+  box-shadow: var(--elevation-1);
+  transition: border-top-color var(--dur-short) var(--ease-out),
+              box-shadow var(--dur-standard) var(--ease-out),
+              transform var(--dur-standard) var(--ease-out);
 }
 
-.door:hover { border-top-color: var(--oxide); }
+.door:hover {
+  border-top-color: var(--oxide);
+  box-shadow: var(--elevation-2);
+  transform: translateY(-2px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .door:hover { transform: none; }
+}
 
 .doorTitle {
   display: block;
   font-family: var(--serif);
   font-size: var(--t-md);
+  font-weight: var(--w-regular);
+  letter-spacing: var(--tracking-tight);
   color: var(--ink);
+  transition: color var(--dur-short) var(--ease-out);
 }
 
 .door:hover .doorTitle { color: var(--oxide); }
@@ -331,7 +366,7 @@
     padding: var(--s-5) 0 var(--s-6);
   }
 
-  .name { font-size: var(--t-xl); }
+  .name { font-size: var(--t-3xl); }
 
   .personGrid,
   .workGrid,

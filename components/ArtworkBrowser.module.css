@@ -32,7 +32,7 @@
   padding: 0.2em 0.4em;
   border: 1px solid var(--rule-strong);
   border-radius: 2px;
-  background: var(--paper);
+  background: var(--surface-ground);
   color: var(--ink);
 }
 
@@ -65,9 +65,11 @@
 
 .cardMedia {
   display: block;
-  background: var(--paper-deep);
-  border: 1px solid var(--rule);
   aspect-ratio: 4 / 3;
+  background: var(--surface-sunk);
+  border-radius: var(--radius-frame);
+  box-shadow: var(--frame-glow);
+  transition: box-shadow var(--dur-standard) var(--ease-out);
   overflow: hidden;
 }
 

@@ -34,3 +34,27 @@ table routing you to the chapter you need:
 | [docs/verification.md](./docs/verification.md) | the UI sweep, and the ways this repo reports a passing build while broken |
 
 Outstanding work is tracked in [BACKLOG.md](./BACKLOG.md).
+
+## The design layer
+
+`design/` is **vendored** from [lalaf02/sievan-design](https://github.com/lalaf02/sievan-design),
+which is where it is authored and reviewed, and which the public site and the
+curator admin both consume so they cannot drift apart.
+
+It is copied in rather than installed as a dependency. That repo is private, and
+a private git dependency cannot be fetched inside a Vercel build container
+without a token — a setup whose failure modes are all invisible locally: npm
+rewrites git URLs on its own, `npm ci` treats the resulting mismatch as fatal,
+`git config` silently keeps only the last of several same-key rewrites, and
+`vercel.json` rejects any key outside its schema. Vendoring removes every one of
+them. There is no token, and no `vercel.json`.
+
+To change the design: edit it in `sievan-design`, then here run
+
+```bash
+npm run design:sync    # copy it in and re-stamp design/MANIFEST.json
+```
+
+and commit the result. `npm run design:check` runs on every build and **fails**
+if `design/` has been edited in place — which is vendoring's one real hazard,
+since an edit made there is silently lost on the next sync.

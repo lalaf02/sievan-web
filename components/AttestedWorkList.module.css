@@ -122,7 +122,7 @@
 .collision {
   margin: var(--s-3) 0 0;
   padding: var(--s-3) var(--s-4);
-  background: var(--paper-deep);
+  background: var(--surface-raised);
   border-left: 2px solid var(--oxide);
   font-size: var(--t-sm);
   color: var(--ink-muted);

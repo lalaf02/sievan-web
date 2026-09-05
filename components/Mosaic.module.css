@@ -41,11 +41,13 @@
 .fill { height: 100%; }
 
 .panel {
-  background: var(--paper-deep);
+  background: var(--surface-raised);
+  border-radius: var(--radius);
+  box-shadow: var(--elevation-1);
   padding: var(--s-5);
 }
 
-.panelSunk { background: var(--paper-sunk); }
+.panelSunk { background: var(--surface-sunk); }
 
 .label {
   font-family: var(--sans);

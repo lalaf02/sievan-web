@@ -7,7 +7,7 @@
   padding: var(--s-2) var(--s-3);
   border: 1px solid var(--rule-strong);
   border-radius: 2px;
-  background: var(--paper);
+  background: var(--surface-ground);
   color: var(--ink);
 }
 
@@ -51,7 +51,7 @@
 .chipOn {
   background: var(--oxide);
   border-color: var(--oxide);
-  color: var(--paper);
+  color: var(--surface-ground);
 }
 
 .chipCount { opacity: 0.65; margin-left: 0.35em; font-variant-numeric: tabular-nums; }
@@ -127,7 +127,7 @@
   font-size: var(--t-sm);
   border: 1px solid var(--rule-strong);
   border-radius: 2px;
-  background: var(--paper);
+  background: var(--surface-ground);
   color: var(--ink);
   padding: 0.15em 0.4em;
 }

@@ -1,0 +1,462 @@
+/*
+ * The shared component vocabulary. Built only from tokens.css — there is not a
+ * raw colour, size or duration in this file, and there must never be one.
+ *
+ * Both apps consume this. A rule that belongs to one app only belongs in that
+ * app's stylesheet, not here.
+ */
+
+/* ═══════════════════════════════════════════════════════════════════════ base */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  -webkit-text-size-adjust: 100%;
+  height: 100%;
+  /* Reserve the gutter so a short page and a long one lay out to the same width
+   * and navigating between them does not shift the type sideways. */
+  scrollbar-gutter: stable;
+  /* clip, not hidden. `hidden` makes html a scroll container and silently breaks
+   * every position:sticky on the site — the transcript rail, the research
+   * contents, the chronology's year labels. This has regressed before. */
+  overflow-x: clip;
+}
+
+body {
+  margin: 0;
+  min-height: 100%;
+  background: var(--surface-ground);
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: var(--t-body);
+  line-height: var(--leading-body);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--serif);
+  font-weight: var(--w-semibold);
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
+  margin: 0 0 var(--s-4);
+}
+
+/*
+ * h1 is the only heading at display size, so it takes the display voice: lighter
+ * and tracked in. h2 downward stay semibold, which is what keeps them reading as
+ * structure rather than as competing titles. A heading is large OR heavy here,
+ * never both — that pairing is the hierarchy the old single-weight system lacked.
+ */
+h1 {
+  font-size: var(--t-xl);
+  font-weight: var(--w-light);
+  letter-spacing: var(--tracking-display);
+  line-height: var(--leading-tight);
+}
+h2 { font-size: var(--t-lg); }
+h3 { font-size: var(--t-md); }
+h4 { font-size: var(--t-base); }
+
+p { margin: 0 0 var(--s-4); }
+ul, ol { margin: 0 0 var(--s-4); padding-left: 1.2em; }
+
+a {
+  color: var(--oxide);
+  /*
+   * The archive is full of strings no line-breaking algorithm will split on its
+   * own: contact addresses, permanent identifiers, full citations. The contact
+   * email is 35 characters and overflowed /research/ at 320px on its own.
+   * break-word rather than anywhere: it breaks only to prevent overflow, and it
+   * leaves min-content sizing alone, so no grid track silently changes width.
+   */
+  overflow-wrap: break-word;
+  text-decoration-color: color-mix(in srgb, var(--oxide) 35%, transparent);
+  text-underline-offset: 0.16em;
+  transition: color var(--dur-short) var(--ease-out),
+              text-decoration-color var(--dur-short) var(--ease-out);
+}
+a:hover { text-decoration-color: currentColor; }
+
+/*
+ * Hover states across both apps changed colour with no transition declared, so
+ * every one of them snapped. Ten stylesheets had hover rules and no transition
+ * at all. Rather than restate the same three properties in each of them, the
+ * package gives interactive elements and their contents the short curve; a
+ * component wanting a different one simply declares it and wins on specificity.
+ */
+a, button, summary,
+a *, button * {
+  transition:
+    color var(--dur-short) var(--ease-out),
+    border-color var(--dur-short) var(--ease-out),
+    background-color var(--dur-short) var(--ease-out);
+}
+
+:focus-visible {
+  outline: 2px solid var(--oxide);
+  outline-offset: 2px;
+  border-radius: var(--radius);
+}
+
+hr {
+  border: 0;
+  border-top: 1px solid var(--rule);
+  margin: var(--s-6) 0;
+}
+
+::selection { background: color-mix(in srgb, var(--oxide) 28%, transparent); }
+
+mark {
+  background: color-mix(in srgb, var(--flag) 32%, transparent);
+  color: inherit;
+  padding: 0 0.1em;
+  border-radius: var(--radius);
+}
+
+/* ══════════════════════════════════════════════════════════════════════ type
+ *
+ * The hierarchy is a pair, not a ramp: display type is large, thin and pulled
+ * tight; label type is small, heavy and opened up. Everything else sits between
+ * them and stays quiet. This is what replaces a site where every emphasis was
+ * weight 600 and nothing was louder than anything else.
+ */
+
+.sv-display {
+  font-family: var(--serif);
+  font-size: var(--t-3xl);
+  font-weight: var(--w-thin);
+  line-height: var(--leading-display);
+  letter-spacing: var(--tracking-display);
+  margin: 0;
+}
+
+.sv-display-xl { font-size: var(--t-4xl); }
+
+.sv-label {
+  font-family: var(--sans);
+  font-size: var(--t-2xs);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-label);
+  color: var(--ink-faint);
+  margin: 0;
+}
+
+/* Interface type: filters, counts, metadata. Follows the density setting. */
+.sv-ui {
+  font-family: var(--sans);
+  font-size: var(--density-ui);
+  letter-spacing: 0.01em;
+}
+
+.sv-tnum { font-variant-numeric: tabular-nums; }
+.sv-muted { color: var(--ink-muted); }
+.sv-faint { color: var(--ink-faint); }
+.sv-measure { max-width: var(--measure); }
+
+/* Monospace is a semantic signal, not decoration: it marks text reproduced
+ * verbatim from the archive manifest, unedited. Never use it for emphasis. */
+.sv-verbatim {
+  font-family: var(--mono);
+  font-size: 0.85em;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  color: var(--ink-muted);
+}
+
+.sv-sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ═════════════════════════════════════════════════════════════════ surfaces */
+
+.sv-raised {
+  background: var(--surface-raised);
+  box-shadow: var(--elevation-1);
+  border-radius: var(--radius);
+}
+
+.sv-overlay {
+  background: var(--surface-overlay);
+  box-shadow: var(--elevation-3);
+  border-radius: var(--radius);
+}
+
+.sv-sunk {
+  background: var(--surface-sunk);
+  border-radius: var(--radius);
+}
+
+/* ═══════════════════════════════════════════════════════════════════ buttons
+ *
+ * Typographic and thin-ruled, as they were; what is new is that every state is
+ * actually distinguishable and that the transition exists, so a hover arrives
+ * rather than snapping.
+ */
+
+.sv-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-2);
+  padding: var(--s-3) var(--s-4);
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: var(--density-ui);
+  font-weight: var(--w-semibold);
+  line-height: 1;
+  cursor: pointer;
+  transition: background var(--dur-short) var(--ease-out),
+              border-color var(--dur-short) var(--ease-out),
+              color var(--dur-short) var(--ease-out),
+              box-shadow var(--dur-short) var(--ease-out),
+              transform var(--dur-short) var(--ease-out);
+}
+
+.sv-button:hover:not(:disabled) {
+  background: var(--surface-raised);
+  border-color: var(--ink-faint);
+  box-shadow: var(--elevation-1);
+}
+
+.sv-button:active:not(:disabled) {
+  transform: translateY(1px);
+  box-shadow: none;
+}
+
+.sv-button:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.sv-button-primary {
+  border-color: var(--oxide);
+  background: var(--oxide);
+  color: var(--surface-ground);
+}
+.sv-button-primary:hover:not(:disabled) {
+  background: color-mix(in oklab, var(--oxide) 85%, var(--ink));
+  border-color: color-mix(in oklab, var(--oxide) 85%, var(--ink));
+  color: var(--surface-ground);
+  box-shadow: var(--elevation-2);
+}
+
+.sv-button-danger { border-color: var(--danger); color: var(--danger); }
+.sv-button-danger:hover:not(:disabled) {
+  background: var(--danger-soft);
+  border-color: var(--danger);
+}
+
+/* A button that is working. The label stays put and the spinner joins it, so the
+ * control does not resize mid-action. */
+.sv-button[data-loading='true'] { cursor: progress; }
+
+/* ════════════════════════════════════════════════════════════════════ fields */
+
+.sv-field {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius);
+  background: var(--surface-sunk);
+  color: var(--ink);
+  padding: var(--s-3);
+  font-family: var(--sans);
+  font-size: var(--density-ui);
+  transition: border-color var(--dur-short) var(--ease-out),
+              background var(--dur-short) var(--ease-out),
+              box-shadow var(--dur-short) var(--ease-out);
+}
+
+.sv-field:hover:not(:disabled) { border-color: var(--ink-faint); }
+
+.sv-field:focus {
+  outline: none;
+  border-color: var(--oxide);
+  background: var(--surface-ground);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--oxide) 22%, transparent);
+}
+
+.sv-field:disabled { opacity: 0.5; cursor: not-allowed; }
+.sv-field[aria-invalid='true'] { border-color: var(--danger); }
+.sv-field::placeholder { color: var(--ink-faint); }
+
+textarea.sv-field { min-height: 7rem; resize: vertical; line-height: 1.5; }
+.sv-field[type='checkbox'] { width: 1.1rem; height: 1.1rem; accent-color: var(--oxide); }
+
+.sv-field-label {
+  display: block;
+  font-family: var(--sans);
+  font-size: var(--t-2xs);
+  font-weight: var(--w-bold);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-label);
+  color: var(--ink-faint);
+  margin-bottom: var(--s-2);
+}
+
+/* ═════════════════════════════════════════════════════════════════════ frame
+ *
+ * The mat around a reproduction, and the single most important object in the
+ * redesign: it is how a painting hangs on the dark wall, and it is shared by the
+ * public site's MediaTile and the admin's MediaPreview so that a curator checks
+ * an upload in exactly the frame the public will see it in.
+ *
+ * The image sits on a sunk surface so the mat reads as recessed and the picture
+ * as lit. Sheets and documents are never cropped.
+ */
+
+.sv-frame {
+  position: relative;
+  display: block;
+  aspect-ratio: var(--aspect, 720 / 486);
+  background: var(--surface-sunk);
+  border-radius: var(--radius-frame);
+  box-shadow: var(--frame-glow);
+  overflow: hidden;
+}
+
+/* Documents: show the whole sheet, never crop the masthead off. */
+.sv-frame-contain { width: 100%; height: 100%; object-fit: contain; display: block; }
+/* Pictures: fill the frame. */
+.sv-frame-cover { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+a.sv-frame { text-decoration: none; }
+a.sv-frame:hover { box-shadow: var(--frame-glow), var(--elevation-2); }
+
+/* Nothing to show. Twenty of the fifty objects are not digitised and they stay
+ * in every listing — an archive that hides what it does not have is not a
+ * record. So absence is designed, not an empty box. */
+.sv-frame-absent {
+  aspect-ratio: var(--aspect, 720 / 486);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-1);
+  padding: var(--s-4);
+  border: 1px dashed var(--rule-strong);
+  border-radius: var(--radius-frame);
+  background: var(--surface-sunk);
+  text-align: center;
+}
+
+.sv-frame-item { display: flex; flex-direction: column; margin: 0; min-width: 0; }
+
+.sv-frame-caption {
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  line-height: 1.45;
+  color: var(--ink-muted);
+  margin-top: var(--s-2);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* ═════════════════════════════════════════════════════════════════════ badge
+ *
+ * Status was rendered as a bare grey string with its underscores swapped for
+ * spaces, on every row of every index in the admin — roughly fourteen distinct
+ * status fields with no colour, dot or shape between them. This is that fix.
+ */
+
+.sv-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  padding: 0.15em 0.6em 0.15em 0.5em;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  font-family: var(--sans);
+  font-size: var(--t-2xs);
+  font-weight: var(--w-semibold);
+  letter-spacing: 0.04em;
+  line-height: 1.5;
+  white-space: nowrap;
+  color: var(--ink-faint);
+}
+
+.sv-badge::before {
+  content: '';
+  width: 0.45em;
+  height: 0.45em;
+  border-radius: 50%;
+  background: currentColor;
+  flex: none;
+}
+
+.sv-badge[data-status='published'] { color: var(--success); }
+.sv-badge[data-status='review'] { color: var(--flag); }
+.sv-badge[data-status='pending'] { color: var(--accent-cool); }
+.sv-badge[data-status='error'] { color: var(--danger); }
+.sv-badge[data-status='draft'] { color: var(--ink-muted); }
+.sv-badge[data-status='archived'] { color: var(--ink-faint); }
+
+/* ═══════════════════════════════════════════════════════════════════ spinner
+ *
+ * The first animation in either repo. "Saving…" was a text swap with no
+ * indicator; a curator could not tell a slow save from a dead one.
+ */
+
+@keyframes sv-spin { to { transform: rotate(360deg); } }
+
+.sv-spinner {
+  display: inline-block;
+  width: 0.85em;
+  height: 0.85em;
+  border: 2px solid color-mix(in srgb, currentColor 25%, transparent);
+  border-top-color: currentColor;
+  border-radius: 50%;
+  animation: sv-spin 700ms linear infinite;
+  flex: none;
+}
+
+@keyframes sv-pulse { 50% { opacity: 0.45; } }
+
+.sv-skeleton {
+  background: var(--surface-raised);
+  border-radius: var(--radius);
+  animation: sv-pulse 1.4s var(--ease-out) infinite;
+}
+
+/* ════════════════════════════════════════════════════════════════════ notice */
+
+.sv-notice {
+  border-left: 2px solid var(--rule-strong);
+  background: var(--surface-raised);
+  border-radius: var(--radius);
+  padding: var(--s-4);
+  font-family: var(--sans);
+  font-size: var(--t-sm);
+  line-height: 1.55;
+}
+
+.sv-notice[data-tone='error'] { border-left-color: var(--danger); background: var(--danger-soft); }
+.sv-notice[data-tone='success'] { border-left-color: var(--success); background: var(--success-soft); }
+.sv-notice[data-tone='review'] { border-left-color: var(--flag); }
+.sv-notice[data-tone='info'] { border-left-color: var(--accent-cool); background: var(--accent-cool-soft); }
+
+/* ═════════════════════════════════════════════════════════════════════ motion
+ *
+ * The archive still does not animate to show that it can: no parallax, no
+ * scroll spectacle, no route transitions. What survives here is state.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  /* A spinner that cannot spin must still say it is working. */
+  .sv-spinner { animation: sv-pulse 1.4s ease-in-out infinite !important; }
+}

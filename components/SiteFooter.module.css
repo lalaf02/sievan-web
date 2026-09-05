@@ -1,6 +1,6 @@
 .footer {
   border-top: 1px solid var(--rule);
-  background: var(--paper-deep);
+  background: var(--surface-raised);
   padding: var(--s-5) 0;
   margin-top: auto;
 }

@@ -3,7 +3,9 @@
 .quote {
   margin: 0;
   padding: var(--s-4);
-  background: var(--paper-deep);
+  background: var(--surface-raised);
+  border-radius: var(--radius);
+  box-shadow: var(--elevation-1);
   border-left: 3px solid var(--oxide);
 }
 

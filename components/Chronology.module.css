@@ -20,7 +20,7 @@
 }
 
 .chip:hover { border-color: var(--oxide); color: var(--oxide); }
-.chipOn { background: var(--oxide); border-color: var(--oxide); color: var(--paper); }
+.chipOn { background: var(--oxide); border-color: var(--oxide); color: var(--surface-ground); }
 .chipCount { opacity: 0.65; margin-left: 0.4em; font-variant-numeric: tabular-nums; }
 
 .timeline { position: relative; }
