@@ -1,7 +1,7 @@
 /*
  * App-level layout and the typographic utilities the route stylesheets compose.
  *
- * Tokens, base element styles and the shared primitives live in @sievan/design
+ * Tokens, base element styles and the shared primitives live in ./design, vendored from lalaf02/sievan-design
  * and are imported ahead of this file in app/layout.tsx. Nothing here may
  * declare a raw colour, size or duration — see the package's DESIGN.md.
  */

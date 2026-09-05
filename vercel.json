@@ -1,4 +1,0 @@
-{
-  "$schema": "https://openapi.vercel.sh/vercel.json",
-  "installCommand": "if [ -n \"$SIEVAN_DESIGN_TOKEN\" ]; then R=\"https://x-access-token:$SIEVAN_DESIGN_TOKEN@github.com/\"; git config --global --add url.\"$R\".insteadOf ssh://git@github.com/; git config --global --add url.\"$R\".insteadOf git@github.com:; git config --global --add url.\"$R\".insteadOf https://github.com/; fi; npm install"
-}

@@ -1,11 +1,11 @@
 import type { Metadata } from 'next';
 import { Source_Serif_4, Inter } from 'next/font/google';
-import '@sievan/design/tokens.css';
-import '@sievan/design/primitives.css';
+import '@/design/tokens.css';
+import '@/design/primitives.css';
 import './globals.css';
 import { SiteHeader } from '@/components/SiteHeader';
 import { SiteFooter } from '@/components/SiteFooter';
-import { themeScript } from '@sievan/design';
+import { themeScript } from '@/design';
 
 const serif = Source_Serif_4({
   variable: '--font-serif',

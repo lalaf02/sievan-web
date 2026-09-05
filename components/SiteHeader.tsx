@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ThemeToggle } from '@sievan/design';
+import { ThemeToggle } from '@/design';
 import styles from './SiteHeader.module.css';
 
 /**

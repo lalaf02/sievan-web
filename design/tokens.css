@@ -1,0 +1,238 @@
+/*
+ * The Sievan Archive design tokens.
+ *
+ * Read DESIGN.md before changing anything here. Every value in this file is a
+ * closed set: a colour, size or duration used anywhere in either app must be one
+ * of these names. A raw value at a call site is a finding.
+ *
+ * Dark is :root and light is the override. That inversion is the design: the
+ * archive is a gallery at night, and the art is the only thing lit. Light mode is
+ * a full peer, not a fallback — it is the reading room, and it gets its own
+ * elevation model rather than a recolouring of this one.
+ *
+ * Colours are OKLCH so that the two themes can be reasoned about by lightness.
+ * Next emits an sRGB fallback automatically; do not hand-write one.
+ */
+
+:root {
+  /* ─────────────────────────────────────────────────────────── surfaces (dark)
+   *
+   * Four surfaces, one lightness step apart. On a dark ground a drop shadow is
+   * nearly invisible, so depth is carried by surface lightness first and shadow
+   * second: something nearer the reader is lighter. This is the whole answer to
+   * the flatness the old system mandated, and the reason there are four names
+   * here rather than the two paper tones the archive used to have.
+   *
+   * Warm charcoal, never neutral black and never pure black: the archive's paper
+   * was warm, and the room it now hangs in keeps that hue.
+   */
+  --surface-ground: oklch(16% 0.010 75);
+  --surface-raised: oklch(21% 0.012 75);
+  --surface-overlay: oklch(26% 0.014 75);
+  --surface-sunk: oklch(12% 0.008 75);
+
+  /* ─────────────────────────────────────────────────────────────── ink (dark)
+   * Parchment, not white. Pure white on charcoal glares and makes the paintings
+   * look grey by comparison.
+   */
+  --ink: oklch(93% 0.014 82);
+  --ink-muted: oklch(74% 0.018 82);
+  --ink-faint: oklch(62% 0.018 82);
+
+  /* Rules stay low-contrast but must remain visible; -strong is for a rule that
+   * is doing structural work (a table head, a segmented control). */
+  --rule: oklch(30% 0.014 75);
+  --rule-strong: oklch(50% 0.018 75);
+
+  /* ──────────────────────────────────────────────────────────── accents (dark)
+   *
+   * The oxide rust survives as the primary and still leads. It is lifted here:
+   * the light-mode value (45% L) is unreadable on charcoal.
+   *
+   * --accent-cool is the counterpoint the old single-accent rule forbade. It
+   * carries secondary actions and data so that everything non-primary no longer
+   * has to be another shade of the paper.
+   *
+   * --flag is gold and is reserved for review markers. It meant that in
+   * sievan-web already; it still means only that.
+   */
+  --oxide: oklch(70% 0.132 42);
+  --oxide-soft: oklch(30% 0.055 40);
+  --accent-cool: oklch(74% 0.098 248);
+  --accent-cool-soft: oklch(29% 0.045 250);
+  --flag: oklch(80% 0.115 88);
+
+  --danger: oklch(72% 0.145 28);
+  --danger-soft: oklch(28% 0.055 28);
+  --success: oklch(74% 0.125 152);
+  --success-soft: oklch(27% 0.050 152);
+
+  /* ───────────────────────────────────────────────────────────────── elevation
+   *
+   * Two mechanisms behind one set of names. On dark: an inset top highlight (the
+   * lit edge of a surface facing a light above it) plus a soft ambient shadow.
+   * On light: real drop shadows, warm-tinted so they read as shadow on paper
+   * rather than as grey haze. Call sites use the name and never care which.
+   */
+  --elevation-1:
+    inset 0 1px 0 oklch(100% 0 0 / 0.06),
+    0 1px 2px oklch(0% 0 0 / 0.32);
+  --elevation-2:
+    inset 0 1px 0 oklch(100% 0 0 / 0.07),
+    0 4px 12px oklch(0% 0 0 / 0.38);
+  --elevation-3:
+    inset 0 1px 0 oklch(100% 0 0 / 0.09),
+    0 12px 32px oklch(0% 0 0 / 0.48);
+
+  /* A lit frame around a reproduction: the mat, and the faint spill around it. */
+  --frame-glow: 0 0 0 1px var(--rule), 0 8px 28px oklch(0% 0 0 / 0.42);
+
+  /* ───────────────────────────────────────────────────────────────────── type
+   *
+   * Two faces, both already loaded, both variable across 200–900. The old system
+   * declared no weights and used only 400/500/600, which is why nothing on
+   * either site was ever louder than anything else. The range is the drama.
+   */
+  --serif: var(--font-serif), 'Iowan Old Style', Palatino, Georgia, serif;
+  --sans: var(--font-sans), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  /* A 1.25 scale through --t-2xl, then two display sizes that clamp. */
+  --t-2xs: 0.68rem;
+  --t-xs: 0.75rem;
+  --t-sm: 0.85rem;
+  --t-base: 0.95rem;
+  --t-body: 1.1rem;
+  --t-md: 1.3rem;
+  --t-lg: 1.7rem;
+  --t-xl: 2.2rem;
+  --t-2xl: 3rem;
+  --t-3xl: clamp(2.75rem, 6vw, 5rem);
+  --t-4xl: clamp(3.25rem, 9vw, 8rem);
+
+  --w-thin: 200;
+  --w-light: 300;
+  --w-regular: 400;
+  --w-medium: 500;
+  --w-semibold: 600;
+  --w-bold: 700;
+  --w-black: 900;
+
+  /* Display type is set large and thin and pulled tight; label type is set small
+   * and heavy and opened up. The pair is the hierarchy. */
+  --tracking-display: -0.04em;
+  --tracking-tight: -0.015em;
+  --tracking-label: 0.14em;
+
+  --leading-display: 0.95;
+  --leading-tight: 1.2;
+  --leading-body: 1.6;
+
+  /* ──────────────────────────────────────────────────────────────────── space */
+  --s-1: 0.25rem;
+  --s-2: 0.5rem;
+  --s-3: 0.75rem;
+  --s-4: 1rem;
+  --s-5: 1.5rem;
+  --s-6: 2rem;
+  --s-7: 3rem;
+  --s-8: 4.5rem;
+  --s-9: 6rem;
+
+  /* ─────────────────────────────────────────────────────────────────── measure
+   * Widths are deliberate and named. Never set one at a call site.
+   */
+  --measure: 68ch;
+  --measure-record: 52rem;
+  --page: 1400px;
+  --page-wide: 1500px;
+  --rail: 250px;
+
+  /* ─────────────────────────────────────────────────────────────────── density
+   *
+   * One package, two densities. The public site reads; the admin works. These
+   * are the only three values allowed to differ, and [data-density='compact']
+   * below is the only place they may be reset.
+   */
+  --density-row: var(--s-4);
+  --density-pad: var(--s-5);
+  --density-ui: var(--t-sm);
+
+  /* ─────────────────────────────────────────────────────────────────── motion
+   *
+   * "Archives should feel still" meant no spectacle, and that survives: nothing
+   * here animates on scroll, on route change, or to prove it can. What these
+   * buy is legible state — a hover that arrives, a save that shows it is saving.
+   */
+  --dur-short: 140ms;
+  --dur-standard: 220ms;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+
+  --radius: 2px;
+  --radius-frame: 3px;
+
+  color-scheme: dark;
+}
+
+/*
+ * ══════════════════════════════════════════════════════════════════════ light
+ *
+ * The reading room. Long transcripts, metadata proofing, and printing all happen
+ * here, and it is judged on its own terms — if it looks like a recolouring of
+ * the dark theme it has failed review.
+ *
+ * Only the values that must change are restated. Type, space, measure, density
+ * and motion are shared and are not repeated.
+ */
+[data-theme='light'] {
+  --surface-ground: oklch(97.4% 0.010 84);
+  --surface-raised: oklch(93.8% 0.020 82);
+  --surface-overlay: oklch(99.5% 0.003 84);
+  --surface-sunk: oklch(90.8% 0.024 82);
+
+  --ink: oklch(19% 0.015 82);
+  --ink-muted: oklch(46% 0.022 83);
+  /* Darkened from the archive's original #948b78 (~62% L), which fell short of
+   * 4.5:1 against a card and was carrying real caption text on both sites.
+   * scripts/check-contrast.mjs is what caught it; keep it passing. */
+  --ink-faint: oklch(51% 0.020 83);
+
+  --rule: oklch(85.3% 0.024 83);
+  --rule-strong: oklch(63% 0.028 82);
+
+  --oxide: oklch(45% 0.112 38);
+  --oxide-soft: oklch(91% 0.035 43);
+  --accent-cool: oklch(45% 0.095 250);
+  --accent-cool-soft: oklch(92% 0.030 250);
+  --flag: oklch(52% 0.105 85);
+
+  --danger: oklch(48% 0.160 28);
+  --danger-soft: oklch(93% 0.035 28);
+  --success: oklch(45% 0.105 152);
+  --success-soft: oklch(93% 0.032 152);
+
+  /* Real shadows, warm-tinted: shadow on paper, not grey haze. */
+  --elevation-1: 0 1px 2px oklch(35% 0.020 82 / 0.10);
+  --elevation-2:
+    0 1px 2px oklch(35% 0.020 82 / 0.06),
+    0 6px 16px oklch(35% 0.020 82 / 0.10);
+  --elevation-3:
+    0 2px 4px oklch(35% 0.020 82 / 0.06),
+    0 20px 44px oklch(35% 0.020 82 / 0.16);
+
+  --frame-glow:
+    0 0 0 1px var(--rule),
+    0 8px 24px oklch(35% 0.020 82 / 0.16);
+
+  color-scheme: light;
+}
+
+/*
+ * The admin's working density. The only override of the three density tokens.
+ * Set on the admin shell, never on a component.
+ */
+[data-density='compact'] {
+  --density-row: var(--s-2);
+  --density-pad: var(--s-4);
+  --density-ui: var(--t-xs);
+}

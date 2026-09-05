@@ -35,31 +35,26 @@ table routing you to the chapter you need:
 
 Outstanding work is tracked in [BACKLOG.md](./BACKLOG.md).
 
-## Deploying
+## The design layer
 
-`@sievan/design` is a **private** GitHub repo consumed as an npm git dependency.
-npm records it in `package-lock.json` as an ssh URL however `package.json` spells
-it, and asks git for it in the scp short form (`git@github.com:owner/repo`). A
-Vercel build container has no SSH key, so the install fails there and only there
-— locally it works because the OS keychain quietly supplies credentials.
+`design/` is **vendored** from [lalaf02/sievan-design](https://github.com/lalaf02/sievan-design),
+which is where it is authored and reviewed, and which the public site and the
+curator admin both consume so they cannot drift apart.
 
-`vercel.json` rewrites that URL to https with a token at install time. To deploy:
+It is copied in rather than installed as a dependency. That repo is private, and
+a private git dependency cannot be fetched inside a Vercel build container
+without a token — a setup whose failure modes are all invisible locally: npm
+rewrites git URLs on its own, `npm ci` treats the resulting mismatch as fatal,
+`git config` silently keeps only the last of several same-key rewrites, and
+`vercel.json` rejects any key outside its schema. Vendoring removes every one of
+them. There is no token, and no `vercel.json`.
 
-> Vercel → project → Settings → Environment Variables → add `SIEVAN_DESIGN_TOKEN`,
-> a fine-grained PAT with **read-only Contents on `lalaf02/sievan-design`** and
-> nothing else. Set it for Production **and** Preview.
+To change the design: edit it in `sievan-design`, then here run
 
-Three details in that install command are load-bearing:
+```bash
+npm run design:sync    # copy it in and re-stamp design/MANIFEST.json
+```
 
-- **`--add`.** All three URL spellings share one git config key, and `git config`
-  replaces rather than appends. Without `--add` only the last survives — and the
-  `ssh://` one npm actually asks for is the one that gets dropped.
-- **`npm install`, not `npm ci`.** `ci` exits fatally when `package.json` and the
-  lockfile disagree on a URL spelling, which npm causes on its own for git
-  dependencies. It fails before the fetch, so it looks like a credential error.
-- **No comment keys in `vercel.json`.** Its schema sets `additionalProperties:
-  false`, so an unknown key (`_comment`) fails validation and kills the deploy
-  before the build starts. That is why this note lives here instead.
-
-If `sievan-design` is ever made public, delete `vercel.json` — the dependency
-then resolves anonymously and no token is needed.
+and commit the result. `npm run design:check` runs on every build and **fails**
+if `design/` has been edited in place — which is vendoring's one real hazard,
+since an edit made there is silently lost on the next sync.

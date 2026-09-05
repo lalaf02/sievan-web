@@ -6,7 +6,7 @@
     "data": "node scripts/build-data.mjs && node scripts/check-data.mjs && node --no-warnings=MODULE_TYPELESS_PACKAGE_JSON scripts/check-quotes.mjs",
     "predev": "npm run data",
     "dev": "next dev",
-    "prebuild": "npm run data",
+    "prebuild": "node scripts/check-design.mjs && npm run data",
     "build": "next build",
     "postbuild": "node scripts/check-export.mjs",
     "start": "next start",
@@ -16,10 +16,10 @@
     "db:export": "node scripts/export-seeds.mjs",
     "db:media": "node scripts/upload-media.mjs",
     "db:parity": "node scripts/check-parity.mjs",
-    "design:sync": "rsync -a --delete --exclude .git --exclude node_modules ../sievan-design/ node_modules/@sievan/design/"
+    "design:sync": "node scripts/sync-design.mjs",
+    "design:check": "node scripts/check-design.mjs"
   },
   "dependencies": {
-    "@sievan/design": "git+https://github.com/lalaf02/sievan-design.git#v1.1.0",
     "next": "16.2.12",
     "react": "19.2.4",
     "react-dom": "19.2.4"
