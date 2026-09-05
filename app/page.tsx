@@ -3,9 +3,7 @@ import Link from 'next/link';
 import {
   allExhibitions, counts, getClip,
 } from '@/lib/data';
-import { getQuote } from '@/lib/quotes';
 import { THESIS } from '@/lib/validation';
-import { PullQuote } from '@/components/PullQuote';
 import { ClipTile } from '@/components/MediaTile';
 import styles from './home.module.css';
 
@@ -18,7 +16,7 @@ export const metadata: Metadata = {
 };
 
 /**
- * The front page: the man, the surviving footage, and what this site is.
+ * The front page: the man and what this site is.
  */
 export default function Home() {
   const years = allExhibitions.map((e) => e.date_earliest ?? 0).filter(Boolean);
@@ -60,37 +58,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ═════════════════════════════════════════════════ Sievan as a person */}
-      <section className={styles.band} aria-labelledby="person">
-        <div className={styles.bandHead}>
-          <h2 id="person" className={styles.bandTitle}>The only footage the archive holds</h2>
-          <p className={styles.bandNote}>
-            Of the seven tapes the estate recorded, six are people talking about Sievan
-            and one is Sievan himself. It is silent, and undated.
-          </p>
-        </div>
-
-        <div className={styles.personGrid}>
-          {PROCESS_FRAMES.map((f) => {
-            const clip = getClip(f.id);
-            if (!clip) return null;
-            return (
-              <ClipTile
-                key={f.id}
-                clip={clip}
-                aspect="3 / 2"
-                still={f.motion === 'still'}
-                caption={f.caption}
-              />
-            );
-          })}
-          <div className={styles.personQuote}>
-            <PullQuote quote={getQuote('barnet-passion')} size="small" showSource />
-            <PullQuote quote={getQuote('solman-resourceful')} size="small" showSource />
-          </div>
-        </div>
-      </section>
-
       {/* ══════════════════════════════════════════════════ what this site is */}
       <section className={styles.band} aria-labelledby="about">
         <div className={styles.bandHead}>
@@ -121,7 +88,7 @@ export default function Home() {
             <ul className={styles.doorList}>
               <li>
                 <Link href="/life/" className={styles.door}>
-                  <span className={styles.doorTitle}>Life and Work</span>
+                  <span className={styles.doorTitle}>Life and Memory</span>
                   <span className={styles.doorText}>
                     The biography, the chronology, the exhibitions between {span}, and the
                     people who spoke on the record.
@@ -163,13 +130,3 @@ export default function Home() {
     </div>
   );
 }
-
-const PROCESS_FRAMES: {
-  id: string; motion: 'play' | 'still'; caption: string;
-}[] = [
-  { id: 'painting-landscape', motion: 'play', caption: 'A landscape canvas going down in real time.' },
-  { id: 'easel-demonstration', motion: 'still', caption: 'A plein-air demonstration, in a hat, at the easel.' },
-  { id: 'painting-outdoors', motion: 'still', caption: 'Painting outdoors while a crowd stands watching behind him.' },
-  { id: 'drawing-portrait', motion: 'still', caption: 'A charcoal portrait on the easel, worked at the mouth.' },
-  { id: 'mixing-palette', motion: 'still', caption: 'Colour drawn across a loaded palette.' },
-];
