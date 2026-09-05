@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import {
-  archive, counts, getVideo, allExhibitions, getPerson, clipForPerson, pageOf,
+  archive, counts, getVideo, allExhibitions, getPerson, clipForPerson, pageOf, getClip,
 } from '@/lib/data';
 import { getQuote } from '@/lib/quotes';
 import { MUSEUM_COLLECTIONS, CRITICS } from '@/lib/validation';
@@ -12,9 +12,10 @@ import { Chronology } from '@/components/Chronology';
 import { ClipTile, SheetTile } from '@/components/MediaTile';
 import { formatRange } from '@/lib/dates';
 import styles from './life.module.css';
+import homeStyles from '../home.module.css';
 
 export const metadata: Metadata = {
-  title: 'Life and Work',
+  title: 'Life and Memory',
   description:
     'Maurice Sievan (1898–1981) placed in time: a biography in five phases, the full '
     + 'chronology of the archive, the exhibition record, and the people around him.',
@@ -96,7 +97,7 @@ export default function LifePage() {
     <div className="pageWide">
       <header className="measure" style={{ marginBottom: 'var(--s-6)' }}>
         <p className="eyebrow">1898–1981</p>
-        <h1>Life and Work</h1>
+        <h1>Life and Memory</h1>
         <p className={styles.lede}>
           Born in Ukraine, raised in Brooklyn, trained in Paris, and at work in New York
           for sixty years. This is the record placed in order: the life, everything the
@@ -109,6 +110,36 @@ export default function LifePage() {
           record and its reception.
         </p>
       </header>
+
+      <section className={homeStyles.band} aria-labelledby="person">
+        <div className={homeStyles.bandHead}>
+          <h2 id="person" className={homeStyles.bandTitle}>The only footage the archive holds</h2>
+          <p className={homeStyles.bandNote}>
+            Of the seven tapes the estate recorded, six are people talking about Sievan
+            and one is Sievan himself. It is silent, and undated.
+          </p>
+        </div>
+
+        <div className={homeStyles.personGrid}>
+          {PROCESS_FRAMES.map((f) => {
+            const clip = getClip(f.id);
+            if (!clip) return null;
+            return (
+              <ClipTile
+                key={f.id}
+                clip={clip}
+                aspect="3 / 2"
+                still={f.motion === 'still'}
+                caption={f.caption}
+              />
+            );
+          })}
+          <div className={homeStyles.personQuote}>
+            <PullQuote quote={getQuote('barnet-passion')} size="small" showSource />
+            <PullQuote quote={getQuote('solman-resourceful')} size="small" showSource />
+          </div>
+        </div>
+      </section>
 
       {/*
         Two columns, and they do different jobs. Left is the narrative; right is the
@@ -269,8 +300,6 @@ export default function LifePage() {
             <ul className={styles.venueList}>
               {exhibitions.map((e) => (
                 <li key={e.id}>
-                  {/* Venue first: thirteen of the fifteen are titled "Maurice Sievan",
-                      so the name alone identifies nothing. */}
                   <Link href={`/exhibitions/${e.id}/`} className={styles.venueName}>
                     {e.gallery_or_venue ?? e.name ?? 'Untitled exhibition'}
                   </Link>
@@ -291,7 +320,6 @@ export default function LifePage() {
         </aside>
       </div>
 
-      {/* ------------------------------------------------------------ the timeline */}
       <section id="chronology" className={styles.section}>
         <h2>Chronology</h2>
         <p className="measure muted" style={{ marginBottom: 'var(--s-5)' }}>
@@ -306,7 +334,6 @@ export default function LifePage() {
         />
       </section>
 
-      {/* ------------------------------------------ the two exhibition records */}
       <section id="exhibitions" className={styles.section}>
         <h2>Where the work was shown</h2>
         <p className="measure muted">
@@ -357,7 +384,6 @@ export default function LifePage() {
         </CVSource>
       </section>
 
-      {/* ------------------------------------------------------- private collections */}
       <section className={styles.section}>
         <h2>Private collections</h2>
         <p className="measure muted">
@@ -368,10 +394,6 @@ export default function LifePage() {
             <li key={n}><span className={styles.museumName}>{n}</span></li>
           ))}
         </ul>
-        {/*
-          Stated as a lead, not an identification. Two of these names resemble
-          names Sievan wrote on his own sheets, and resemblance is not proof.
-        */}
         <p className={styles.railNote}>
           Two names here — <strong>I. David Orr</strong> and{' '}
           <strong>Charles Zitner</strong> — resemble names Sievan wrote on his own
@@ -384,3 +406,13 @@ export default function LifePage() {
     </div>
   );
 }
+
+const PROCESS_FRAMES: {
+  id: string; motion: 'play' | 'still'; caption: string;
+}[] = [
+  { id: 'painting-landscape', motion: 'play', caption: 'A landscape canvas going down in real time.' },
+  { id: 'easel-demonstration', motion: 'still', caption: 'A plein-air demonstration, in a hat, at the easel.' },
+  { id: 'painting-outdoors', motion: 'still', caption: 'Painting outdoors while a crowd stands watching behind him.' },
+  { id: 'drawing-portrait', motion: 'still', caption: 'A charcoal portrait on the easel, worked at the mouth.' },
+  { id: 'mixing-palette', motion: 'still', caption: 'Colour drawn across a loaded palette.' },
+];
