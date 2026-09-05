@@ -23,8 +23,8 @@ const actual = hashTree(DEST);
 
 if (actual !== manifest.hash) {
   console.error('  check-design: design/ has been edited in place.');
-  console.error(`    expected ${manifest.hash.slice(0, 16)}`);
-  console.error(`    actual   ${actual.slice(0, 16)}`);
+  console.error(`    expected ${manifest.hash}`);
+  console.error(`    actual   ${actual}`);
   console.error('  This directory is vendored from lalaf02/sievan-design. Make the change');
   console.error('  there, run `npm run design:sync`, and commit the result.');
   process.exit(1);
