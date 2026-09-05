@@ -8,7 +8,7 @@ import styles from './SiteHeader.module.css';
 /**
  * Five destinations, ordered by depth: the case, the life, the work, the evidence,
  * the apparatus. Exhibitions, people, the chronology and the retrospective are
- * reached from within Life and Work rather than competing at the top level.
+ * reached from within Life and Memory rather than competing at the top level.
  *
  * Works carried an "in preparation" badge while it was empty. It is not empty:
  * twenty-five works on paper are catalogued there. The gap that remains — no
@@ -16,7 +16,7 @@ import styles from './SiteHeader.module.css';
  * said accurately, rather than compressed into two words in the nav.
  */
 const NAV = [
-  { href: '/life/', label: 'Life and Work' },
+  { href: '/life/', label: 'Life and Memory' },
   { href: '/works/', label: 'Catalogue Raisonné' },
   { href: '/archive/', label: 'Archives' },
   { href: '/research/', label: 'Research' },
