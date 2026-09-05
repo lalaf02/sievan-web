@@ -26,10 +26,10 @@
    * Warm charcoal, never neutral black and never pure black: the archive's paper
    * was warm, and the room it now hangs in keeps that hue.
    */
-  --surface-ground: oklch(16% 0.010 75);
-  --surface-raised: oklch(21% 0.012 75);
-  --surface-overlay: oklch(26% 0.014 75);
-  --surface-sunk: oklch(12% 0.008 75);
+  --surface-ground: oklch(21% 0.010 75);
+  --surface-raised: oklch(25% 0.012 75);
+  --surface-overlay: oklch(29% 0.014 75);
+  --surface-sunk: oklch(17% 0.008 75);
 
   /* ─────────────────────────────────────────────────────────────── ink (dark)
    * Parchment, not white. Pure white on charcoal glares and makes the paintings
