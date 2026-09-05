@@ -50,19 +50,36 @@ const headers = () => ({
   'Content-Type': 'application/json',
 });
 
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
 async function request(path, init = {}) {
   const { url } = requireCredentials();
-  let res;
-  try {
-    res = await fetch(`${url}${path}`, { ...init, headers: { ...headers(), ...init.headers } });
-  } catch (e) {
-    fail(`cannot reach ${url}${path}: ${e.message}`);
-  }
-  if (!res.ok) {
+  const attempts = 4;
+
+  for (let attempt = 1; attempt <= attempts; attempt++) {
+    let res;
+    try {
+      res = await fetch(`${url}${path}`, { ...init, headers: { ...headers(), ...init.headers } });
+    } catch (e) {
+      if (attempt < attempts) {
+        await sleep(attempt * 1000);
+        continue;
+      }
+      fail(`cannot reach ${url}${path}: ${e.message}`);
+    }
+
+    if (res.ok) return res;
+
     const body = await res.text().catch(() => '');
+    const clockSkew = res.status === 401 && /JWT issued at future/i.test(body);
+    if (clockSkew && attempt < attempts) {
+      console.warn(`  supabase: JWT clock skew on ${path}; retrying (${attempt}/${attempts - 1})`);
+      await sleep(attempt * 1500);
+      continue;
+    }
+
     fail(`${init.method ?? 'GET'} ${path} -> ${res.status} ${res.statusText}\n  ${body.slice(0, 600)}`);
   }
-  return res;
 }
 
 /** Every row of a table or view, in a stable order. */
