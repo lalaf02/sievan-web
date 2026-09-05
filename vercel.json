@@ -1,26 +1,4 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "_comment": [
-    "@sievan/design is a private GitHub repo consumed as an npm git dependency.",
-    "npm records it in package-lock.json as an ssh URL no matter how package.json",
-    "spells it, and a Vercel build container has no SSH key, so the install fails",
-    "there and only there. This rewrites that URL to https with a token.",
-    "",
-    "--add is load-bearing: all three rewrites share one config key, and without",
-    "it each call replaces the previous one, leaving only the last. npm asks for",
-    "the ssh:// form, which would be the one silently dropped.",
-    "",
-    "Set SIEVAN_DESIGN_TOKEN in the Vercel project: a fine-grained PAT with",
-    "read-only Contents on lalaf02/sievan-design and nothing else. The guard means",
-    "a checkout without the variable still installs normally.",
-    "npm install rather than npm ci: ci refuses outright when package.json and",
-    "the lockfile disagree on how this URL is spelled, which it did, and which",
-    "fails before the fetch is even attempted. install is also Vercel's own",
-    "default, so this changes only the credential, not the build.",
-    "",
-    "",
-    "If sievan-design is ever made public, delete this file \u2014 the dependency then",
-    "resolves anonymously and no token is needed."
-  ],
   "installCommand": "if [ -n \"$SIEVAN_DESIGN_TOKEN\" ]; then R=\"https://x-access-token:$SIEVAN_DESIGN_TOKEN@github.com/\"; git config --global --add url.\"$R\".insteadOf ssh://git@github.com/; git config --global --add url.\"$R\".insteadOf git@github.com:; git config --global --add url.\"$R\".insteadOf https://github.com/; fi; npm install"
 }

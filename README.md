@@ -34,3 +34,32 @@ table routing you to the chapter you need:
 | [docs/verification.md](./docs/verification.md) | the UI sweep, and the ways this repo reports a passing build while broken |
 
 Outstanding work is tracked in [BACKLOG.md](./BACKLOG.md).
+
+## Deploying
+
+`@sievan/design` is a **private** GitHub repo consumed as an npm git dependency.
+npm records it in `package-lock.json` as an ssh URL however `package.json` spells
+it, and asks git for it in the scp short form (`git@github.com:owner/repo`). A
+Vercel build container has no SSH key, so the install fails there and only there
+— locally it works because the OS keychain quietly supplies credentials.
+
+`vercel.json` rewrites that URL to https with a token at install time. To deploy:
+
+> Vercel → project → Settings → Environment Variables → add `SIEVAN_DESIGN_TOKEN`,
+> a fine-grained PAT with **read-only Contents on `lalaf02/sievan-design`** and
+> nothing else. Set it for Production **and** Preview.
+
+Three details in that install command are load-bearing:
+
+- **`--add`.** All three URL spellings share one git config key, and `git config`
+  replaces rather than appends. Without `--add` only the last survives — and the
+  `ssh://` one npm actually asks for is the one that gets dropped.
+- **`npm install`, not `npm ci`.** `ci` exits fatally when `package.json` and the
+  lockfile disagree on a URL spelling, which npm causes on its own for git
+  dependencies. It fails before the fetch, so it looks like a credential error.
+- **No comment keys in `vercel.json`.** Its schema sets `additionalProperties:
+  false`, so an unknown key (`_comment`) fails validation and kills the deploy
+  before the build starts. That is why this note lives here instead.
+
+If `sievan-design` is ever made public, delete `vercel.json` — the dependency
+then resolves anonymously and no token is needed.
