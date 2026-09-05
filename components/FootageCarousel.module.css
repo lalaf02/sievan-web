@@ -1,0 +1,62 @@
+.carousel {
+  max-width: 52rem;
+}
+
+.stage {
+  display: grid;
+  grid-template-columns: 3rem minmax(0, 1fr) 3rem;
+  gap: var(--s-3);
+  align-items: center;
+}
+
+.slide {
+  min-width: 0;
+}
+
+.arrow {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 999px;
+  border: 1px solid var(--rule-strong);
+  background: var(--surface-raised);
+  color: var(--ink);
+  font: inherit;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: background 140ms ease, border-color 140ms ease, color 140ms ease;
+}
+
+.arrow:hover {
+  background: var(--surface-overlay);
+  border-color: var(--oxide);
+  color: var(--oxide);
+}
+
+.arrow:focus-visible {
+  outline: 2px solid var(--oxide);
+  outline-offset: 3px;
+}
+
+.counter {
+  margin: var(--s-3) 0 0;
+  text-align: center;
+  font-family: var(--sans);
+  font-size: var(--t-xs);
+  color: var(--ink-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 620px) {
+  .stage {
+    grid-template-columns: 2.75rem minmax(0, 1fr) 2.75rem;
+    gap: var(--s-2);
+  }
+
+  .arrow {
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+}
