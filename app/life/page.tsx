@@ -21,25 +21,10 @@ export const metadata: Metadata = {
     + 'chronology of the archive, the exhibition record, and the people around him.',
 };
 
-/**
- * A witness, set beside the claim they support.
- *
- * Defined at module scope, not inside the page: a component created during render is a
- * new type on every render. This is what replaced the "Who was there" section — five
- * faces in a row at the foot of the page, a directory of people disconnected from
- * anything they said. Each of the five now appears where their testimony bears on the
- * narrative, which is what makes it evidence rather than a cast list.
- */
 function Witness({
   personId, quoteId, role,
 }: {
   personId: string;
-  /**
-   * Optional, and the omission is a fact about the archive. Curated quotes exist for
-   * Karp, Barnet, Solman and Wolins; John Dobkin's interview is transcribed but no
-   * passage of it has been verified against an anchor, so he appears with his face and
-   * a way into his transcript and nothing is put in his mouth.
-   */
   quoteId?: string;
   role: string;
 }) {
@@ -116,41 +101,54 @@ export default function LifePage() {
           <h2 id="person" className={homeStyles.bandTitle}>The only footage the archive holds</h2>
           <p className={homeStyles.bandNote}>
             Of the seven tapes the estate recorded, six are people talking about Sievan
-            and one is Sievan himself. It is silent, and undated.
+            and one is Sievan himself. It is silent, and undated. Swipe to move through
+            the surviving footage.
           </p>
         </div>
 
-        <div className={homeStyles.personGrid}>
+        <div
+          aria-label="Archival footage carousel"
+          style={{
+            display: 'flex',
+            gap: 'var(--s-5)',
+            overflowX: 'auto',
+            scrollSnapType: 'x mandatory',
+            WebkitOverflowScrolling: 'touch',
+            paddingBottom: 'var(--s-3)',
+            overscrollBehaviorInline: 'contain',
+          }}
+        >
           {PROCESS_FRAMES.map((f) => {
             const clip = getClip(f.id);
             if (!clip) return null;
             return (
-              <ClipTile
+              <div
                 key={f.id}
-                clip={clip}
-                aspect="3 / 2"
-                still={f.motion === 'still'}
-                caption={f.caption}
-              />
+                style={{
+                  flex: '0 0 clamp(18rem, 62vw, 44rem)',
+                  minWidth: 0,
+                  scrollSnapAlign: 'start',
+                }}
+              >
+                <ClipTile
+                  clip={clip}
+                  aspect="3 / 2"
+                  priority
+                  caption={f.caption}
+                />
+              </div>
             );
           })}
-          <div className={homeStyles.personQuote}>
-            <PullQuote quote={getQuote('barnet-passion')} size="small" showSource />
-            <PullQuote quote={getQuote('solman-resourceful')} size="small" showSource />
-          </div>
+        </div>
+
+        <div className={homeStyles.personQuote} style={{ marginTop: 'var(--s-5)' }}>
+          <PullQuote quote={getQuote('barnet-passion')} size="small" showSource />
+          <PullQuote quote={getQuote('solman-resourceful')} size="small" showSource />
         </div>
       </section>
 
-      {/*
-        Two columns, and they do different jobs. Left is the narrative; right is the
-        record it rests on — the institutions, the awards, the shows the archive can
-        actually prove. The rail is not a summary of the prose and must not become one:
-        a timeline that repeats the biography sentence by sentence is worth nothing.
-      */}
       <div className={styles.split}>
         <div className={styles.narrative}>
-
-          {/* --------------------------------------------------------- the life */}
           <section className={styles.section}>
             <h2>A career in five phases</h2>
 
@@ -203,7 +201,6 @@ export default function LifePage() {
             </p>
           </section>
 
-          {/* ------------------------------------------------- why he vanished */}
           <section className={styles.section}>
             <h2>Why he remained unknown</h2>
 
@@ -259,7 +256,6 @@ export default function LifePage() {
           </section>
         </div>
 
-        {/* ══════════════════════════════════════════════════ the record, in a rail */}
         <aside className={styles.rail} aria-label="The record">
           <section>
             <h2 className={styles.railTitle}>In permanent collections</h2>
@@ -407,12 +403,10 @@ export default function LifePage() {
   );
 }
 
-const PROCESS_FRAMES: {
-  id: string; motion: 'play' | 'still'; caption: string;
-}[] = [
-  { id: 'painting-landscape', motion: 'play', caption: 'A landscape canvas going down in real time.' },
-  { id: 'easel-demonstration', motion: 'still', caption: 'A plein-air demonstration, in a hat, at the easel.' },
-  { id: 'painting-outdoors', motion: 'still', caption: 'Painting outdoors while a crowd stands watching behind him.' },
-  { id: 'drawing-portrait', motion: 'still', caption: 'A charcoal portrait on the easel, worked at the mouth.' },
-  { id: 'mixing-palette', motion: 'still', caption: 'Colour drawn across a loaded palette.' },
+const PROCESS_FRAMES: { id: string; caption: string }[] = [
+  { id: 'painting-landscape', caption: 'A landscape canvas going down in real time.' },
+  { id: 'easel-demonstration', caption: 'A plein-air demonstration, in a hat, at the easel.' },
+  { id: 'painting-outdoors', caption: 'Painting outdoors while a crowd stands watching behind him.' },
+  { id: 'drawing-portrait', caption: 'A charcoal portrait on the easel, worked at the mouth.' },
+  { id: 'mixing-palette', caption: 'Colour drawn across a loaded palette.' },
 ];
