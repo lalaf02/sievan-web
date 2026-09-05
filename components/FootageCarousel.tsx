@@ -2,19 +2,12 @@
 
 import { useState } from 'react';
 import { ClipTile } from '@/components/MediaTile';
+import type { Clip } from '@/lib/types';
 import styles from './FootageCarousel.module.css';
-
-type CarouselClip = {
-  src: string;
-  poster: string;
-  alt: string;
-  width: number;
-  height: number;
-};
 
 type Slide = {
   id: string;
-  clip: CarouselClip;
+  clip: Clip;
   caption: string;
 };
 
