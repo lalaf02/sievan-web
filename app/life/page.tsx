@@ -10,6 +10,7 @@ import { CVSource } from '@/components/CVSource';
 import { PullQuote } from '@/components/PullQuote';
 import { Chronology } from '@/components/Chronology';
 import { ClipTile, SheetTile } from '@/components/MediaTile';
+import { FootageCarousel } from '@/components/FootageCarousel';
 import { formatRange } from '@/lib/dates';
 import styles from './life.module.css';
 import homeStyles from '../home.module.css';
@@ -78,6 +79,11 @@ export default function LifePage() {
   const studio = pageOf('MS-AR-00027', 2);
   const rothko = pageOf('MS-AR-00029', 4);
 
+  const footageSlides = PROCESS_FRAMES.flatMap((frame) => {
+    const clip = getClip(frame.id);
+    return clip ? [{ id: frame.id, clip, caption: frame.caption }] : [];
+  });
+
   return (
     <div className="pageWide">
       <header className="measure" style={{ marginBottom: 'var(--s-6)' }}>
@@ -101,45 +107,12 @@ export default function LifePage() {
           <h2 id="person" className={homeStyles.bandTitle}>The only footage the archive holds</h2>
           <p className={homeStyles.bandNote}>
             Of the seven tapes the estate recorded, six are people talking about Sievan
-            and one is Sievan himself. It is silent, and undated. Swipe to move through
-            the surviving footage.
+            and one is Sievan himself. It is silent, and undated. Use the arrows to move
+            through the surviving footage.
           </p>
         </div>
 
-        <div
-          aria-label="Archival footage carousel"
-          style={{
-            display: 'flex',
-            gap: 'var(--s-5)',
-            overflowX: 'auto',
-            scrollSnapType: 'x mandatory',
-            WebkitOverflowScrolling: 'touch',
-            paddingBottom: 'var(--s-3)',
-            overscrollBehaviorInline: 'contain',
-          }}
-        >
-          {PROCESS_FRAMES.map((f) => {
-            const clip = getClip(f.id);
-            if (!clip) return null;
-            return (
-              <div
-                key={f.id}
-                style={{
-                  flex: '0 0 clamp(18rem, 62vw, 44rem)',
-                  minWidth: 0,
-                  scrollSnapAlign: 'start',
-                }}
-              >
-                <ClipTile
-                  clip={clip}
-                  aspect="3 / 2"
-                  priority
-                  caption={f.caption}
-                />
-              </div>
-            );
-          })}
-        </div>
+        <FootageCarousel slides={footageSlides} />
 
         <div className={homeStyles.personQuote} style={{ marginTop: 'var(--s-5)' }}>
           <PullQuote quote={getQuote('barnet-passion')} size="small" showSource />
