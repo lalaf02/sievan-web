@@ -10,8 +10,7 @@
  */
 .spine {
   margin: var(--s-7) 0 var(--s-8);
-  padding-top: var(--s-4);
-  border-top: 2px solid var(--oxide);
+  padding: var(--s-7) 0 var(--s-4);
 }
 
 .track {
@@ -20,8 +19,11 @@
   padding: 0;
   display: flex;
   align-items: stretch;
-  gap: var(--s-2);
+  gap: 0;
+  position: relative;
 }
+
+.track::before { content: ''; position: absolute; left: 0; right: 0; bottom: calc(var(--s-5) + var(--s-3)); height: 2px; background: var(--oxide); }
 
 .band {
   position: relative;
@@ -29,7 +31,7 @@
   background: transparent;
   border: 0;
   /* Was --s-3 all round. Half the vertical padding, same horizontal. */
-  padding: var(--s-3);
+  padding: var(--s-3) var(--s-3) var(--s-5);
   display: flex;
   flex-direction: column;
   gap: var(--s-2);
@@ -53,6 +55,8 @@
   display: block;
   min-width: 0;
 }
+
+.bandLink::after { content: ''; position: absolute; z-index: 1; bottom: calc(var(--s-5) + var(--s-3) - 5px); left: var(--s-3); width: 10px; height: 10px; border-radius: 50%; background: var(--surface-ground); border: 2px solid var(--oxide); }
 
 .bandLink:hover .bandName { text-decoration: underline; }
 
@@ -95,7 +99,7 @@
   position: relative;
   height: var(--s-5);
   margin-top: auto;
-  border-bottom: 1px solid var(--rule-strong);
+  border-bottom: 0;
 }
 
 .mark {
@@ -152,17 +156,22 @@
 @media (max-width: 860px) {
   .track {
     flex-direction: column;
-    gap: var(--s-2);
+    gap: 0;
+    padding-left: var(--s-6);
   }
+
+  .track::before { top: 0; bottom: 0; left: var(--s-2); right: auto; width: 2px; height: auto; }
 
   .band {
     /* flex-basis is set inline for the to-scale layout; stacked, it must not apply. */
     flex-basis: auto !important;
     border-radius: 0;
+    padding: var(--s-3) var(--s-3) var(--s-4);
   }
 
-  .band:first-child { border-radius: 7px 7px 2px 2px; }
-  .band:last-child { border-radius: 2px 2px 7px 7px; }
+  .bandLink::after { left: calc(var(--s-6) * -1 - 5px); top: var(--s-4); bottom: auto; }
+  .plot { height: var(--s-3); }
+  .mark { display: none; }
 
   .markLabel { white-space: normal; max-width: 60vw; }
 }

@@ -2,8 +2,9 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import {
-  allExhibitions, counts,
+  allExhibitions, counts, getClip,
 } from '@/lib/data';
+import { Footage } from '@/components/Footage';
 import { THESIS } from '@/lib/validation';
 import styles from './home.module.css';
 
@@ -15,14 +16,26 @@ export const metadata: Metadata = {
     + 'records and the catalogue of works.',
 };
 
-const studioWorks = [
-  { src: '/artworks/home/anchor.jpg', width: 1800, height: 1350, alt: 'Large abstract painting in cobalt blue, earthen red, ochre and deep green, photographed on a gallery wall.', role: 'anchor', priority: true },
-  { src: '/artworks/home/veil.jpg', width: 1000, height: 1333, alt: 'Blue-grey abstract painting with a veiled face-like form, photographed against a pale wall.', role: 'veil' },
-  { src: '/artworks/home/figures.jpg', width: 1100, height: 1467, alt: 'Muted figurative painting of two closely gathered forms beside dark brushwork.', role: 'figures' },
-  { src: '/artworks/home/blue.jpg', width: 1000, height: 1333, alt: 'Vertical abstract painting dominated by deep cobalt blue with flashes of red and white.', role: 'blue' },
-  { src: '/artworks/home/umber-figure.jpg', width: 900, height: 1201, alt: 'Dark umber figurative painting in a narrow gold frame, photographed on its hanging rail.', role: 'umber' },
-  { src: '/artworks/home/earth.jpg', width: 1100, height: 825, alt: 'Wide earth-toned abstract painting with a pale textured horizon.', role: 'earth' },
-] as const;
+type HomeMedia = {
+  type: 'image' | 'video';
+  src: string;
+  poster?: string;
+  width: number;
+  height: number;
+  alt: string;
+  caption: string;
+  role: 'anchor' | 'studio' | 'rothko' | 'working' | 'blue' | 'earth';
+  priority?: boolean;
+};
+
+const homeMedia: HomeMedia[] = [
+  { type: 'video', src: '/clips/painting-portrait.mp4', poster: '/clips/painting-portrait.jpg', width: 720, height: 486, alt: 'Maurice Sievan working a brush across the face of a portrait in progress.', caption: 'Sievan at work. Silent, undated footage from the estate archive.', role: 'anchor', priority: true },
+  { type: 'image', src: '/scans/pages/MSAR00027-p02.jpg', width: 1500, height: 1125, alt: 'Maurice Sievan seated by a window in his studio.', caption: 'Sievan in the studio, from a 1963 gallery catalogue.', role: 'studio' },
+  { type: 'image', src: '/scans/pages/MSAR00029-p04.jpg', width: 1143, height: 1500, alt: "Maurice Sievan in Mark Rothko's studio, Provincetown, 1961.", caption: 'In Mark Rothko’s studio, Provincetown, 1961. Photograph by Lee C. Sievan.', role: 'rothko' },
+  { type: 'video', src: '/clips/painting-outdoors.mp4', poster: '/clips/painting-outdoors.jpg', width: 720, height: 486, alt: 'Sievan painting at an easel outdoors while a crowd stands watching behind him.', caption: 'Painting outdoors, watched by a crowd. Silent, undated footage.', role: 'working' },
+  { type: 'image', src: '/artworks/home/blue.jpg', width: 1000, height: 1333, alt: 'Vertical abstract painting dominated by deep cobalt blue with flashes of red and white.', caption: 'A work in cobalt, red and white.', role: 'blue' },
+  { type: 'image', src: '/artworks/home/earth.jpg', width: 1100, height: 825, alt: 'Wide earth-toned abstract painting with a pale textured horizon.', caption: 'An earth-toned abstraction photographed in context.', role: 'earth' },
+];
 
 /**
  * The front page: the man and what this site is.
@@ -40,19 +53,25 @@ export default function Home() {
           <p className="eyebrow">1898–1981</p>
           <h1 id="name" className={styles.name}>Maurice Sievan</h1>
         </div>
-        <div className={styles.studioWall} aria-label="Paintings by Maurice Sievan">
-          {studioWorks.map((work) => (
-            <figure className={`${styles.work} ${styles[work.role]}`} key={work.src}>
-              <Image
-                src={work.src}
-                alt={work.alt}
-                width={work.width}
-                height={work.height}
-                priority={'priority' in work && work.priority}
-                sizes={work.role === 'anchor'
-                  ? '(max-width: 860px) 92vw, 56vw'
-                  : '(max-width: 620px) 58vw, (max-width: 860px) 38vw, 18vw'}
-              />
+        <div className={styles.studioWall} aria-label="Maurice Sievan at work, among his paintings">
+          {homeMedia.map((item) => (
+            <figure className={`${styles.work} ${styles[item.role]}`} key={item.src}>
+              {item.type === 'video' ? (
+                <Footage clip={{
+                  id: item.role,
+                  videoId: getClip(item.role === 'anchor' ? 'painting-portrait' : 'painting-outdoors')?.videoId ?? 'MS-VI-00007',
+                  src: item.src,
+                  poster: item.poster ?? '',
+                  width: item.width,
+                  height: item.height,
+                  duration: getClip(item.role === 'anchor' ? 'painting-portrait' : 'painting-outdoors')?.duration ?? 0,
+                  alt: item.alt,
+                }} priority={item.priority} />
+              ) : (
+                <Image src={item.src} alt={item.alt} width={item.width} height={item.height}
+                  priority={item.priority} sizes="(max-width: 620px) 46vw, (max-width: 860px) 34vw, 18vw" />
+              )}
+              <figcaption>{item.caption}</figcaption>
             </figure>
           ))}
         </div>
