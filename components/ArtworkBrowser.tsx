@@ -220,7 +220,7 @@ export function ArtworkBrowser({
             Counts by grade, never one total. Four different strengths of evidence
             added together would be exactly the number CLAUDE.md forbids.
           */}
-          <p className={styles.resultCount}>
+          <p className={styles.resultCount} role="status">
             <span className="tnum">{describeCounts(results)}</span>
           </p>
 
@@ -263,7 +263,9 @@ export function ArtworkBrowser({
                       not a file that failed to load.
                     */
                     <span className={styles.noImage}>
-                      Not separable from the page it is printed on
+                      {r.grade === 'printed'
+                        ? 'Not separable from the page it is printed on'
+                        : 'No scan on file'}
                     </span>
                   )}
                 </span>

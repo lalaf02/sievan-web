@@ -51,18 +51,16 @@ shared package and is replaced by the density rule below.
 ## The system
 
 - Genre: an archive that hangs its holdings on a wall
-- Default mode: **dark, warm charcoal.** Dark is `:root` and carries no attribute
-- Light mode: **a full peer, not a fallback.** It is the reading room — long
+- Default mode: **light, warm paper.** Light is `:root` and carries no attribute
+- Dark mode: **a full peer, not a fallback.** It is the evening gallery —
   transcripts, metadata proofing, printing — and it has its own elevation model.
   If it looks like a recolouring of the dark theme it has failed review
 - One package, two densities: the public site reads, the admin works
 
 ## Colour
 
-- **Warm charcoal, never neutral black and never pure black.** The archive's
-  paper was warm; the room it now hangs in keeps that hue
-- **Text is parchment, never pure white.** White on charcoal glares and makes the
-  paintings look grey beside it
+- **Warm paper by default; warm charcoal in dark mode.** Neither theme uses
+  neutral black or pure white, so the archive's paper remains the visual source.
 - `--oxide` is the primary accent and leads. `--accent-cool` is the counterpoint
   and carries secondary actions and data. `--flag` is gold and means *review
   marker* and nothing else — it meant only that before, and still does
@@ -89,9 +87,8 @@ shared package and is replaced by the density rule below.
 
 ## Typography
 
-- **Source Serif 4 and Inter.** Both are variable across 200–900 and both were
-  already loaded; neither app ever used more than 400/500/600, which is why
-  nothing on either site was ever louder than anything else
+- **Source Serif 4, Roboto Condensed and Inter.** Serif carries archive prose,
+  condensed type carries graphic headings and labels, and Inter carries controls.
 - The hierarchy is **a pair, not a ramp**: display type is large, thin and pulled
   tight (`--w-thin`, `--tracking-display`); label type is small, heavy and opened
   up (`--w-bold`, `--tracking-label`). Everything between them stays quiet

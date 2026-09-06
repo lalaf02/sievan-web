@@ -43,7 +43,10 @@ function block(name) {
   )) out[k] = luminance(+L / 100, +C, +h);
   return out;
 }
-const themes = { dark: block(':root'), light: { ...block(':root'), ...block("\\[data-theme='light'\\]") } };
+const themes = {
+  light: block(':root'),
+  dark: { ...block(':root'), ...block("\\[data-theme='dark'\\]") },
+};
 
 /* fg, bg, minimum, what it is */
 const PAIRS = [
@@ -55,6 +58,7 @@ const PAIRS = [
   ['ink-muted', 'surface-raised', 4.5, 'secondary text on a card'],
   ['ink-faint', 'surface-ground', 4.5, 'captions and metadata'],
   ['ink-faint', 'surface-raised', 4.5, 'captions on a card'],
+  ['ink-faint', 'surface-overlay', 4.5, 'metadata in an overlay'],
   ['oxide', 'surface-ground', 4.5, 'primary link'],
   ['oxide', 'surface-raised', 4.5, 'primary link on a card'],
   ['accent-cool', 'surface-ground', 4.5, 'secondary accent'],
@@ -62,6 +66,9 @@ const PAIRS = [
   ['danger', 'surface-ground', 4.5, 'error text'],
   ['success', 'surface-ground', 4.5, 'success text'],
   ['rule-strong', 'surface-ground', 3, 'structural rule'],
+  ['rule-strong', 'surface-raised', 3, 'control on a card'],
+  ['rule-strong', 'surface-overlay', 3, 'control in an overlay'],
+  ['rule-strong', 'surface-sunk', 3, 'control in a well'],
   ['oxide', 'surface-sunk', 3, 'focus ring in a well'],
 ];
 

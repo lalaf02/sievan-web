@@ -78,9 +78,8 @@ export function scoreFields(fields: Field[], queryTokens: string[]): number {
  * So a multi-word query is treated as one contiguous needle. Single words behave
  * exactly as before.
  *
- * Note the needle is normalised but not whitespace-collapsed: `normalize` maps each
- * character to exactly one character, which is what lets `highlightSegments` index
- * back into the original string with offsets found in the normalised one.
+ * Matching tolerates whitespace introduced by punctuation. highlightSegments maps
+ * normalised offsets back to the source, including decomposed accents and ligatures.
  */
 export function highlightNeedles(query: string): string[] {
   const needle = normalize(query).trim();
@@ -92,9 +91,8 @@ export function highlightNeedles(query: string): string[] {
  *
  * `normalize` maps each punctuation character to a single space rather than
  * deleting it, so "individual, original" becomes "individual  original" — two
- * spaces. A plain `indexOf` for "individual original" then finds nothing. Since
- * every character still maps 1:1, matching with `\s+` between words keeps the
- * offsets usable for slicing the original text.
+ * spaces. A plain `indexOf` for "individual original" then finds nothing;
+ * matching with `\s+` between words finds either spelling.
  */
 export function needleRegex(needle: string): RegExp {
   const words = needle.trim().split(/\s+/)
@@ -109,13 +107,28 @@ export function highlightSegments(
 ): { text: string; hit: boolean }[] {
   if (!queryTokens.length) return [{ text, hit: false }];
 
-  const hay = normalize(text);
+  // NFKD can expand ligatures or remove combining marks. Keep original UTF-16
+  // offsets rather than slicing the source with positions from the transformed text.
+  let hay = '';
+  const starts: number[] = [];
+  const ends: number[] = [];
+  let offset = 0;
+  for (const char of text) {
+    const folded = normalize(char);
+    for (let i = 0; i < folded.length; i++) {
+      starts.push(offset);
+      ends.push(offset + char.length);
+    }
+    if (!folded && ends.length) ends[ends.length - 1] = offset + char.length;
+    hay += folded;
+    offset += char.length;
+  }
   const ranges: [number, number][] = [];
   for (const token of queryTokens) {
     const re = needleRegex(token);
     for (let m = re.exec(hay); m; m = re.exec(hay)) {
       if (m[0].length === 0) break;
-      ranges.push([m.index, m.index + m[0].length]);
+      ranges.push([starts[m.index], ends[m.index + m[0].length - 1]]);
     }
   }
   if (!ranges.length) return [{ text, hit: false }];
@@ -137,4 +150,15 @@ export function highlightSegments(
   }
   if (cursor < text.length) out.push({ text: text.slice(cursor), hit: false });
   return out;
+}
+
+/** A source-text window around the same phrase that Highlight will mark. */
+export function excerptAroundMatch(text: string, needles: string[], radius = 130): string {
+  const segments = highlightSegments(text, needles);
+  const hit = segments.findIndex((segment) => segment.hit);
+  if (hit === -1) return text.length > 220 ? `${text.slice(0, 220)}…` : text;
+  const at = segments.slice(0, hit).reduce((length, segment) => length + segment.text.length, 0);
+  const start = Math.max(0, at - radius);
+  const end = Math.min(text.length, at + segments[hit].text.length + radius);
+  return `${start > 0 ? '…' : ''}${text.slice(start, end).trim()}${end < text.length ? '…' : ''}`;
 }

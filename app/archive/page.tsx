@@ -45,6 +45,7 @@ function buildRows(): ArchiveRow[] {
         type: o.object_type,
         typeLabel: OBJECT_TYPE_LABELS[o.object_type] ?? o.object_type,
         scanned: Boolean(cover),
+        withheld: /not scanned/i.test(o.raw_title_description),
         /*
           Labelled by VENUE and year, not by name. Thirteen of the fifteen shows are
           titled "Maurice Sievan", so a facet keyed on the name offered a reader

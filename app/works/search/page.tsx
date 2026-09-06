@@ -52,7 +52,7 @@ export default function WorkSearchPage() {
       {/*
         The four grades, stated before the rail rather than discovered inside it.
         A reader who filters to "Named on a sheet" and finds no images needs to already
-        know why: these are paintings nobody has seen. Counted separately here for the
+        know why: these are paintings the archive does not hold. Counted separately here for the
         same reason they are counted separately everywhere — see lib/artworkIndex.ts.
       */}
       <section className={styles.grades} aria-labelledby="grades">

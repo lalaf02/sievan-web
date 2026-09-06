@@ -4,7 +4,7 @@ import { useMemo } from 'react';
 import Link from 'next/link';
 import type { Painting } from '@/lib/types';
 import { highlightNeedles, scoreFields, tokenize } from '@/lib/search';
-import { decadeLabel } from '@/lib/dates';
+import { compareDatesUndatedLast, decadeLabel } from '@/lib/dates';
 import { useUrlState } from '@/lib/useUrlState';
 import { facetOf, parseDims } from '@/lib/facets';
 import { CheckList, ClearFilters, RailSearch } from './FacetRail';
@@ -108,9 +108,11 @@ export function WorksBrowser({ paintings }: { paintings: Painting[] }) {
     kept.sort((a, b) => {
       if (tokens.length && b.score !== a.score) return b.score - a.score;
       if (sort === 'title') return (a.p.title ?? '').localeCompare(b.p.title ?? '');
-      const av = a.p.date_earliest ?? 0;
-      const bv = b.p.date_earliest ?? 0;
-      return sort === 'date-desc' ? bv - av : av - bv;
+      return compareDatesUndatedLast(
+        a.p.date_earliest?.toString() ?? null,
+        b.p.date_earliest?.toString() ?? null,
+        sort === 'date-desc' ? 'desc' : 'asc',
+      );
     });
 
     return kept.map(({ p }) => p);
@@ -163,7 +165,7 @@ export function WorksBrowser({ paintings }: { paintings: Painting[] }) {
 
       <div>
         <div className={styles.head}>
-          <p className={styles.resultCount}>
+          <p className={styles.resultCount} role="status">
             {results.length} of {paintings.length} works
           </p>
 

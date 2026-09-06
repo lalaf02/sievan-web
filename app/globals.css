@@ -15,6 +15,8 @@ body {
   flex-direction: column;
 }
 
+main { isolation: isolate; }
+
 /* ═════════════════════════════════════════════════════ typographic utilities
  *
  * These names are used by all 42 route and component stylesheets. They are the
@@ -49,12 +51,12 @@ body {
  * heavy and opened up — which is one half of the type hierarchy.
  */
 .eyebrow {
-  font-family: var(--sans);
+  font-family: var(--display);
   font-size: var(--t-2xs);
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--tracking-label);
-  color: var(--ink-faint);
+  color: var(--oxide);
   margin: 0 0 var(--s-2);
 }
 
@@ -75,6 +77,39 @@ body {
 .faint { color: var(--ink-faint); }
 .measure { max-width: var(--measure); }
 
+/* The public editorial voice. Source prose remains serif; navigation, hierarchy,
+   dates and counts use the condensed display face. */
+main h1,
+main h2,
+main h3,
+main h4,
+main h1[class],
+main h2[class],
+main h3[class],
+main h4[class] {
+  font-family: var(--display);
+}
+
+main h2,
+main h2[class] {
+  color: var(--oxide);
+  font-weight: var(--w-regular);
+  letter-spacing: -0.025em;
+}
+
+main :is(input, select, button, summary) { font-family: var(--sans); }
+
+main :is(input[type='search'], select) {
+  border-color: var(--oxide);
+  background: color-mix(in srgb, var(--surface-overlay) 65%, transparent);
+}
+
+main section { scroll-margin-top: calc(var(--s-9) + var(--s-5)); }
+
+main :is(dl, table) { font-variant-numeric: tabular-nums; }
+
+main figure img { background: var(--surface-sunk); }
+
 /* ═════════════════════════════════════════════════════════════════ page frames
  *
  * Use these; never set a width at the call site. `padding-top` lives here rather
@@ -87,7 +122,7 @@ body {
   width: 100%;
   max-width: var(--page);
   margin: 0 auto;
-  padding: var(--s-6) var(--s-5) 0;
+  padding: var(--s-8) var(--s-6) 0;
 }
 
 /* The home page opens on its hero; no rule of space above it. */
@@ -104,7 +139,7 @@ body {
   width: 100%;
   max-width: var(--page-wide);
   margin: 0 auto;
-  padding: var(--s-6) var(--s-5) 0;
+  padding: var(--s-8) var(--s-6) 0;
 }
 
 /*
@@ -117,7 +152,20 @@ body {
   width: 100%;
   max-width: var(--measure-record);
   margin: 0 auto;
-  padding: var(--s-6) var(--s-5) 0;
+  padding: var(--s-8) var(--s-6) 0;
+}
+
+.page > header:first-child,
+.pageWide > header:first-child,
+.record > header:first-child {
+  max-width: 72rem;
+  margin-bottom: var(--s-8);
+}
+
+.page > header:first-child h1,
+.pageWide > header:first-child h1,
+.record > header:first-child h1 {
+  max-width: 14ch;
 }
 
 /* Layout: rail + content. Used by every browser and the transcript reader. */
@@ -130,9 +178,15 @@ body {
 
 .rail {
   position: sticky;
-  top: var(--s-5);
+  top: calc(var(--s-9) + var(--s-4));
   font-family: var(--sans);
   font-size: var(--t-sm);
+  border-top: 2px solid var(--oxide);
+  padding-top: var(--s-4);
+}
+
+@media (max-width: 620px) {
+  .page, .pageWide, .record { padding-inline: var(--s-4); padding-top: var(--s-7); }
 }
 
 @media (max-width: 860px) {

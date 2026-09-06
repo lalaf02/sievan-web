@@ -97,13 +97,13 @@ export default async function ExhibitionPage({ params }: Props) {
       <Section title="Works shown">
         <Pending
           eyebrow="Not recorded"
-          title="It is not known which paintings hung in this exhibition."
+          title="The works shown have not yet been indexed."
         >
           <p>
             The archive holds evidence that the show happened — a catalogue, a poster or a
-            review — but nothing that lists what was on the walls. Checklists, installation
-            photographs and priced inventories are the documents that would answer this,
-            and none survive here for this exhibition.
+            review — but the works shown have not yet been indexed for this exhibition.
+            Surviving catalogues may contain checklists; their entries need to be
+            transcribed and checked before individual works can be listed here.
           </p>
         </Pending>
       </Section>

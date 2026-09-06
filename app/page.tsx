@@ -29,6 +29,10 @@ export default function Home() {
 
       {/* ═══════════════════════════════════════════════ hero: the man, painting */}
       <section className={styles.hero} aria-labelledby="name">
+        <div className={styles.heroTitle}>
+          <p className="eyebrow">1898–1981</p>
+          <h1 id="name" className={styles.name}>Maurice Sievan</h1>
+        </div>
         <div className={styles.heroMedia}>
           {atTheEasel && (
             <ClipTile
@@ -41,8 +45,6 @@ export default function Home() {
           )}
         </div>
         <div className={styles.heroText}>
-          <p className="eyebrow">1898–1981</p>
-          <h1 id="name" className={styles.name}>Maurice Sievan</h1>
           <p className={styles.lede}>{THESIS.subhead}</p>
           <p className={styles.heroBody}>
             Born in Ukraine in 1898 and raised in New York, he studied at the National

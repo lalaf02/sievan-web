@@ -145,7 +145,7 @@ export default async function PeriodPage({ params }: Props) {
           />
           <span className={styles.sourceHint}>See the page</span>
         </CatalogueSource>
-        <div className={styles.sourceBody}>
+        <div>
           {opening && (
             <blockquote className={styles.sourceQuote}>
               <CatalogueSource page={page} className={styles.sourceQuoteLink}>
@@ -172,8 +172,8 @@ export default async function PeriodPage({ params }: Props) {
           {catalogueYears.length === 1 ? '' : 's'} on the page above, dated{' '}
           <span className="tnum">{catalogueYears.join(', ')}</span>. They cannot be
           separated into individual images: each exists only as part of the page it is
-          printed on, photocopied inside a typescript whose colour Sievan himself
-          annotated as “way off color”. No title, medium or dimension is recorded
+          printed on, photocopied inside a typescript carrying a note reading
+          “way off color”. No title, medium or dimension is recorded
           anywhere in the archive for any of them — the year is all that is known.
         </p>
       </EvidenceSection>

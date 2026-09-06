@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useMemo } from 'react';
-import { highlightNeedles, NO_TEXT_LAYER, normalize, scoreFields, tokenize } from '@/lib/search';
+import { excerptAroundMatch, highlightNeedles, NO_TEXT_LAYER, scoreFields, tokenize } from '@/lib/search';
 import { Highlight } from './Highlight';
 import { useUrlState } from '@/lib/useUrlState';
 import styles from './SiteSearch.module.css';
@@ -107,7 +107,7 @@ export function SiteSearch({ rows }: { rows: SearchRow[] }) {
           name="q"
           className={styles.input}
           placeholder="A name, a publication, a year, a phrase"
-          defaultValue={query}
+          value={query}
           onChange={(e) => update((p) => {
             const v = e.target.value;
             if (v) p.set('q', v);
@@ -117,7 +117,7 @@ export function SiteSearch({ rows }: { rows: SearchRow[] }) {
         <p className={styles.caveat}>{NO_TEXT_LAYER}</p>
       </div>
 
-      <p className={styles.count}>
+      <p className={styles.count} role="status">
         {query
           ? `${scored.length} ${scored.length === 1 ? 'result' : 'results'} for “${query}”`
           : `${rows.length} records. Type to narrow, or browse below.`}
@@ -138,7 +138,12 @@ export function SiteSearch({ rows }: { rows: SearchRow[] }) {
           <ul className={styles.list}>
             {list.map((r) => (
               <li key={r.id} className={styles.row}>
-                <Link href={r.href} className={styles.rowLink}>
+                <Link
+                  href={r.kind === 'transcript' && query
+                    ? `${r.href.split('#')[0]}?q=${encodeURIComponent(query)}#${r.href.split('#')[1]}`
+                    : r.href}
+                  className={styles.rowLink}
+                >
                   <span className={styles.rowTitle}>
                     <Highlight text={r.title} tokens={needles} />
                   </span>
@@ -151,7 +156,7 @@ export function SiteSearch({ rows }: { rows: SearchRow[] }) {
                 </Link>
                 {r.kind === 'transcript' && r.body && (
                   <p className={styles.excerpt}>
-                    <Highlight text={excerpt(r.body, needles)} tokens={needles} />
+                    <Highlight text={excerptAroundMatch(r.body, needles)} tokens={needles} />
                   </p>
                 )}
               </li>
@@ -161,24 +166,4 @@ export function SiteSearch({ rows }: { rows: SearchRow[] }) {
       ))}
     </div>
   );
-}
-
-/**
- * A window of the paragraph around the first hit, so a transcript result shows the
- * sentence you searched for rather than the paragraph's opening words.
- */
-function excerpt(text: string, tokens: string[], radius = 130): string {
-  if (!tokens.length) return text.length > 220 ? `${text.slice(0, 220)}…` : text;
-  // Must match how the needles were built, or a phrase containing punctuation
-  // never lines up and the excerpt silently falls back to the paragraph opening.
-  const hay = normalize(text);
-  let at = -1;
-  for (const t of tokens) {
-    const i = hay.indexOf(t);
-    if (i !== -1 && (at === -1 || i < at)) at = i;
-  }
-  if (at === -1) return text.length > 220 ? `${text.slice(0, 220)}…` : text;
-  const start = Math.max(0, at - radius);
-  const end = Math.min(text.length, at + radius);
-  return `${start > 0 ? '…' : ''}${text.slice(start, end).trim()}${end < text.length ? '…' : ''}`;
 }

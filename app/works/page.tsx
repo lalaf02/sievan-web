@@ -212,7 +212,7 @@ function AttestedSummary() {
         <strong>{counts.attestedWorks} further paintings</strong> —{' '}
         {counts.attestedWorksWithDimensions} of them with a size,{' '}
         {counts.attestedWorksWithPrice} with a price — that exist nowhere else in the
-        record. Nobody has seen them. They are the strongest evidence the archive has
+        record. The archive has no catalogue entries for them. They are evidence
         toward the catalogue of paintings, and they are not that catalogue: a sketch
         records a painting, it does not establish one.
       </p>

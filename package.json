@@ -12,6 +12,7 @@
     "start": "next start",
     "typecheck": "tsc --noEmit",
     "lint": "eslint",
+    "test": "node --no-warnings=MODULE_TYPELESS_PACKAGE_JSON --test tests/*.test.mjs",
     "db:seed": "node scripts/seed-supabase.mjs",
     "db:export": "node scripts/export-seeds.mjs",
     "db:media": "node scripts/upload-media.mjs",

@@ -24,22 +24,23 @@
 .group { margin-bottom: var(--s-5); }
 
 .groupTitle {
-  font-family: var(--sans);
+  font-family: var(--display);
   font-size: var(--t-xs);
   text-transform: uppercase;
   letter-spacing: 0.09em;
-  color: var(--ink-faint);
+  color: var(--oxide);
+  font-weight: 700;
   margin: 0 0 var(--s-2);
 }
 
 .chips { display: flex; flex-wrap: wrap; gap: var(--s-2); }
 
 .chip {
-  font-family: var(--sans);
+  font-family: var(--display);
   font-size: var(--t-xs);
   padding: 0.2em 0.6em;
   border: 1px solid var(--rule-strong);
-  border-radius: 999px;
+  border-radius: 2px;
   background: transparent;
   color: var(--ink-muted);
   cursor: pointer;
@@ -109,8 +110,8 @@
   justify-content: space-between;
   align-items: baseline;
   gap: var(--s-4);
-  border-bottom: 1px solid var(--rule-strong);
-  padding-bottom: var(--s-2);
+  border-top: 2px solid var(--oxide);
+  padding-top: var(--s-3);
   margin-bottom: var(--s-2);
   flex-wrap: wrap;
 }

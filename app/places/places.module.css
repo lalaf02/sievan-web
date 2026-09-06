@@ -7,19 +7,19 @@
 }
 
 .region {
-  margin-bottom: var(--s-6);
+  margin-bottom: var(--s-8);
 }
 
 .regionName {
-  font-family: var(--sans);
+  font-family: var(--display);
   font-size: var(--t-xs);
   text-transform: uppercase;
   letter-spacing: 0.09em;
-  color: var(--ink-faint);
-  border-bottom: 1px solid var(--rule);
-  padding-bottom: var(--s-2);
+  color: var(--oxide);
+  border-top: 2px solid var(--oxide);
+  padding-top: var(--s-3);
   margin: 0 0 var(--s-3);
-  font-weight: 400;
+  font-weight: 700;
 }
 
 .list {

@@ -9,6 +9,7 @@
  */
 import Link from 'next/link';
 import type { Clip, ScanPage } from '@/lib/types';
+import { Footage } from './Footage';
 import styles from './MediaTile.module.css';
 
 /** A rasterised sheet. Documents are shown whole, never cropped to a shape. */
@@ -129,18 +130,10 @@ export function ClipTile({
       decoding="async"
     />
   ) : (
-    <video
+    <Footage
       className={styles.footage}
-      src={clip.src}
-      poster={clip.poster}
-      width={clip.width}
-      height={clip.height}
-      autoPlay
-      muted
-      loop
-      playsInline
-      preload={priority ? 'metadata' : 'none'}
-      aria-label={clip.alt}
+      clip={clip}
+      priority={priority}
     />
   );
 
@@ -150,9 +143,10 @@ export function ClipTile({
 
   return (
     <figure className={styles.item}>
-      {href
+      {href && still
         ? <Link className={styles.frame} style={style} href={href}>{media}</Link>
         : <span className={styles.frame} style={style}>{media}</span>}
+      {href && !still && <Link href={href}>{caption ?? clip.alt}</Link>}
       {(caption || meta) && (
         <figcaption className={styles.caption}>
           {/*

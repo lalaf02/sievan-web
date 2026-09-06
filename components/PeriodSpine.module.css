@@ -9,7 +9,9 @@
  * one plot line, and tight padding.
  */
 .spine {
-  margin: 0 0 var(--s-5);
+  margin: var(--s-7) 0 var(--s-8);
+  padding-top: var(--s-4);
+  border-top: 2px solid var(--oxide);
 }
 
 .track {
@@ -18,34 +20,31 @@
   padding: 0;
   display: flex;
   align-items: stretch;
-  gap: 2px;
+  gap: var(--s-2);
 }
 
 .band {
   position: relative;
   min-width: 0;
-  background: var(--surface-raised);
-  border: 1px solid var(--rule);
-  border-radius: var(--radius);
-  box-shadow: var(--elevation-1);
+  background: transparent;
+  border: 0;
   /* Was --s-3 all round. Half the vertical padding, same horizontal. */
-  padding: var(--s-2) var(--s-3);
+  padding: var(--s-3);
   display: flex;
   flex-direction: column;
   gap: var(--s-2);
-  border-radius: 2px;
+  border-radius: 0;
 }
 
 /* The rail reads as one continuous run of years, so only its ends are rounded. */
-.band:first-child { border-radius: 7px 2px 2px 7px; }
-.band:last-child { border-radius: 2px 7px 7px 2px; }
+.band:first-child,
+.band:last-child { border-radius: 0; }
 
-.band:hover { border-color: var(--rule-strong); }
+.band:hover { background: var(--surface-raised); }
 
 /* The period whose page you are on. */
 .current {
-  background: var(--surface-sunk);
-  border-color: var(--oxide);
+  background: var(--oxide-soft);
 }
 
 .bandLink {
@@ -59,10 +58,12 @@
 
 .bandName {
   display: block;
-  font-family: var(--serif);
-  font-size: var(--t-base);
+  font-family: var(--display);
+  font-size: var(--t-md);
+  font-weight: 700;
+  text-transform: uppercase;
   line-height: 1.2;
-  color: var(--ink);
+  color: var(--oxide);
   /* Five names in a row at 1440px; the shortest band is seven years wide. */
   overflow-wrap: break-word;
 }
@@ -92,7 +93,7 @@
 /* The plotted years. Each mark is a link, which is what makes this work with JS off. */
 .plot {
   position: relative;
-  height: 0.875rem;
+  height: var(--s-5);
   margin-top: auto;
   border-bottom: 1px solid var(--rule-strong);
 }
@@ -100,8 +101,8 @@
 .mark {
   position: absolute;
   bottom: 0;
-  width: 3px;
-  height: 0.6rem;
+  width: 4px;
+  height: 0.9rem;
   background: var(--oxide);
   /* Nudge left so a mark at 100% still sits inside its own band. */
   transform: translateX(-1px);
@@ -151,13 +152,13 @@
 @media (max-width: 860px) {
   .track {
     flex-direction: column;
-    gap: 1px;
+    gap: var(--s-2);
   }
 
   .band {
     /* flex-basis is set inline for the to-scale layout; stacked, it must not apply. */
     flex-basis: auto !important;
-    border-radius: 2px;
+    border-radius: 0;
   }
 
   .band:first-child { border-radius: 7px 7px 2px 2px; }

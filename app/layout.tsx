@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Source_Serif_4, Inter } from 'next/font/google';
+import { Source_Serif_4, Inter, Roboto_Condensed } from 'next/font/google';
 import '@/design/tokens.css';
 import '@/design/primitives.css';
 import './globals.css';
@@ -15,6 +15,12 @@ const serif = Source_Serif_4({
 
 const sans = Inter({
   variable: '--font-sans',
+  subsets: ['latin'],
+  display: 'swap',
+});
+
+const display = Roboto_Condensed({
+  variable: '--font-display',
   subsets: ['latin'],
   display: 'swap',
 });
@@ -45,10 +51,10 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${serif.variable} ${sans.variable}`} suppressHydrationWarning>
+    <html lang="en" className={`${serif.variable} ${sans.variable} ${display.variable}`} suppressHydrationWarning>
       <head>
         {/*
-          Restores an explicit light choice before first paint. Dark is the
+          Restores an explicit dark choice before first paint. Light is the
           default and carries no attribute, so the prerendered HTML is already
           correct for everyone who has not chosen otherwise, and this only ever
           runs to prevent a flash for those who have.
@@ -57,7 +63,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body>
         <SiteHeader />
-        <main id="main" style={{ flex: 1, paddingBottom: 'var(--s-8)' }}>
+        <main id="main" tabIndex={-1} style={{ flex: 1, paddingBottom: 'var(--s-8)' }}>
           {children}
         </main>
         <SiteFooter />

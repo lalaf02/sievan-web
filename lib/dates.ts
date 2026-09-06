@@ -53,13 +53,16 @@ export function formatPartial(iso: PartialDate): string | null {
  *
  * 13 of 15 exhibitions carry an end_date *less* precise than their start_date
  * (start "1939-04-01", end "1939"), which naively renders "April 1, 1939 – 1939".
- * A less precise end is not a range — it is the same date restated vaguely, so
- * it is dropped. Only albert-landry-1963 is a genuine range.
+ * An end that restates the start’s month or year is dropped. A later endpoint
+ * is preserved even when its precision is lower.
  */
 export function formatRange(start: PartialDate, end: PartialDate): string | null {
   const from = formatPartial(start);
   if (!from) return formatPartial(end);
-  if (!end || componentsOf(end) <= componentsOf(start)) return from;
+  if (!end || end === start) return from;
+  // A vague end is redundant only when it restates the start's month or year.
+  // Equal-precision endpoints (February 7–28) and later years are real ranges.
+  if (componentsOf(end) < componentsOf(start) && start!.startsWith(`${end}-`)) return from;
 
   // Same month and year: "February 7–28, 1963" rather than repeating the month.
   const startParts = start!.split('-');
@@ -92,6 +95,16 @@ export function formatArticleDate(
 
 export const decadeOf = (year: number | null): number | null =>
   year == null ? null : Math.floor(year / 10) * 10;
+
+/** ISO partial dates sort chronologically; missing dates stay last in either direction. */
+export function compareDatesUndatedLast(
+  a: PartialDate, b: PartialDate, direction: 'asc' | 'desc' = 'asc',
+): number {
+  if (!a && !b) return 0;
+  if (!a) return 1;
+  if (!b) return -1;
+  return direction === 'desc' ? b.localeCompare(a) : a.localeCompare(b);
+}
 
 export const decadeLabel = (decade: number | string): string => `${decade}s`;
 

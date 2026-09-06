@@ -41,6 +41,7 @@ export function SiteHeader() {
                 <li key={item.href}>
                   <Link
                     href={item.href}
+                    aria-current={isActive ? 'location' : undefined}
                     className={`${styles.link} ${isActive ? styles.active : ''}`}
                   >
                     {item.label}

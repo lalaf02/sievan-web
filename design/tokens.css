@@ -5,46 +5,37 @@
  * closed set: a colour, size or duration used anywhere in either app must be one
  * of these names. A raw value at a call site is a finding.
  *
- * Dark is :root and light is the override. That inversion is the design: the
- * archive is a gallery at night, and the art is the only thing lit. Light mode is
- * a full peer, not a fallback — it is the reading room, and it gets its own
- * elevation model rather than a recolouring of this one.
+ * Light is :root and dark is the explicit peer. The public archive now opens as a
+ * warm reading room; readers who choose the charcoal gallery keep that choice.
  *
  * Colours are OKLCH so that the two themes can be reasoned about by lightness.
  * Next emits an sRGB fallback automatically; do not hand-write one.
  */
 
 :root {
-  /* ─────────────────────────────────────────────────────────── surfaces (dark)
+  /* ────────────────────────────────────────────────────────── surfaces (light)
    *
-   * Four surfaces, one lightness step apart. On a dark ground a drop shadow is
-   * nearly invisible, so depth is carried by surface lightness first and shadow
-   * second: something nearer the reader is lighter. This is the whole answer to
-   * the flatness the old system mandated, and the reason there are four names
-   * here rather than the two paper tones the archive used to have.
-   *
-   * Warm charcoal, never neutral black and never pure black: the archive's paper
-   * was warm, and the room it now hangs in keeps that hue.
+   * Four warm paper surfaces make the reading room feel physical while keeping
+   * archival sheets visually distinct from the interface around them.
    */
-  --surface-ground: oklch(21% 0.010 75);
-  --surface-raised: oklch(25% 0.012 75);
-  --surface-overlay: oklch(29% 0.014 75);
-  --surface-sunk: oklch(17% 0.008 75);
+  --surface-ground: oklch(96.5% 0.020 82);
+  --surface-raised: oklch(92.8% 0.030 80);
+  --surface-overlay: oklch(99% 0.010 82);
+  --surface-sunk: oklch(89.8% 0.035 80);
 
-  /* ─────────────────────────────────────────────────────────────── ink (dark)
-   * Parchment, not white. Pure white on charcoal glares and makes the paintings
-   * look grey by comparison.
+  /* ────────────────────────────────────────────────────────────── ink (light)
+   * Warm brown-black keeps the page softer than neutral black.
    */
-  --ink: oklch(93% 0.014 82);
-  --ink-muted: oklch(74% 0.018 82);
-  --ink-faint: oklch(62% 0.018 82);
+  --ink: oklch(24% 0.025 55);
+  --ink-muted: oklch(46% 0.030 58);
+  --ink-faint: oklch(51% 0.030 58);
 
   /* Rules stay low-contrast but must remain visible; -strong is for a rule that
    * is doing structural work (a table head, a segmented control). */
-  --rule: oklch(30% 0.014 75);
-  --rule-strong: oklch(50% 0.018 75);
+  --rule: oklch(82% 0.035 55);
+  --rule-strong: oklch(48% 0.180 30);
 
-  /* ──────────────────────────────────────────────────────────── accents (dark)
+  /* ─────────────────────────────────────────────────────────── accents (light)
    *
    * The oxide rust survives as the primary and still leads. It is lifted here:
    * the light-mode value (45% L) is unreadable on charcoal.
@@ -56,16 +47,16 @@
    * --flag is gold and is reserved for review markers. It meant that in
    * sievan-web already; it still means only that.
    */
-  --oxide: oklch(70% 0.132 42);
-  --oxide-soft: oklch(30% 0.055 40);
-  --accent-cool: oklch(74% 0.098 248);
-  --accent-cool-soft: oklch(29% 0.045 250);
-  --flag: oklch(80% 0.115 88);
+  --oxide: oklch(51% 0.205 30);
+  --oxide-soft: oklch(90% 0.055 35);
+  --accent-cool: oklch(45% 0.095 250);
+  --accent-cool-soft: oklch(92% 0.030 250);
+  --flag: oklch(52% 0.105 85);
 
-  --danger: oklch(72% 0.145 28);
-  --danger-soft: oklch(28% 0.055 28);
-  --success: oklch(74% 0.125 152);
-  --success-soft: oklch(27% 0.050 152);
+  --danger: oklch(48% 0.160 28);
+  --danger-soft: oklch(93% 0.035 28);
+  --success: oklch(45% 0.105 152);
+  --success-soft: oklch(93% 0.032 152);
 
   /* ───────────────────────────────────────────────────────────────── elevation
    *
@@ -74,18 +65,12 @@
    * On light: real drop shadows, warm-tinted so they read as shadow on paper
    * rather than as grey haze. Call sites use the name and never care which.
    */
-  --elevation-1:
-    inset 0 1px 0 oklch(100% 0 0 / 0.06),
-    0 1px 2px oklch(0% 0 0 / 0.32);
-  --elevation-2:
-    inset 0 1px 0 oklch(100% 0 0 / 0.07),
-    0 4px 12px oklch(0% 0 0 / 0.38);
-  --elevation-3:
-    inset 0 1px 0 oklch(100% 0 0 / 0.09),
-    0 12px 32px oklch(0% 0 0 / 0.48);
+  --elevation-1: 0 1px 2px oklch(32% 0.030 55 / 0.08);
+  --elevation-2: 0 8px 22px oklch(32% 0.030 55 / 0.12);
+  --elevation-3: 0 24px 56px oklch(32% 0.030 55 / 0.18);
 
   /* A lit frame around a reproduction: the mat, and the faint spill around it. */
-  --frame-glow: 0 0 0 1px var(--rule), 0 8px 28px oklch(0% 0 0 / 0.42);
+  --frame-glow: 0 0 0 1px var(--rule), 0 10px 30px oklch(32% 0.030 55 / 0.14);
 
   /* ───────────────────────────────────────────────────────────────────── type
    *
@@ -94,6 +79,7 @@
    * either site was ever louder than anything else. The range is the drama.
    */
   --serif: var(--font-serif), 'Iowan Old Style', Palatino, Georgia, serif;
+  --display: var(--font-display), 'Arial Narrow', sans-serif;
   --sans: var(--font-sans), -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
@@ -108,7 +94,8 @@
   --t-xl: 2.2rem;
   --t-2xl: 3rem;
   --t-3xl: clamp(2.75rem, 6vw, 5rem);
-  --t-4xl: clamp(3.25rem, 9vw, 8rem);
+  --t-4xl: clamp(4rem, 11vw, 10rem);
+  --t-hero: clamp(5.5rem, 16vw, 14rem);
 
   --w-thin: 200;
   --w-light: 300;
@@ -144,8 +131,8 @@
    */
   --measure: 68ch;
   --measure-record: 52rem;
-  --page: 1400px;
-  --page-wide: 1500px;
+  --page: 1440px;
+  --page-wide: 1600px;
   --rail: 250px;
 
   /* ─────────────────────────────────────────────────────────────────── density
@@ -171,47 +158,43 @@
   --radius: 2px;
   --radius-frame: 3px;
 
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 /*
- * ══════════════════════════════════════════════════════════════════════ light
+ * ═══════════════════════════════════════════════════════════════════════ dark
  *
- * The reading room. Long transcripts, metadata proofing, and printing all happen
- * here, and it is judged on its own terms — if it looks like a recolouring of
- * the dark theme it has failed review.
+ * The charcoal gallery is a fully designed peer for readers who choose it.
  *
  * Only the values that must change are restated. Type, space, measure, density
  * and motion are shared and are not repeated.
  */
-[data-theme='light'] {
-  --surface-ground: oklch(97.4% 0.010 84);
-  --surface-raised: oklch(93.8% 0.020 82);
-  --surface-overlay: oklch(99.5% 0.003 84);
-  --surface-sunk: oklch(90.8% 0.024 82);
+[data-theme='dark'] {
+  --surface-ground: oklch(21% 0.010 55);
+  --surface-raised: oklch(25% 0.014 55);
+  --surface-overlay: oklch(29% 0.016 55);
+  --surface-sunk: oklch(17% 0.010 55);
 
-  --ink: oklch(19% 0.015 82);
-  --ink-muted: oklch(46% 0.022 83);
+  --ink: oklch(94% 0.020 82);
+  --ink-muted: oklch(76% 0.022 82);
   /* Darkened from the archive's original #948b78 (~62% L), which fell short of
    * 4.5:1 against a card and was carrying real caption text on both sites.
    * scripts/check-contrast.mjs is what caught it; keep it passing. */
-  --ink-faint: oklch(51% 0.020 83);
+  --ink-faint: oklch(68% 0.022 82);
 
-  --rule: oklch(85.3% 0.024 83);
-  --rule-strong: oklch(63% 0.028 82);
+  --rule: oklch(31% 0.018 55);
+  --rule-strong: oklch(70% 0.160 30);
 
-  --oxide: oklch(45% 0.112 38);
-  --oxide-soft: oklch(91% 0.035 43);
-  --accent-cool: oklch(45% 0.095 250);
-  --accent-cool-soft: oklch(92% 0.030 250);
-  --flag: oklch(52% 0.105 85);
-
-  --danger: oklch(48% 0.160 28);
-  --danger-soft: oklch(93% 0.035 28);
-  --success: oklch(45% 0.105 152);
-  --success-soft: oklch(93% 0.032 152);
-
-  /* Real shadows, warm-tinted: shadow on paper, not grey haze. */
+  --oxide: oklch(72% 0.170 30);
+  --oxide-soft: oklch(30% 0.065 30);
+  --accent-cool: oklch(74% 0.098 248);
+  --accent-cool-soft: oklch(29% 0.045 250);
+  --flag: oklch(80% 0.115 88);
+  --danger: oklch(72% 0.145 28);
+  --danger-soft: oklch(28% 0.055 28);
+  --success: oklch(74% 0.125 152);
+  --success-soft: oklch(27% 0.050 152);
+  /* Warm, restrained depth against charcoal. */
   --elevation-1: 0 1px 2px oklch(35% 0.020 82 / 0.10);
   --elevation-2:
     0 1px 2px oklch(35% 0.020 82 / 0.06),
@@ -224,7 +207,7 @@
     0 0 0 1px var(--rule),
     0 8px 24px oklch(35% 0.020 82 / 0.16);
 
-  color-scheme: light;
+  color-scheme: dark;
 }
 
 /*

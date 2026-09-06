@@ -44,10 +44,10 @@ export default function AttestedWorksPage() {
         <div className={styles.disclaimer}>
           <p>
             <strong>What this list is not.</strong> It is not the catalogue raisonné,
-            and none of these is a catalogue entry. Nobody has seen these paintings.
-            No one has photographed one, measured one, or established where it is.
-            What survives is Sievan alone at a table, drawing a canvas he had finished
-            and writing beside it what he called it and what he wanted for it. A
+            and none of these is a catalogue entry. The archive holds the annotated
+            sheets, not the paintings. The sheets record titles and, in some cases,
+            dimensions, prices or destinations; those annotations do not establish
+            a painting’s present location or condition. A
             drawing records that a painting existed and what the artist called it on
             the day he drew it — not that the title stuck, not that the sale went
             through, and not that the work survives.

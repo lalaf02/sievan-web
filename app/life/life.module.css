@@ -5,14 +5,14 @@
 }
 
 .section {
-  margin-bottom: var(--s-7);
+  margin-bottom: var(--s-9);
   scroll-margin-top: var(--s-4);
 }
 
 .section > h2 {
-  border-bottom: 1px solid var(--rule-strong);
-  padding-bottom: var(--s-2);
-  margin-bottom: var(--s-4);
+  border-top: 2px solid var(--oxide);
+  padding-top: var(--s-4);
+  margin-bottom: var(--s-6);
 }
 
 .subhead {
@@ -114,16 +114,17 @@
   float: right;
   width: 16rem;
   margin: var(--s-2) 0 var(--s-4) var(--s-6);
-  border-top: 2px solid var(--rule-strong);
+  border-top: 2px solid var(--oxide);
   padding-top: var(--s-3);
 }
 
 .witness figure { margin: 0 0 var(--s-3); }
+.witness figure > *:first-child { border-radius: 50% 50% var(--radius-frame) var(--radius-frame); overflow: hidden; }
 .witnessBody { min-width: 0; }
 .witnessPlain { margin: 0; display: flex; flex-direction: column; gap: var(--s-1); }
 
 .witnessLink {
-  font-family: var(--sans);
+  font-family: var(--display);
   font-size: var(--t-xs);
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -146,8 +147,8 @@
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.09em;
-  color: var(--ink-faint);
-  border-bottom: 1px solid var(--rule-strong);
+  color: var(--oxide);
+  border-bottom: 2px solid var(--oxide);
   padding-bottom: var(--s-2);
   margin: 0 0 var(--s-3);
   display: flex;

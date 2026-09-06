@@ -4,11 +4,12 @@
  * look it already had.
  */
 .label {
-  font-family: var(--sans);
+  font-family: var(--display);
   font-size: var(--t-xs);
   text-transform: uppercase;
   letter-spacing: 0.09em;
-  color: var(--ink-faint);
+  color: var(--oxide);
+  font-weight: var(--w-semibold);
   margin: 0 0 var(--s-2);
   display: block;
 }
@@ -19,8 +20,8 @@
   font-size: var(--t-base);
   padding: var(--s-2) var(--s-3);
   border: 1px solid var(--rule-strong);
-  border-radius: 2px;
-  background: var(--surface-ground);
+  border-radius: var(--radius);
+  background: var(--surface-overlay);
   color: var(--ink);
   margin-bottom: var(--s-5);
 }

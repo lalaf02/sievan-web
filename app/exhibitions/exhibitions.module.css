@@ -5,7 +5,7 @@
   grid-template-columns: 4rem 1fr;
   gap: var(--s-4);
   align-items: baseline;
-  padding: var(--s-4) 0;
+  padding: var(--s-5) 0;
   border-bottom: 1px solid var(--rule);
   text-decoration: none;
   color: inherit;
@@ -14,15 +14,16 @@
 .row:hover .name { color: var(--oxide); }
 
 .year {
-  font-family: var(--sans);
-  font-size: var(--t-sm);
-  color: var(--ink-muted);
+  font-family: var(--display);
+  font-size: var(--t-lg);
+  color: var(--oxide);
 }
 
 .body { display: flex; flex-direction: column; gap: 0.15em; }
 
 .name {
-  font-size: var(--t-md);
+  font-family: var(--display);
+  font-size: var(--t-lg);
   line-height: 1.3;
   transition: color 150ms;
 }

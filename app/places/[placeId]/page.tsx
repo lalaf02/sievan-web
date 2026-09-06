@@ -112,12 +112,12 @@ export default async function PlacePage({ params }: Props) {
       */}
       {museum && (
         <div className={styles.corroboration}>
-          <p className={styles.corroborationHead}>Two sources name this independently</p>
+          <p className={styles.corroborationHead}>Two sources name this institution</p>
           <p>
             Sievan’s own sheet, and the CV page of the retrospective
             catalogue, which lists <em>“{museum.name}, {museum.location}”</em> among
-            the collections holding his work. The two records were made decades
-            apart and neither knew about the other.{' '}
+            the collections holding his work. The dates and independence of these
+            two sources have not been established.{' '}
             <Link href="/life/retrospective/">Read the catalogue as scanned</Link>.
           </p>
           <p className={styles.corroborationCaveat}>

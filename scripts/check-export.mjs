@@ -57,6 +57,10 @@ const resolves = (route) => {
 };
 
 const seen = new Set();
+const anchorChecks = new Set();
+const idsByFile = new Map(html.map((file) => [file,
+  new Set([...readFileSync(file, 'utf8').matchAll(/\bid="([^"]*)"/g)].map((m) => m[1])),
+]));
 for (const file of html) {
   const body = readFileSync(file, 'utf8');
   for (const m of body.matchAll(/href="(\/[^"']*)"/g)) {
@@ -69,6 +73,23 @@ for (const file of html) {
       errors.push(`dead internal link ${href} (first seen in ${relative(OUT, file)})`);
     }
   }
+  // A route can resolve while its citation points nowhere. Check fragments too,
+  // including same-page links; the old gate missed a slash appended after an id.
+  for (const m of body.matchAll(/href="((?:\/|#)[^"']*#[^"']+|#[^"']+)"/g)) {
+    const href = m[1];
+    if (href.startsWith('//')) continue;
+    const [route, fragment] = href.split('#');
+    if (!fragment || fragment.startsWith(':~:text=')) continue;
+    const rel = decodeURIComponent(route.split('?')[0]).replace(/^\/+/, '');
+    const target = !route ? file : [join(OUT, rel, 'index.html'), join(OUT, rel),
+      join(OUT, `${rel.replace(/\/$/, '')}.html`)].find((candidate) => idsByFile.has(candidate));
+    if (!target) continue; // Downloads and missing routes are handled separately.
+    const id = decodeURIComponent(fragment).split(':~:text=')[0];
+    const key = `${target}#${id}`;
+    if (anchorChecks.has(key)) continue;
+    anchorChecks.add(key);
+    if (!idsByFile.get(target).has(id)) errors.push(`missing anchor ${href} (first seen in ${relative(OUT, file)})`);
+  }
 }
 
 if (errors.length) {
@@ -78,4 +99,4 @@ if (errors.length) {
   process.exit(1);
 }
 
-console.log(`  check-export: OK - ${html.length} pages, ${seen.size} internal links all resolve`);
+console.log(`  check-export: OK - ${html.length} pages, ${seen.size} internal links and ${anchorChecks.size} anchors all resolve`);

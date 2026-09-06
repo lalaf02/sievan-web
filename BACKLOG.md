@@ -169,8 +169,10 @@ Buildable today.
   timecode mapping, interview clips cannot be cut to land on a specific sentence. That is why
   every clip in `public/clips/` is silent process footage. Forced alignment would unlock
   "watch him say it" next to every quote.
-- **Digitise the remaining 20 objects.** 30 of 50 are scanned. The other 20 are catalogued
-  with everything known about them and marked `Not yet digitised`.
+- **Digitise the remaining 20 objects.** In the committed snapshot reviewed on
+  2026-09-05, 55 of 76 objects have scans. Twenty await digitisation; MS-AR-00076
+  is separately recorded as not scanned by decision. The documentary index contains
+  51 objects; the 25 works on paper are listed in the catalogue.
 - **OCR the scans.** They have no text layer, so search reaches catalogue records and
   transcripts but never the words printed inside a clipping. Every search box says so. This is
   the single change that would most improve the archive's usefulness to researchers.

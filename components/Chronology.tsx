@@ -106,6 +106,7 @@ export function Chronology({
         ))}
       </div>
 
+      {shown.length === 0 && <p role="status">No dated records in the selected categories.</p>}
       <div className={styles.timeline}>
         {decades.map(([decade, items], i) => {
           const prev = decades[i - 1];
@@ -125,7 +126,8 @@ export function Chronology({
             <div key={decade}>
               {gap && (
                 <p className={styles.gap}>
-                  {gapFrom}–{gapTo + 9} · nothing in the archive
+                  {gapFrom}–{gapTo + 9} · {events.some((e) => e.year >= gapFrom! && e.year <= gapTo + 9)
+                    ? 'no records in the selected categories' : 'no dated records in the archive'}
                 </p>
               )}
               <section className={styles.decade}>

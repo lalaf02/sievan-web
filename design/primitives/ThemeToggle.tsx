@@ -14,10 +14,8 @@ function subscribe(fn: () => void) {
 }
 
 /*
- * The server snapshot is the default theme, which is what the server actually
- * renders: dark carries no attribute, so the prerendered HTML is always the dark
- * one and only an explicit light choice diverges. The pre-paint script has
- * already corrected the DOM by the time this hydrates.
+ * The server snapshot is the light default rendered by the static HTML. The
+ * pre-paint script corrects the DOM when a reader has explicitly chosen dark.
  */
 const getServerSnapshot = () => DEFAULT_THEME;
 
@@ -25,11 +23,11 @@ export function ThemeToggle({ className }: { className?: string }) {
   const theme = useSyncExternalStore(subscribe, readTheme, getServerSnapshot);
 
   const toggle = useCallback(() => {
-    writeTheme(readTheme() === 'light' ? 'dark' : 'light');
+    writeTheme(readTheme() === 'dark' ? 'light' : 'dark');
     listeners.forEach((fn) => fn());
   }, []);
 
-  const next: Theme = theme === 'light' ? 'dark' : 'light';
+  const next: Theme = theme === 'dark' ? 'light' : 'dark';
 
   return (
     <button
@@ -40,7 +38,7 @@ export function ThemeToggle({ className }: { className?: string }) {
       title={`Switch to ${next} theme`}
     >
       <ThemeIcon theme={theme} />
-      <span>{theme === 'light' ? 'Light' : 'Dark'}</span>
+      <span>{theme === 'dark' ? 'Dark' : 'Light'}</span>
     </button>
   );
 }
@@ -50,9 +48,9 @@ function ThemeIcon({ theme }: { theme: Theme }) {
   return (
     <svg width="14" height="14" viewBox="0 0 16 16" aria-hidden="true" fill="none">
       <circle cx="8" cy="8" r="5.25" stroke="currentColor" strokeWidth="1.5" />
-      {theme === 'light' ? null : (
+      {theme === 'dark' ? (
         <path d="M8 2.75a5.25 5.25 0 0 0 0 10.5z" fill="currentColor" />
-      )}
+      ) : null}
     </svg>
   );
 }

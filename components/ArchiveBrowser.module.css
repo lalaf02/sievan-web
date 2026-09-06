@@ -8,8 +8,8 @@
   justify-content: space-between;
   align-items: baseline;
   gap: var(--s-4);
-  border-bottom: 1px solid var(--rule-strong);
-  padding-bottom: var(--s-2);
+  border-top: 2px solid var(--oxide);
+  padding-top: var(--s-3);
   margin-bottom: var(--s-5);
   flex-wrap: wrap;
 }
@@ -59,11 +59,12 @@
 /* The lone boolean facet. The CheckList component needs two options to earn its
    keep, so availability is written out here rather than forced into one. */
 .label {
-  font-family: var(--sans);
+  font-family: var(--display);
   font-size: var(--t-xs);
   text-transform: uppercase;
   letter-spacing: 0.09em;
-  color: var(--ink-faint);
+  color: var(--oxide);
+  font-weight: 700;
   margin: 0 0 var(--s-2);
   display: block;
 }

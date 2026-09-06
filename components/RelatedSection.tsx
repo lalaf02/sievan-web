@@ -76,7 +76,7 @@ export function SameYearSection({
 function Row({ event }: { event: TimelineEvent }) {
   return (
     <li className={styles.row}>
-      <Link href={`${event.href}/`} className={styles.rowLink}>
+      <Link href={event.href} className={styles.rowLink}>
         <span className={styles.kind}>{KIND_LABEL[event.kind]}</span>
         <span className={styles.rowTitle}>{event.title}</span>
         {event.subtitle && event.subtitle !== event.title && (

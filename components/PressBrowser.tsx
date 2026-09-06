@@ -4,8 +4,8 @@ import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useUrlState } from '@/lib/useUrlState';
 import { Highlight } from './Highlight';
-import { NO_TEXT_LAYER, scoreFields, tokenize } from '@/lib/search';
-import { formatArticleDate } from '@/lib/dates';
+import { highlightNeedles, NO_TEXT_LAYER, scoreFields, tokenize } from '@/lib/search';
+import { compareDatesUndatedLast, formatArticleDate } from '@/lib/dates';
 import styles from './PressBrowser.module.css';
 
 /** Flattened at build time so the client bundle carries no lookup maps. */
@@ -59,6 +59,7 @@ export function PressBrowser({
   const sort = (params.get('sort') as SortKey) ?? 'date-desc';
 
   const tokens = useMemo(() => tokenize(q), [q]);
+  const needles = useMemo(() => highlightNeedles(q), [q]);
 
   const results = useMemo(() => {
     const scored = rows
@@ -89,10 +90,11 @@ export function PressBrowser({
       if (sort === 'publication') {
         return (a.row.publicationName ?? '').localeCompare(b.row.publicationName ?? '');
       }
-      const ay = a.row.year ?? 0;
-      const by = b.row.year ?? 0;
-      if (ay !== by) return sort === 'date-asc' ? ay - by : by - ay;
-      return (a.row.dateNormalized ?? '').localeCompare(b.row.dateNormalized ?? '');
+      return compareDatesUndatedLast(
+        a.row.dateNormalized ?? a.row.year?.toString() ?? null,
+        b.row.dateNormalized ?? b.row.year?.toString() ?? null,
+        sort === 'date-asc' ? 'asc' : 'desc',
+      );
     });
     return scored.map((s) => s.row);
   }, [rows, tokens, selDecades, selPubs, selAuthors, scanOnly, sort]);
@@ -101,7 +103,7 @@ export function PressBrowser({
     q || selDecades.length || selPubs.length || selAuthors.length || scanOnly;
 
   // 24 publications have exactly one article; the long tail is collapsed by default.
-  const pubsShown = showAllPubs ? publications : publications.filter((p) => p.count > 1);
+  const pubsShown = showAllPubs ? publications : publications.filter((p) => p.count > 1 || selPubs.includes(p.id));
   const hiddenPubs = publications.length - pubsShown.length;
 
   return (
@@ -114,7 +116,7 @@ export function PressBrowser({
             type="search"
             className={styles.search}
             placeholder="Headline, critic, publication…"
-            defaultValue={q}
+            value={q}
             onChange={(e) => update((p) => {
               const v = e.target.value;
               if (v) p.set('q', v); else p.delete('q');
@@ -208,7 +210,7 @@ export function PressBrowser({
 
       <div>
         <div className={styles.resultsHead}>
-          <p className={styles.count}>
+          <p className={styles.count} role="status">
             {results.length} of {rows.length} press notices
           </p>
           <label className="ui">
@@ -237,26 +239,26 @@ export function PressBrowser({
                   <div className={styles.rowMeta}>
                     <span className={styles.rowYear}>{r.year ?? 'undated'}</span>
                     {r.publicationName && (
-                      <span><Highlight text={r.publicationName} tokens={tokens} /></span>
+                      <span><Highlight text={r.publicationName} tokens={needles} /></span>
                     )}
                     {r.hasScan && <span className={`${styles.tag} ${styles.tagScan}`}>scan</span>}
                   </div>
 
                   {r.headline ? (
                     <p className={styles.rowTitle}>
-                      <Highlight text={r.headline} tokens={tokens} />
+                      <Highlight text={r.headline} tokens={needles} />
                     </p>
                   ) : (
                     // 25 of 60 records have no headline; showing the manifest line
                     // keeps the row from being blank.
                     <p className={styles.rowRaw}>
-                      <Highlight text={r.raw} tokens={tokens} />
+                      <Highlight text={r.raw} tokens={needles} />
                     </p>
                   )}
 
                   <p className={styles.rowFoot}>
                     {r.authorName && (
-                      <><Highlight text={r.authorName} tokens={tokens} />{' · '}</>
+                      <><Highlight text={r.authorName} tokens={needles} />{' · '}</>
                     )}
                     {formatArticleDate(r.dateNormalized, r.dateText, r.dateUncertain)}
                     {' · '}

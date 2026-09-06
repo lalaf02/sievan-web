@@ -65,7 +65,7 @@ export function RailSearch({
         id={id}
         type="search"
         className={styles.search}
-        defaultValue={value}
+        value={value}
         placeholder={placeholder}
         onChange={(e) => onChange(e.target.value)}
       />

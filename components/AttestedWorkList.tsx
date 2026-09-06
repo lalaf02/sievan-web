@@ -181,7 +181,7 @@ export function AttestedWorkList({ groups }: { groups: AttestedGroup[] }) {
                         {others.map((o, i) => (
                           <span key={o.id}>
                             {i > 0 && ', '}
-                            <Link href={`#${o.id}`}>{o.source_id}</Link>
+                            <Link href={`/works/attested/#${o.id}`}>{o.source_id}</Link>
                           </span>
                         ))}
                         . Whether that is one painting, two, or a series is not

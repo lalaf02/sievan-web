@@ -1,7 +1,7 @@
 .footer {
-  border-top: 1px solid var(--rule);
+  border-top: 2px solid var(--oxide);
   background: var(--surface-raised);
-  padding: var(--s-5) 0;
+  padding: var(--s-7) 0;
   margin-top: auto;
 }
 

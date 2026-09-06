@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import type { Clip } from '@/lib/types';
+import { Footage } from './Footage';
 import styles from './FootageCarousel.module.css';
 
 type Slide = {
@@ -12,29 +13,19 @@ type Slide = {
 
 export function FootageCarousel({ slides }: { slides: Slide[] }) {
   const [index, setIndex] = useState(0);
-  const videoRef = useRef<HTMLVideoElement>(null);
 
   if (!slides.length) return null;
 
   const previous = () => setIndex((current) => (current - 1 + slides.length) % slides.length);
   const next = () => setIndex((current) => (current + 1) % slides.length);
-  const slide = slides[index];
-
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-    video.load();
-    void video.play().catch(() => {
-      // Muted autoplay is expected to succeed, but the poster remains a usable fallback.
-    });
-  }, [index]);
+  const slide = slides[index % slides.length];
 
   return (
     <div className={styles.carousel} aria-label="Archival footage carousel">
       <div className={styles.stage}>
         <button
           type="button"
-          className={`${styles.arrow} ${styles.previous}`}
+          className={styles.arrow}
           onClick={previous}
           aria-label="Previous video"
         >
@@ -43,20 +34,11 @@ export function FootageCarousel({ slides }: { slides: Slide[] }) {
 
         <figure className={styles.slide} aria-live="polite">
           <div className={styles.videoFrame}>
-            <video
-              ref={videoRef}
+            <Footage
               key={slide.clip.src}
               className={styles.video}
-              src={slide.clip.src}
-              poster={slide.clip.poster}
-              width={slide.clip.width}
-              height={slide.clip.height}
-              aria-label={slide.clip.alt}
-              autoPlay
-              muted
-              loop
-              playsInline
-              preload="auto"
+              clip={slide.clip}
+              priority
             />
           </div>
           <figcaption className={styles.caption}>{slide.caption}</figcaption>
@@ -64,7 +46,7 @@ export function FootageCarousel({ slides }: { slides: Slide[] }) {
 
         <button
           type="button"
-          className={`${styles.arrow} ${styles.next}`}
+          className={styles.arrow}
           onClick={next}
           aria-label="Next video"
         >
@@ -73,8 +55,14 @@ export function FootageCarousel({ slides }: { slides: Slide[] }) {
       </div>
 
       <p className={styles.counter} aria-hidden="true">
-        {index + 1} / {slides.length}
+        {(index % slides.length) + 1} / {slides.length}
       </p>
+      <noscript>
+        <p>Open the surviving footage:</p>
+        <ul>{slides.map((item) => (
+          <li key={item.id}><a href={item.clip.src}>{item.caption}</a></li>
+        ))}</ul>
+      </noscript>
     </div>
   );
 }

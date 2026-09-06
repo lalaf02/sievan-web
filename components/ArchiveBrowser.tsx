@@ -22,6 +22,7 @@ export interface ArchiveRow {
   type: string;
   typeLabel: string;
   scanned: boolean;
+  withheld: boolean;
   exhibitionNames: string[];
   exhibitionIds: string[];
   /** Low-weight search text: the verbatim manifest line. */
@@ -174,7 +175,7 @@ export function ArchiveBrowser({ rows }: { rows: ArchiveRow[] }) {
 
       <div>
         <div className={styles.head}>
-          <p className={styles.resultCount}>
+          <p className={styles.resultCount} role="status">
             <span className="tnum">{shown}</span>
             {shown === 1 ? ' object' : ' objects'}
             {' · '}
@@ -223,8 +224,9 @@ export function ArchiveBrowser({ rows }: { rows: ArchiveRow[] }) {
                   />
                 ) : (
                   <AbsentTile
+                    title={r.withheld ? 'Not scanned' : 'Not yet digitised'}
                     aspect="3 / 4"
-                    note="Catalogued from the sheet; no scan on file."
+                    note={r.withheld ? 'Deliberately not scanned; retained for the record.' : 'Catalogued from the sheet; no scan on file.'}
                     caption={caption}
                     meta={meta}
                   />

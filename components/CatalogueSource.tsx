@@ -49,7 +49,7 @@ export function CatalogueSource({
     const dialog = dialogRef.current;
     // Feature-detected, not assumed: without showModal the anchor must still navigate.
     if (!dialog || typeof dialog.showModal !== 'function') return;
-    if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
+    if (e.altKey || e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
     e.preventDefault();
     dialog.showModal();
   }, []);
@@ -101,8 +101,8 @@ export function CatalogueSource({
               {page.caption && <p className={styles.caption}>{page.caption}</p>}
               <p className={styles.meta}>
                 From the retrospective typescript held in the archive, page {page.page}.{' '}
-                <Link href={href}>Read it in the document</Link> ·{' '}
-                <Link href="/archive/objects/MS-AR-00026/">the archive record</Link>
+                <Link href={href} onClick={() => dialogRef.current?.close()}>Read it in the document</Link> ·{' '}
+                <Link href="/archive/objects/MS-AR-00026/" onClick={() => dialogRef.current?.close()}>the archive record</Link>
               </p>
             </div>
           </div>

@@ -74,19 +74,19 @@ a.frame:hover { box-shadow: var(--frame-glow), var(--elevation-2); }
   justify-content: center;
   gap: var(--s-1);
   padding: var(--s-4);
-  border: 1px dashed var(--rule-strong);
+  border: 1px dashed var(--oxide);
   border-radius: var(--radius-frame);
-  background: var(--surface-sunk);
+  background: var(--oxide-soft);
   text-align: center;
 }
 
 .absentTitle {
-  font-family: var(--sans);
+  font-family: var(--display);
   font-size: var(--t-2xs);
   font-weight: var(--w-bold);
   text-transform: uppercase;
   letter-spacing: var(--tracking-label);
-  color: var(--ink-faint);
+  color: var(--oxide);
 }
 
 .absentNote {

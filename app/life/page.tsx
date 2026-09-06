@@ -246,6 +246,7 @@ export default function LifePage() {
                 </li>
               ))}
             </ul>
+            <CVSource />
           </section>
 
           <section>
@@ -259,6 +260,7 @@ export default function LifePage() {
               ))}
             </ul>
             <p className={styles.railNote}>He studied at {CV.studies}.</p>
+            <CVSource />
           </section>
 
           <section>
@@ -285,7 +287,6 @@ export default function LifePage() {
             </p>
           </section>
 
-          <CVSource />
         </aside>
       </div>
 

@@ -66,7 +66,7 @@ export function TranscriptReader({ pages }: { pages: TranscriptPage[] }) {
             onChange={(e) => setTyped(e.target.value)}
           />
           {tokens.length > 0 && (
-            <p className={styles.matchCount}>
+            <p className={styles.matchCount} role="status">
               {matches === 0 ? 'No matches' : `${matches} match${matches === 1 ? '' : 'es'}`}
             </p>
           )}

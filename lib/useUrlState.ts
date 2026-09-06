@@ -44,7 +44,8 @@ export function useUrlState() {
     mutate(next);
     const qs = next.toString();
     // replaceState does not fire popstate, so subscribers are notified directly.
-    window.history.replaceState(null, '', qs ? `?${qs}` : window.location.pathname);
+    window.history.replaceState(window.history.state, '',
+      `${window.location.pathname}${qs ? `?${qs}` : ''}${window.location.hash}`);
     for (const fn of listeners) fn();
   }, []);
 

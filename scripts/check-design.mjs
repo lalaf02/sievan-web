@@ -8,6 +8,7 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { spawnSync } from 'node:child_process';
 import { hashTree } from './design-hash.mjs';
 
 const DEST = join(dirname(fileURLToPath(import.meta.url)), '..', 'design');
@@ -30,4 +31,8 @@ if (actual !== manifest.hash) {
   process.exit(1);
 }
 
-console.log(`  check-design: OK - matches ${manifest.commit.slice(0, 8)}`);
+console.log(`  check-design: OK - matches snapshot ${manifest.commit.slice(0, 8)}${manifest.sourceDirty ? " with local source changes" : ""}`);
+// Integrity alone cannot catch a colour change that breaks the design contract.
+const contrast = spawnSync(process.execPath, [join(DEST, 'scripts/check-contrast.mjs')], { stdio: 'inherit' });
+if (contrast.error) throw contrast.error;
+if (contrast.status !== 0) process.exit(contrast.status ?? 1);

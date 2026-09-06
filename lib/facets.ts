@@ -8,7 +8,7 @@
  */
 
 /** Free-text dimensions, e.g. "18 x 24". */
-export const DIMS = /(\d+(?:\.\d+)?)\s*[x×]\s*(\d+(?:\.\d+)?)/;
+export const DIMS = /(?<![\d./])(?:(\d+\s+\d+\/\d+|\d+\/\d+|\d+(?:\.\d+)?))\s*[x×]\s*(\d+\s+\d+\/\d+|\d+\/\d+|\d+(?:\.\d+)?)(?![\d./])/i;
 
 /**
  * Parse a free-text dimension pair.
@@ -21,7 +21,16 @@ export const DIMS = /(\d+(?:\.\d+)?)\s*[x×]\s*(\d+(?:\.\d+)?)/;
 export function parseDims(s: string | null | undefined): { a: number; b: number } | null {
   if (!s) return null;
   const m = s.match(DIMS);
-  return m ? { a: Number(m[1]), b: Number(m[2]) } : null;
+  if (!m) return null;
+  const number = (value: string): number => {
+    if (!value.includes('/')) return Number(value);
+    const parts = value.split(/\s+/);
+    const [numerator, denominator] = parts[parts.length - 1].split('/').map(Number);
+    return denominator ? (parts.length > 1 ? Number(parts[0]) : 0) + numerator / denominator : NaN;
+  };
+  const a = number(m[1]);
+  const b = number(m[2]);
+  return Number.isFinite(a) && Number.isFinite(b) ? { a, b } : null;
 }
 
 /**

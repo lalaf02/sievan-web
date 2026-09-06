@@ -16,16 +16,18 @@
 
 .hero {
   display: grid;
-  /* Footage left, words right — the brief's arrangement, and the right one: the one
-     moving image of the man is the strongest thing the archive owns. */
-  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
-  gap: var(--s-8);
-  align-items: center;
-  padding: var(--s-8) 0 var(--s-9);
+  grid-template-columns: minmax(0, 7fr) minmax(18rem, 4fr);
+  grid-template-areas: "title title" "media copy";
+  gap: var(--s-7) var(--s-9);
+  align-items: end;
+  min-height: calc(100svh - var(--s-9));
+  padding: var(--s-7) 0 var(--s-9);
 }
 
-.heroMedia { min-width: 0; }
-.heroText { min-width: 0; }
+.heroTitle { grid-area: title; text-align: center; }
+.heroMedia { grid-area: media; min-width: 0; max-width: 58rem; }
+.heroMedia figure > span:first-child { border-radius: 50% 50% var(--radius-frame) var(--radius-frame); }
+.heroText { grid-area: copy; min-width: 0; padding-bottom: var(--s-6); }
 
 /*
  * The name, in the display voice: large, thin, pulled tight. The old setting was
@@ -34,15 +36,17 @@
  * this and .eyebrow directly above it.
  */
 .name {
-  font-size: var(--t-4xl);
-  font-weight: var(--w-thin);
-  letter-spacing: var(--tracking-display);
-  line-height: var(--leading-display);
-  margin: var(--s-3) 0 var(--s-5);
+  font-family: var(--display);
+  font-size: var(--t-hero);
+  font-weight: var(--w-regular);
+  letter-spacing: -0.055em;
+  line-height: 0.76;
+  color: var(--oxide);
+  margin: var(--s-2) 0 0;
 }
 
 .lede {
-  font-size: var(--t-md);
+  font-size: var(--t-lg);
   line-height: 1.4;
   color: var(--ink);
   max-width: 46ch;
@@ -61,7 +65,10 @@
   display: flex;
   flex-wrap: wrap;
   gap: var(--s-5);
-  font-family: var(--sans);
+  font-family: var(--display);
+  font-weight: var(--w-semibold);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
   font-size: var(--t-sm);
   margin: 0;
 }
@@ -78,8 +85,8 @@
 /* ═══════════════════════════════════════════════════════════════════════ bands */
 
 .band {
-  border-top: 1px solid var(--rule);
-  padding: var(--s-7) 0;
+  border-top: 2px solid var(--oxide);
+  padding: var(--s-9) 0;
 }
 
 .bandHead {
@@ -88,9 +95,12 @@
 }
 
 .bandTitle {
-  font-size: var(--t-xl);
-  font-weight: var(--w-light);
-  letter-spacing: var(--tracking-tight);
+  font-family: var(--display);
+  font-size: var(--t-3xl);
+  font-weight: var(--w-regular);
+  letter-spacing: -0.025em;
+  line-height: 0.9;
+  color: var(--oxide);
   margin: 0;
 }
 
@@ -263,8 +273,8 @@
 
 .aboutGrid {
   display: grid;
-  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
-  gap: var(--s-7);
+  grid-template-columns: minmax(18rem, 4fr) minmax(0, 8fr);
+  gap: var(--s-9);
   align-items: start;
 }
 
@@ -297,7 +307,7 @@
   padding: 0;
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: var(--s-5);
+  gap: var(--s-6);
 }
 
 /*
@@ -310,20 +320,15 @@
   text-decoration: none;
   color: inherit;
   height: 100%;
-  padding: var(--s-4);
-  border-top: 2px solid var(--rule-strong);
-  border-radius: var(--radius);
-  background: var(--surface-raised);
-  box-shadow: var(--elevation-1);
+  padding: var(--s-5) 0 var(--s-6);
+  border-top: 2px solid var(--oxide);
   transition: border-top-color var(--dur-short) var(--ease-out),
               box-shadow var(--dur-standard) var(--ease-out),
               transform var(--dur-standard) var(--ease-out);
 }
 
 .door:hover {
-  border-top-color: var(--oxide);
-  box-shadow: var(--elevation-2);
-  transform: translateY(-2px);
+  transform: translateY(calc(var(--s-1) * -1));
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -332,11 +337,11 @@
 
 .doorTitle {
   display: block;
-  font-family: var(--serif);
-  font-size: var(--t-md);
+  font-family: var(--display);
+  font-size: var(--t-xl);
   font-weight: var(--w-regular);
   letter-spacing: var(--tracking-tight);
-  color: var(--ink);
+  color: var(--oxide);
   transition: color var(--dur-short) var(--ease-out);
 }
 
@@ -362,11 +367,13 @@
 @media (max-width: 860px) {
   .hero {
     grid-template-columns: 1fr;
-    gap: var(--s-5);
-    padding: var(--s-5) 0 var(--s-6);
+    grid-template-areas: "title" "media" "copy";
+    gap: var(--s-6);
+    min-height: auto;
+    padding: var(--s-7) 0 var(--s-8);
   }
 
-  .name { font-size: var(--t-3xl); }
+  .heroTitle { text-align: left; }
 
   .personGrid,
   .workGrid,
@@ -377,5 +384,9 @@
   }
 
   .peerList { grid-template-columns: repeat(2, 1fr); }
-  .band { padding: var(--s-6) 0; }
+  .band { padding: var(--s-8) 0; }
+}
+
+@media (max-width: 560px) {
+  .name { font-size: clamp(4rem, 23vw, 7rem); line-height: 0.83; }
 }

@@ -51,7 +51,7 @@ export const GRADES: { id: ArtworkGrade; label: string; short: string; note: str
     id: 'named',
     label: 'Named on a sheet',
     short: 'named',
-    note: 'A painting Sievan wrote down on one of his own sheets. Nobody has seen it; '
+    note: 'A painting Sievan wrote down on one of his own sheets; '
       + 'the archive holds the sheet, not the painting.',
   },
 ];

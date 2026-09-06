@@ -7,7 +7,7 @@
   border: none;
   padding: 0;
   background: transparent;
-  max-width: min(72rem, 94vw);
+  max-width: min(var(--page), 94vw);
   max-height: 92vh;
   width: 100%;
   overflow: visible;
@@ -19,8 +19,10 @@
 }
 
 .panel {
-  background: var(--surface-ground);
-  border: 1px solid var(--rule-strong);
+  background: var(--surface-overlay);
+  box-shadow: var(--elevation-3);
+  border: 0;
+  border-top: 4px solid var(--oxide);
   max-height: 92vh;
   display: flex;
   flex-direction: column;
@@ -35,11 +37,12 @@
 }
 
 .close {
-  font-family: var(--sans);
+  font-family: var(--display);
   font-size: var(--t-xs);
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--ink-muted);
+  color: var(--oxide);
+  font-weight: 700;
   background: none;
   border: none;
   padding: var(--s-3) var(--s-4);
@@ -82,7 +85,9 @@
 .text { min-width: 0; }
 
 .heading {
-  font-size: var(--t-md);
+  font-family: var(--display);
+  font-size: var(--t-xl);
+  color: var(--oxide);
   margin: 0 0 var(--s-4);
 }
 

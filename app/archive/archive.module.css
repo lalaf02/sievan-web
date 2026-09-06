@@ -2,10 +2,9 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
   gap: var(--s-4);
-  border-top: 1px solid var(--rule-strong);
-  border-bottom: 1px solid var(--rule-strong);
-  padding: var(--s-5) 0;
-  margin-bottom: var(--s-4);
+  border-top: 2px solid var(--oxide);
+  padding: var(--s-6) 0 var(--s-7);
+  margin-bottom: var(--s-7);
 }
 
 .stat {
@@ -19,8 +18,9 @@
 a.stat:hover .statNum { color: var(--oxide); }
 
 .statNum {
-  font-family: var(--serif);
-  font-size: var(--t-xl);
+  font-family: var(--display);
+  font-size: var(--t-3xl);
+  color: var(--oxide);
   line-height: 1;
   font-variant-numeric: tabular-nums;
   transition: color 150ms;
@@ -29,7 +29,7 @@ a.stat:hover .statNum { color: var(--oxide); }
 .statOf { color: var(--ink-faint); font-size: var(--t-md); }
 
 .statLabel {
-  font-family: var(--sans);
+  font-family: var(--display);
   font-size: var(--t-xs);
   text-transform: uppercase;
   letter-spacing: 0.08em;
