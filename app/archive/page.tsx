@@ -71,7 +71,7 @@ export default function ArchivePage() {
       <header style={{ marginBottom: 'var(--s-5)' }}>
         <p className="eyebrow">The documentary record</p>
         <h1>The archive</h1>
-        <p className="measure muted">
+        <p className="muted">
           The archive gathers the reviews, exhibition catalogues, posters, photographs,
           and gallery material that document Sievan’s career; the artworks themselves
           are in the <Link href="/works/">Catalogue Raisonné</Link>. Not every holding

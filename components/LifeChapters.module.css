@@ -30,7 +30,7 @@
 .chapter h2 { margin-top: 0; }
 .chapter p { max-width: 62ch; font-size: var(--t-body); line-height: 1.68; }
 
-@media (max-width: 700px) {
+@media (max-width: 620px) {
   .tabs { grid-template-columns: repeat(2, 1fr); }
   .tabs button:nth-child(2) { border-right: 0; }
   .tabs button { border-bottom: 1px solid var(--rule); }

@@ -23,7 +23,7 @@ a.stat:hover .statNum { color: var(--oxide); }
   color: var(--oxide);
   line-height: 1;
   font-variant-numeric: tabular-nums;
-  transition: color 150ms;
+  transition: color var(--dur-short) var(--ease-out);
 }
 
 .statOf { color: var(--ink-faint); font-size: var(--t-md); }
@@ -59,7 +59,7 @@ a.stat:hover .statNum { color: var(--oxide); }
 
 .objectLead {
   font-size: var(--t-base);
-  transition: color 150ms;
+  transition: color var(--dur-short) var(--ease-out);
 }
 
 .objectMeta {
@@ -75,7 +75,7 @@ a.stat:hover .statNum { color: var(--oxide); }
 .notScanned {
   color: var(--ink-faint);
   border: 1px solid var(--rule);
-  border-radius: 2px;
+  border-radius: var(--radius);
   padding: 0 0.35em;
   white-space: nowrap;
 }

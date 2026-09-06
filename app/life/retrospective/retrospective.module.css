@@ -133,7 +133,7 @@
   position: relative;
   border: 1px solid var(--rule);
   background: var(--surface-raised);
-  transition: border-color 150ms;
+  transition: border-color var(--dur-short) var(--ease-out);
 }
 
 .contact a:hover { border-color: var(--oxide); }

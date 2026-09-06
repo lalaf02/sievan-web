@@ -1,5 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync, readdirSync } from 'node:fs';
+import { join } from 'node:path';
 import { formatRange, compareDatesUndatedLast } from '../lib/dates.ts';
 import { excerptAroundMatch, highlightNeedles, highlightSegments, scoreFields, tokenize } from '../lib/search.ts';
 
@@ -52,4 +54,50 @@ test('mixed-fraction dimensions preserve recorded edges without assigning orient
   assert.equal(largestDimension('10 x 12 1/2'), 12.5);
   assert.equal(parseDims('22 28'), null);
   assert.equal(parseDims('1/0 x 12'), null);
+});
+
+test('homepage collage uses five paintings around an accessible autoplaying loop', () => {
+  const home = readFileSync(new URL('../app/page.tsx', import.meta.url), 'utf8');
+  const footage = readFileSync(new URL('../components/Footage.tsx', import.meta.url), 'utf8');
+  for (const name of ['figures.jpg', 'veil.jpg', 'earth.jpg', 'blue.jpg', 'umber-figure.jpg']) {
+    assert.ok(home.includes(`/artworks/home/${name}`), `${name} must appear in the collage`);
+  }
+  assert.ok(home.includes('autoPlay loop controls={false}'));
+  assert.ok(!home.includes('<figcaption>{item.caption}</figcaption>'));
+  assert.ok(footage.includes('muted={autoPlay}'));
+  assert.ok(footage.includes('poster={clip.poster}'));
+});
+
+test('catalogue keeps all evidence grades separate inside five server-rendered chapters', () => {
+  const works = readFileSync(new URL('../app/works/page.tsx', import.meta.url), 'utf8');
+  assert.ok(works.includes('label="Catalogue career periods"'));
+  assert.ok(works.includes('PERIODS.map'));
+  for (const label of ['Catalogue plates', 'Gallery reproductions', 'Estate-held sheets', 'Attested paintings']) {
+    assert.ok(works.includes(label));
+  }
+  for (const href of ['/works/search/', '/works/periods/', '/works/attested/']) {
+    assert.ok(works.includes(href));
+  }
+});
+
+test('public styles use the documented breakpoint, radius, motion and colour contracts', () => {
+  const roots = ['app', 'components'];
+  const css = [];
+  const walk = (dir) => {
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+      const path = join(dir, entry.name);
+      if (entry.isDirectory()) walk(path);
+      else if (entry.name.endsWith('.css')) css.push([path, readFileSync(path, 'utf8')]);
+    }
+  };
+  roots.forEach(walk);
+  const approvedBreakpoints = new Set(['1020', '860', '620', '560']);
+  for (const [path, source] of css) {
+    for (const match of source.matchAll(/@media \(max-width: (\d+)px\)/g)) {
+      assert.ok(approvedBreakpoints.has(match[1]), `${path} uses undocumented breakpoint ${match[1]}px`);
+    }
+    assert.doesNotMatch(source, /(?:transition[^;]*|transition-duration:)\s*[^;]*150ms/, `${path} uses legacy 150ms motion`);
+    assert.doesNotMatch(source, /border-radius:\s*2px/, `${path} bypasses --radius`);
+    assert.doesNotMatch(source, /(?:^|[;{]\s*)(?:color|background(?:-color)?|border(?:-color)?):\s*(?:#[0-9a-f]{3,8}|rgba\()/im, `${path} contains a raw colour`);
+  }
 });

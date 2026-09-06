@@ -21,7 +21,7 @@
   color: var(--ink);
   background: var(--surface-overlay);
   border: 1px solid var(--oxide);
-  border-radius: 2px;
+  border-radius: var(--radius);
   padding: var(--s-3) var(--s-4);
 }
 

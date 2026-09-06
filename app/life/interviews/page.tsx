@@ -36,6 +36,7 @@ export default function InterviewsPage() {
       <Pending
         eyebrow="A gap in the record"
         title="None of the seven recordings is dated."
+        headingLevel="h2"
         footer={
           <>
             Were you there, or do you know when these were filmed?{' '}

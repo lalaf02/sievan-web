@@ -132,8 +132,8 @@ main figure img { background: var(--surface-sunk); }
 .pageDeep { padding-top: var(--s-8); }
 
 /*
- * A page whose content is genuinely two columns wide. Used by /life/, where the
- * biography and the record it rests on run side by side.
+ * A wide editorial page. Used by the career presentations on /life/ and /works/,
+ * where narrative and visual evidence run side by side.
  */
 .pageWide {
   width: 100%;

@@ -17,24 +17,19 @@ export const metadata: Metadata = {
 };
 
 type HomeMedia = {
-  type: 'image' | 'video';
   src: string;
-  poster?: string;
   width: number;
   height: number;
   alt: string;
-  caption: string;
-  role: 'anchor' | 'studio' | 'rothko' | 'working' | 'blue' | 'earth';
-  priority?: boolean;
+  role: 'figures' | 'veil' | 'earth' | 'blue' | 'umber';
 };
 
 const homeMedia: HomeMedia[] = [
-  { type: 'video', src: '/clips/painting-portrait.mp4', poster: '/clips/painting-portrait.jpg', width: 720, height: 486, alt: 'Maurice Sievan working a brush across the face of a portrait in progress.', caption: 'Sievan at work. Silent, undated footage from the estate archive.', role: 'anchor', priority: true },
-  { type: 'image', src: '/scans/pages/MSAR00027-p02.jpg', width: 1500, height: 1125, alt: 'Maurice Sievan seated by a window in his studio.', caption: 'Sievan in the studio, from a 1963 gallery catalogue.', role: 'studio' },
-  { type: 'image', src: '/scans/pages/MSAR00029-p04.jpg', width: 1143, height: 1500, alt: "Maurice Sievan in Mark Rothko's studio, Provincetown, 1961.", caption: 'In Mark Rothko’s studio, Provincetown, 1961. Photograph by Lee C. Sievan.', role: 'rothko' },
-  { type: 'video', src: '/clips/painting-outdoors.mp4', poster: '/clips/painting-outdoors.jpg', width: 720, height: 486, alt: 'Sievan painting at an easel outdoors while a crowd stands watching behind him.', caption: 'Painting outdoors, watched by a crowd. Silent, undated footage.', role: 'working' },
-  { type: 'image', src: '/artworks/home/blue.jpg', width: 1000, height: 1333, alt: 'Vertical abstract painting dominated by deep cobalt blue with flashes of red and white.', caption: 'A work in cobalt, red and white.', role: 'blue' },
-  { type: 'image', src: '/artworks/home/earth.jpg', width: 1100, height: 825, alt: 'Wide earth-toned abstract painting with a pale textured horizon.', caption: 'An earth-toned abstraction photographed in context.', role: 'earth' },
+  { src: '/artworks/home/figures.jpg', width: 1100, height: 1467, alt: 'A Maurice Sievan painting with two figures emerging from a field of red and ochre.', role: 'figures' },
+  { src: '/artworks/home/veil.jpg', width: 1000, height: 1333, alt: 'A vertical Maurice Sievan painting built from veiled blue, cream, and rust forms.', role: 'veil' },
+  { src: '/artworks/home/earth.jpg', width: 1100, height: 825, alt: 'A wide earth-toned Maurice Sievan abstraction with a pale textured horizon.', role: 'earth' },
+  { src: '/artworks/home/blue.jpg', width: 1000, height: 1333, alt: 'A vertical Maurice Sievan painting dominated by cobalt blue with flashes of red and white.', role: 'blue' },
+  { src: '/artworks/home/umber-figure.jpg', width: 900, height: 1201, alt: 'A Maurice Sievan figure painting in umber, black, cream, and muted blue.', role: 'umber' },
 ];
 
 /**
@@ -43,6 +38,7 @@ const homeMedia: HomeMedia[] = [
 export default function Home() {
   const years = allExhibitions.map((e) => e.date_earliest ?? 0).filter(Boolean);
   const span = `${Math.min(...years)}–${Math.max(...years)}`;
+  const portrait = getClip('painting-portrait');
 
   return (
     <div className="page pageFlush">
@@ -54,24 +50,15 @@ export default function Home() {
           <h1 id="name" className={styles.name}>Maurice Sievan</h1>
         </div>
         <div className={styles.studioWall} aria-label="Maurice Sievan at work, among his paintings">
+          {portrait && (
+            <figure className={`${styles.work} ${styles.anchor}`}>
+              <Footage clip={portrait} priority autoPlay loop controls={false} />
+            </figure>
+          )}
           {homeMedia.map((item) => (
             <figure className={`${styles.work} ${styles[item.role]}`} key={item.src}>
-              {item.type === 'video' ? (
-                <Footage clip={{
-                  id: item.role,
-                  videoId: getClip(item.role === 'anchor' ? 'painting-portrait' : 'painting-outdoors')?.videoId ?? 'MS-VI-00007',
-                  src: item.src,
-                  poster: item.poster ?? '',
-                  width: item.width,
-                  height: item.height,
-                  duration: getClip(item.role === 'anchor' ? 'painting-portrait' : 'painting-outdoors')?.duration ?? 0,
-                  alt: item.alt,
-                }} priority={item.priority} />
-              ) : (
-                <Image src={item.src} alt={item.alt} width={item.width} height={item.height}
-                  priority={item.priority} sizes="(max-width: 620px) 46vw, (max-width: 860px) 34vw, 18vw" />
-              )}
-              <figcaption>{item.caption}</figcaption>
+              <Image src={item.src} alt={item.alt} width={item.width} height={item.height}
+                sizes="(max-width: 620px) 46vw, (max-width: 860px) 34vw, 18vw" />
             </figure>
           ))}
         </div>

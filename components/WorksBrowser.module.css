@@ -34,8 +34,8 @@
   cursor: pointer;
 }
 
-.viewBtn:first-child { border-radius: 2px 0 0 2px; }
-.viewBtn:last-child { border-radius: 0 2px 2px 0; }
+.viewBtn:first-child { border-radius: var(--radius) 0 0 var(--radius); }
+.viewBtn:last-child { border-radius: 0 var(--radius) var(--radius) 0; }
 .viewOn { background: var(--oxide); border-color: var(--oxide); color: var(--surface-ground); }
 
 .table {
@@ -126,7 +126,7 @@
   color: var(--ink);
   background: var(--surface-ground);
   border: 1px solid var(--rule);
-  border-radius: 2px;
+  border-radius: var(--radius);
   padding: var(--s-1) var(--s-2);
 }
 

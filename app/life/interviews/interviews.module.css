@@ -27,7 +27,7 @@
   padding: var(--s-4);
   text-decoration: none;
   color: inherit;
-  transition: border-color 150ms;
+  transition: border-color var(--dur-short) var(--ease-out);
 }
 
 a.card:hover { border-color: var(--oxide); }
@@ -47,7 +47,7 @@ a.card:hover .cardTitle { color: var(--oxide); }
 .cardTitle {
   font-size: var(--t-md);
   margin: 0;
-  transition: color 150ms;
+  transition: color var(--dur-short) var(--ease-out);
 }
 
 .cardMeta {

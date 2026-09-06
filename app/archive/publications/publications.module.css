@@ -16,7 +16,7 @@
 .name {
   font-family: var(--display);
   font-size: var(--t-md);
-  transition: color 150ms;
+  transition: color var(--dur-short) var(--ease-out);
 }
 
 .type {

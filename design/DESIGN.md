@@ -100,7 +100,10 @@ shared package and is replaced by the density rule below.
 
 ## Space and geometry
 
-- Space is `--s-1` … `--s-9`. Type is `--t-2xs` … `--t-4xl`
+- Space is `--s-1` … `--s-9`. Type is `--t-2xs` … `--t-4xl`, with
+  `--t-hero` reserved for the public homepage title
+- Named widths are `--measure` (68ch), `--measure-record` (52rem), `--page`
+  (1440px), `--page-wide` (1600px), and `--rail` (250px)
 - Corners are nearly square: `--radius` (2px), `--radius-frame` (3px). The only
   exception is `.sv-badge`, which is a pill because a status marker is one
 - **Use the page frames; never set a width at a call site.** Seven record pages
@@ -111,8 +114,9 @@ shared package and is replaced by the density rule below.
 **1020 / 860 / 620 / 560. Nothing else.** These cannot be custom properties, so
 they are a documented scale rather than a token — which is exactly how three
 one-off values (1180, 1080, 640) drifted in, each within 60px of a tier and none
-justified. The single surviving exception is `/life/`, the one page on
-`--page-wide`, and it says so in its own stylesheet.
+justified. `--page-wide` belongs to the public site's editorial career
+presentations, currently `/life/` and `/works/`; records and indexes retain their
+own frames.
 
 ## Density
 
@@ -128,6 +132,8 @@ instantly as the same product and still be able to work fast in it.
 - No scroll spectacle, parallax, bouncing, or decorative route transitions
 - `prefers-reduced-motion` collapses spatial motion. A spinner that cannot spin
   must still say it is working — it pulses instead of vanishing
+- Autoplaying archival footage is exceptional editorial media: it must be silent,
+  muted, looped, inline, poster-backed, and free of controls that obscure the image
 
 ## Components
 
@@ -143,6 +149,11 @@ states and styled two of them; that is the failure this line exists to prevent.
   stay in every listing; an archive that hides what it does not have is not a
   record
 - **Badge** carries status. Never render a status as a bare string again
+- **Chapter tabs progressively enhance.** Every panel is present in server-rendered
+  HTML; JavaScript may expose one at a time. The tablist has a contextual accessible
+  label and supports Arrow Left/Right, Home, End, and visible keyboard focus
+- Editorial collages may omit visible captions when adjacent prose supplies the
+  context, but meaningful images and footage retain accessible names
 - Tables are ruled archival indexes, not SaaS data grids
 - Destructive actions are separated from the main form and never dominant
 
@@ -159,9 +170,16 @@ states and styled two of them; that is the failure this line exists to prevent.
 - `overflow-x: clip` on `html`, **never** `hidden` — `hidden` makes `html` a
   scroll container and silently breaks every `position: sticky` on the site
 
+## Token boundary
+
+Tokens govern colour, typography, spacing, radii, elevation and motion. Structural
+pixels remain legitimate for one-pixel rules, two-pixel emphasis and focus rings,
+timeline marks, intrinsic media dimensions, aspect ratios and calculated geometry.
+Those values describe rendering mechanics rather than a competing visual scale.
+
 ## What must not drift
 
-- Source Serif 4 + Inter
+- Source Serif 4 + Roboto Condensed + Inter
 - One primary accent, `--oxide`, and colour derived from the room rather than a
   palette generator
 - Editorial restraint and evidence-first language

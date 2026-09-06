@@ -7,7 +7,7 @@
   margin-bottom: var(--s-8);
   text-decoration: none;
   color: inherit;
-  transition: border-color 150ms;
+  transition: border-color var(--dur-short) var(--ease-out);
 }
 
 .subject:hover { background: var(--surface-raised); }
@@ -28,7 +28,7 @@
   font-weight: 400;
   color: var(--oxide);
   margin: 0 0 var(--s-2);
-  transition: color 150ms;
+  transition: color var(--dur-short) var(--ease-out);
 }
 
 .subjectNote {
@@ -88,7 +88,7 @@
 
 .row:hover .name { color: var(--oxide); }
 
-.name { font-size: var(--t-base); transition: color 150ms; }
+.name { font-size: var(--t-base); transition: color var(--dur-short) var(--ease-out); }
 
 .meta {
   font-family: var(--sans);

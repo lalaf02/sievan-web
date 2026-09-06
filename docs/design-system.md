@@ -1,26 +1,25 @@
 # The design system
 
-`app/globals.css` holds the tokens, the utility classes and the reasoning. This section is
-the contract; the file is the implementation. Every rule below was drifted from before it
-was written down, which is why it is written down.
+The authoritative contract is [`design/DESIGN.md`](../design/DESIGN.md), vendored from
+`lalaf02/sievan-design`. `design/tokens.css` and `design/primitives.css` implement the
+shared system; `app/globals.css` adds the public-site utilities and page frames described
+here. If this guide and the contract disagree, the contract wins.
 
 **The scales are closed sets. A value off them is a finding.**
 
 | | |
 |---|---|
-| Type | `--t-xs` … `--t-2xl`, a 1.25 ratio. Body is `--t-body` |
-| Space | `--s-1` … `--s-8`. Sticky offsets are `--s-5` unless the component states a reason |
-| Width | `--measure` (68ch prose) · `--measure-record` (52rem) · `--page` (1400px) · `--page-wide` (1500px, `/life/` only) · `--rail` |
+| Type | `--t-2xs` … `--t-4xl`; `--t-hero` is reserved for the homepage title. Body is `--t-body` |
+| Space | `--s-1` … `--s-9`. Sticky offsets are `--s-5` unless the component states a reason |
+| Width | `--measure` (68ch prose) · `--measure-record` (52rem) · `--page` (1440px) · `--page-wide` (1600px) · `--rail` (250px) |
 | Breakpoints | **1020 / 860 / 620 / 560**. Nothing else |
 
 Breakpoints cannot be custom properties, so they are a documented scale rather than a
-token — which is exactly how three one-off values (1180, 1080, 640) drifted in, each
-within 60px of a tier and none of them justified. They were folded back. The single
-surviving exception is `/life/`, the one page laid out on `--page-wide`, whose two columns
-run out of room a tier early at 1180; it says so in its own stylesheet.
+token — which is exactly how one-off values drifted in. The wide frame is reserved for
+editorial career presentations: `/life/` and `/works/`.
 
 **Use the page frames; never set a width at the call site.**
-`.page` (standard), `.pageWide` (`/life/`), `.record` (any record page). All three carry
+`.page` (standard), `.pageWide` (editorial career pages), `.record` (any record page). All three carry
 their own top padding — `padding-top` was written inline as
 `style={{ paddingTop: 'var(--s-6)' }}` on 23 of 25 routes, a default dressed as a choice,
 and `.pageFlush` / `.pageDeep` are the two real exceptions (the home hero, the 404).
@@ -30,6 +29,8 @@ and did not, because nothing applied it. Inline `style` is for genuine one-offs 
 computed values (`calc()`, `--aspect`), not for layout.
 
 **The typographic vocabulary, and when each applies.**
+Source Serif 4 carries archival prose, Roboto Condensed carries headings and labels, and
+Inter carries controls and metadata.
 `.measure` for prose · `.ui` for interface type (filters, labels, counts, metadata) ·
 `.eyebrow` for the small caps line above a heading · `.muted` and `.faint` for the two
 recessive greys · `.tnum` wherever digits align in a column or a timeline · `.srOnly` for
@@ -69,4 +70,3 @@ Prettier and no stylelint. Consistency is held by this section and by review. Ad
 formatter would reformat every hand-set comment in the repo — the comments are load-bearing
 documentation here, not noise — and it could not have caught any of the drift above, all of
 which was semantic rather than syntactic.
-

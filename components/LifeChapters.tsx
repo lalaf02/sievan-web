@@ -11,7 +11,12 @@ export function LifeChapter(props: {
   return <section id={props.id} aria-labelledby={`${props.id}-tab`} className={styles.chapter}>{props.children}</section>;
 }
 
-export function LifeChapters({ children }: { children: React.ReactNode }) {
+export function LifeChapters({
+  children, label = 'Biography chapters',
+}: {
+  children: React.ReactNode;
+  label?: string;
+}) {
   const chapters = useMemo(() => Children.toArray(children).filter(isValidElement<{
     id: string; title: string;
   }>), [children]);
@@ -34,7 +39,7 @@ export function LifeChapters({ children }: { children: React.ReactNode }) {
 
   return (
     <div ref={root} className={styles.root}>
-      <div className={styles.tabs} role="tablist" aria-label="Biography chapters">
+      <div className={styles.tabs} role="tablist" aria-label={label}>
         {chapters.map((chapter, index) => (
           <button
             key={chapter.props.id}

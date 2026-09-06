@@ -23,6 +23,6 @@ re-exported one ("It mustn't be reexported").
 in the repo.
 
 **Use the page frames; never set a width at the call site.** `.page`, `.pageWide`
-(`/life/` only), `.record`. All three carry their own top padding — do not write
+(editorial career pages), `.record`. All three carry their own top padding — do not write
 `style={{ paddingTop: … }}`. Breakpoints are 1020 / 860 / 620 / 560 and nothing else.
 See [docs/design-system.md](../docs/design-system.md).

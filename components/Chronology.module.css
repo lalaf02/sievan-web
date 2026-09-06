@@ -16,7 +16,7 @@
   background: transparent;
   color: var(--ink-muted);
   cursor: pointer;
-  transition: background 150ms, color 150ms, border-color 150ms;
+  transition: background var(--dur-short) var(--ease-out), color var(--dur-short) var(--ease-out), border-color var(--dur-short) var(--ease-out);
 }
 
 .chip:hover { border-color: var(--oxide); color: var(--oxide); }
@@ -101,7 +101,7 @@
   margin-bottom: var(--s-2);
   text-decoration: none;
   color: inherit;
-  transition: border-color 150ms;
+  transition: border-color var(--dur-short) var(--ease-out);
 }
 
 .entry:hover { border-left-color: var(--oxide); }
@@ -126,7 +126,7 @@
   display: block;
   font-size: var(--t-base);
   line-height: 1.35;
-  transition: color 150ms;
+  transition: color var(--dur-short) var(--ease-out);
 }
 
 .entrySub {

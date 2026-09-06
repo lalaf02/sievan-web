@@ -24,6 +24,7 @@ export function Pending({
   fields,
   fieldsLabel = 'Each entry will carry',
   footer,
+  headingLevel = 'h3',
 }: {
   eyebrow?: string;
   title: string;
@@ -31,12 +32,14 @@ export function Pending({
   fields?: { name: string; note: string }[];
   fieldsLabel?: string;
   footer?: React.ReactNode;
+  headingLevel?: 'h2' | 'h3';
 }) {
+  const Heading = headingLevel;
   return (
     <div className={styles.pending}>
       <div className={styles.body}>
         <p className={styles.eyebrow}>{eyebrow}</p>
-        <h3 className={styles.title}>{title}</h3>
+        <Heading className={styles.title}>{title}</Heading>
         <div className={styles.prose}>{children}</div>
         {footer && <p className={styles.footer}>{footer}</p>}
       </div>

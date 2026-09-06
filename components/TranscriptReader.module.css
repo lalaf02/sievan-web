@@ -15,7 +15,7 @@
   font-size: var(--t-base);
   padding: var(--s-2) var(--s-3);
   border: 1px solid var(--rule-strong);
-  border-radius: 2px;
+  border-radius: var(--radius);
   background: var(--surface-ground);
   color: var(--ink);
 }
@@ -44,7 +44,7 @@
   text-align: center;
   padding: 0.1em 0.3em;
   border: 1px solid var(--rule);
-  border-radius: 2px;
+  border-radius: var(--radius);
   font-family: var(--sans);
   font-size: var(--t-xs);
   font-variant-numeric: tabular-nums;
