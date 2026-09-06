@@ -1,10 +1,10 @@
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import Link from 'next/link';
 import {
-  allExhibitions, counts, getClip,
+  allExhibitions, counts,
 } from '@/lib/data';
 import { THESIS } from '@/lib/validation';
-import { ClipTile } from '@/components/MediaTile';
 import styles from './home.module.css';
 
 export const metadata: Metadata = {
@@ -15,6 +15,15 @@ export const metadata: Metadata = {
     + 'records and the catalogue of works.',
 };
 
+const studioWorks = [
+  { src: '/artworks/home/anchor.jpg', width: 1800, height: 1350, alt: 'Large abstract painting in cobalt blue, earthen red, ochre and deep green, photographed on a gallery wall.', role: 'anchor', priority: true },
+  { src: '/artworks/home/veil.jpg', width: 1000, height: 1333, alt: 'Blue-grey abstract painting with a veiled face-like form, photographed against a pale wall.', role: 'veil' },
+  { src: '/artworks/home/figures.jpg', width: 1100, height: 1467, alt: 'Muted figurative painting of two closely gathered forms beside dark brushwork.', role: 'figures' },
+  { src: '/artworks/home/blue.jpg', width: 1000, height: 1333, alt: 'Vertical abstract painting dominated by deep cobalt blue with flashes of red and white.', role: 'blue' },
+  { src: '/artworks/home/umber-figure.jpg', width: 900, height: 1201, alt: 'Dark umber figurative painting in a narrow gold frame, photographed on its hanging rail.', role: 'umber' },
+  { src: '/artworks/home/earth.jpg', width: 1100, height: 825, alt: 'Wide earth-toned abstract painting with a pale textured horizon.', role: 'earth' },
+] as const;
+
 /**
  * The front page: the man and what this site is.
  */
@@ -22,27 +31,30 @@ export default function Home() {
   const years = allExhibitions.map((e) => e.date_earliest ?? 0).filter(Boolean);
   const span = `${Math.min(...years)}–${Math.max(...years)}`;
 
-  const atTheEasel = getClip('painting-portrait');
-
   return (
     <div className="page pageFlush">
 
-      {/* ═══════════════════════════════════════════════ hero: the man, painting */}
+      {/* ═══════════════════════════════════════════════ hero: a threshold into the studio */}
       <section className={styles.hero} aria-labelledby="name">
         <div className={styles.heroTitle}>
           <p className="eyebrow">1898–1981</p>
           <h1 id="name" className={styles.name}>Maurice Sievan</h1>
         </div>
-        <div className={styles.heroMedia}>
-          {atTheEasel && (
-            <ClipTile
-              clip={atTheEasel}
-              aspect="4 / 3"
-              priority
-              caption="Sievan at the easel, working a brush across a portrait."
-              meta="Silent home-movie footage held by the estate"
-            />
-          )}
+        <div className={styles.studioWall} aria-label="Paintings by Maurice Sievan">
+          {studioWorks.map((work) => (
+            <figure className={`${styles.work} ${styles[work.role]}`} key={work.src}>
+              <Image
+                src={work.src}
+                alt={work.alt}
+                width={work.width}
+                height={work.height}
+                priority={'priority' in work && work.priority}
+                sizes={work.role === 'anchor'
+                  ? '(max-width: 860px) 92vw, 56vw'
+                  : '(max-width: 620px) 58vw, (max-width: 860px) 38vw, 18vw'}
+              />
+            </figure>
+          ))}
         </div>
         <div className={styles.heroText}>
           <p className={styles.lede}>{THESIS.subhead}</p>

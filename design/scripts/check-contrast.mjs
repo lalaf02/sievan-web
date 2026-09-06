@@ -46,6 +46,13 @@ function block(name) {
 const themes = {
   light: block(':root'),
   dark: { ...block(':root'), ...block("\\[data-theme='dark'\\]") },
+  publicLight: { ...block(':root'), ...block("\\[data-site='public'\\]") },
+  publicDark: {
+    ...block(':root'),
+    ...block("\\[data-theme='dark'\\]"),
+    ...block("\\[data-site='public'\\]"),
+    ...block("\\[data-site='public'\\]\\[data-theme='dark'\\]"),
+  },
 };
 
 /* fg, bg, minimum, what it is */

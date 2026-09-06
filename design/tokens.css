@@ -210,6 +210,42 @@
   color-scheme: dark;
 }
 
+/* Public archive palette, drawn from Sievan's smoky grounds, blue passages and
+ * oxidised reds. The admin intentionally keeps the neutral shared defaults. */
+[data-site='public'] {
+  --surface-ground: oklch(92% 0.020 73);
+  --surface-raised: oklch(87% 0.028 72);
+  --surface-overlay: oklch(96% 0.014 76);
+  --surface-sunk: oklch(80% 0.030 67);
+  --ink: oklch(21% 0.025 48);
+  --ink-muted: oklch(39% 0.030 52);
+  --ink-faint: oklch(42% 0.028 55);
+  --rule: oklch(71% 0.035 58);
+  --rule-strong: oklch(40% 0.105 35);
+  --oxide: oklch(42% 0.145 34);
+  --oxide-soft: oklch(84% 0.060 42);
+  --accent-cool: oklch(39% 0.100 245);
+  --accent-cool-soft: oklch(84% 0.045 238);
+  --flag: oklch(48% 0.105 85);
+}
+
+[data-site='public'][data-theme='dark'] {
+  --surface-ground: oklch(17% 0.018 48);
+  --surface-raised: oklch(21% 0.022 48);
+  --surface-overlay: oklch(25% 0.026 48);
+  --surface-sunk: oklch(13% 0.014 48);
+  --ink: oklch(91% 0.020 75);
+  --ink-muted: oklch(73% 0.026 72);
+  --ink-faint: oklch(67% 0.028 70);
+  --rule: oklch(30% 0.030 52);
+  --rule-strong: oklch(68% 0.130 35);
+  --oxide: oklch(72% 0.145 35);
+  --oxide-soft: oklch(29% 0.070 36);
+  --accent-cool: oklch(75% 0.100 242);
+  --accent-cool-soft: oklch(28% 0.050 240);
+  --flag: oklch(80% 0.115 88);
+}
+
 /*
  * The admin's working density. The only override of the three density tokens.
  * Set on the admin shell, never on a component.

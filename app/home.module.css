@@ -1,275 +1,117 @@
-/*
- * The front page: four movements, each a full-width band separated by a hairline.
- *
- * It now opens on a dark wall, and the rule that follows from that is: the art is
- * the only lit thing here. Type recedes into the room — the name is set large and
- * thin rather than large and heavy — and nothing but a frame carries elevation.
- *
- * One primary accent (--oxide), no tinted panels, and no block that is only a shape.
- * The page was a twelve-column mosaic of six independent tiles; the trouble with it
- * was not the grid but that each tile argued its own case, so the quotes sat at full
- * width between the pictures and read as punctuation rather than as evidence. Here a
- * quote is always next to the thing it bears on.
- */
-
-/* ════════════════════════════════════════════════════════════════════════ hero */
+/* The homepage is a threshold into Sievan's working world: a loose studio wall,
+ * not a neutral image grid. All values remain on the shared design scales. */
 
 .hero {
+  position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 7fr) minmax(18rem, 4fr);
-  grid-template-areas: "title title" "media copy";
-  gap: var(--s-7) var(--s-9);
-  align-items: end;
-  min-height: calc(100svh - var(--s-9));
-  padding: var(--s-7) 0 var(--s-9);
+  grid-template-columns: minmax(0, 8fr) minmax(18rem, 4fr);
+  grid-template-areas: "title title" "wall copy";
+  gap: var(--s-6) var(--s-8);
+  align-items: center;
+  min-height: calc(100svh - var(--s-8));
+  padding: var(--s-6) 0 var(--s-9);
 }
 
-.heroTitle { grid-area: title; text-align: center; }
-.heroMedia { grid-area: media; min-width: 0; max-width: 58rem; }
-.heroMedia figure > span:first-child { border-radius: 50% 50% var(--radius-frame) var(--radius-frame); }
-.heroText { grid-area: copy; min-width: 0; padding-bottom: var(--s-6); }
+.heroTitle {
+  grid-area: title;
+  position: relative;
+  z-index: 10;
+  text-align: center;
+}
 
-/*
- * The name, in the display voice: large, thin, pulled tight. The old setting was
- * --t-2xl at the body weight, which made it merely the biggest of several things
- * all set at weight 600. Half the hierarchy on this page is the distance between
- * this and .eyebrow directly above it.
- */
 .name {
+  margin: var(--s-1) 0 calc(var(--s-5) * -1);
+  color: var(--oxide);
   font-family: var(--display);
   font-size: var(--t-hero);
-  font-weight: var(--w-regular);
+  font-weight: var(--w-thin);
   letter-spacing: -0.055em;
   line-height: 0.76;
-  color: var(--oxide);
-  margin: var(--s-2) 0 0;
+}
+
+.studioWall {
+  grid-area: wall;
+  position: relative;
+  min-width: 0;
+  aspect-ratio: 16 / 11;
+  overflow: visible;
+  background: transparent;
+  isolation: isolate;
+}
+
+.work {
+  position: absolute;
+  z-index: 2;
+  margin: 0;
+  overflow: hidden;
+  background: var(--surface-sunk);
+  box-shadow: var(--elevation-1);
+}
+
+.work img { display: block; width: 100%; height: auto; }
+.anchor { width: 66%; left: 14%; top: 11%; z-index: 2; transform: rotate(0.8deg); }
+.veil { width: 19%; left: 0; top: 0; z-index: 4; transform: rotate(-2.7deg); }
+.figures { width: 19%; right: 0; top: 17%; z-index: 3; transform: rotate(2.1deg); }
+.blue { width: 17%; left: 4%; bottom: 0; z-index: 5; transform: rotate(1.8deg); }
+.umber { width: 16%; right: 8%; bottom: 0; z-index: 5; transform: rotate(-1.9deg); }
+.earth { width: 28%; left: 43%; bottom: -2%; z-index: 6; transform: rotate(1.1deg); }
+
+.heroText {
+  grid-area: copy;
+  position: relative;
+  z-index: 9;
+  min-width: 0;
+  padding: var(--s-6) 0;
 }
 
 .lede {
-  font-size: var(--t-lg);
-  line-height: 1.4;
-  color: var(--ink);
-  max-width: 46ch;
+  max-width: 42ch;
   margin: 0 0 var(--s-4);
+  color: var(--ink);
+  font-size: var(--t-lg);
+  line-height: 1.35;
 }
 
 .heroBody {
+  max-width: 48ch;
+  margin: 0 0 var(--s-5);
+  color: var(--ink-muted);
   font-size: var(--t-base);
   line-height: 1.6;
-  color: var(--ink-muted);
-  max-width: 50ch;
-  margin: 0 0 var(--s-5);
 }
 
 .heroLinks {
   display: flex;
   flex-wrap: wrap;
   gap: var(--s-5);
+  margin: 0;
   font-family: var(--display);
+  font-size: var(--t-sm);
   font-weight: var(--w-semibold);
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  font-size: var(--t-sm);
-  margin: 0;
 }
 
 .heroLinks a {
+  padding-bottom: 0.1em;
+  border-bottom: 1px solid currentColor;
   color: var(--oxide);
   text-decoration: none;
-  border-bottom: 1px solid currentColor;
-  padding-bottom: 0.1em;
 }
 
 .heroLinks a:hover { color: var(--ink); }
-
-/* ═══════════════════════════════════════════════════════════════════════ bands */
-
-.band {
-  border-top: 2px solid var(--oxide);
-  padding: var(--s-9) 0;
-}
-
-.bandHead {
-  max-width: 60ch;
-  margin-bottom: var(--s-6);
-}
+.band { padding: var(--s-9) 0; border-top: 2px solid var(--oxide); }
+.bandHead { max-width: 60ch; margin-bottom: var(--s-6); }
 
 .bandTitle {
+  margin: 0;
+  color: var(--oxide);
   font-family: var(--display);
   font-size: var(--t-3xl);
-  font-weight: var(--w-regular);
+  font-weight: var(--w-thin);
   letter-spacing: -0.025em;
   line-height: 0.9;
-  color: var(--oxide);
-  margin: 0;
 }
-
-.bandNote {
-  font-family: var(--sans);
-  font-size: var(--t-sm);
-  line-height: 1.5;
-  color: var(--ink-muted);
-  margin: var(--s-2) 0 0;
-}
-
-.bandFoot {
-  font-family: var(--sans);
-  font-size: var(--t-sm);
-  line-height: 1.5;
-  color: var(--ink-faint);
-  max-width: 72ch;
-  margin: var(--s-6) 0 0;
-}
-
-.bandFoot a { color: var(--oxide); white-space: nowrap; }
-
-/* ════════════════════════════════════════════════════ 1. Sievan as a person */
-
-.personGrid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--s-5);
-  align-items: start;
-}
-
-/*
- * Five frames and the quotes, six cells in two rows. Even columns on purpose: the
- * clips are all 720x486 and none is more important than the others — the frame that
- * matters most is in the hero. A two-column feature tile here stood six hundred
- * pixels tall and made the other four look like contact prints.
- */
-.personQuote {
-  display: flex;
-  flex-direction: column;
-  gap: var(--s-4);
-  justify-content: center;
-}
-
-/* ══════════════════════════════════════════════════════════════ 2. the work */
-
-.workGrid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--s-6);
-}
-
-.work { margin: 0; min-width: 0; }
-
-/* The quote sits under its own painting, not between two of them. */
-.workQuote { margin-top: var(--s-4); }
-
-/* ═══════════════════════════════════════════════════ 3. recognition and legacy */
-
-.recordGrid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--s-6);
-  align-items: start;
-}
-
-.recordCol { min-width: 0; }
-
-.recordTitle {
-  font-family: var(--sans);
-  font-size: var(--t-xs);
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.09em;
-  color: var(--ink-faint);
-  margin: 0 0 var(--s-3);
-}
-
-.recordCol .recordTitle + * { margin-top: 0; }
-.recordCol > * + .recordTitle { margin-top: var(--s-6); }
-
-.points {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  font-family: var(--sans);
-  font-size: var(--t-sm);
-}
-
-.points li {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: var(--s-3);
-  padding: 0.3em 0;
-  border-bottom: 1px solid var(--rule);
-  color: var(--ink);
-}
-
-/* MoMA, the Hirshhorn and Brooklyn. Marked, not reordered — the list keeps the CV's
-   own order, and the mark is the only thing the site adds to it. Specificity rather
-   than !important: `.points li` already sets the border. */
-.points .pointNotable { border-bottom-color: var(--oxide); }
-
-.pointWhere {
-  color: var(--ink-faint);
-  text-align: right;
-  flex-shrink: 0;
-}
-
-.recordAside {
-  font-family: var(--sans);
-  font-size: var(--t-xs);
-  line-height: 1.5;
-  color: var(--ink-faint);
-  margin: var(--s-3) 0 0;
-}
-
-.recordAside a { color: var(--oxide); }
-
-/* The witnesses, small, beneath the words they said. */
-.faces {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--s-3);
-  margin-top: var(--s-5);
-}
-
-.peers {
-  border-top: 1px solid var(--rule);
-  margin-top: var(--s-7);
-  padding-top: var(--s-5);
-}
-
-.tileLabel {
-  font-family: var(--sans);
-  font-size: var(--t-xs);
-  text-transform: uppercase;
-  letter-spacing: 0.09em;
-  color: var(--ink-faint);
-  margin: 0 0 var(--s-4);
-}
-
-.peerList {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: var(--s-4);
-}
-
-.peerName {
-  display: block;
-  font-family: var(--serif);
-  font-size: var(--t-base);
-  color: var(--ink);
-}
-
-.peerNote {
-  display: block;
-  font-family: var(--sans);
-  font-size: var(--t-xs);
-  line-height: 1.4;
-  color: var(--ink-faint);
-  margin-top: var(--s-1);
-}
-
-/* ═════════════════════════════════════════════════════ 4. what this site is */
 
 .aboutGrid {
   display: grid;
@@ -279,112 +121,94 @@
 }
 
 .aboutText p {
-  font-size: var(--t-body);
-  line-height: 1.6;
-  color: var(--ink-muted);
   max-width: 52ch;
   margin: 0 0 var(--s-4);
+  color: var(--ink-muted);
+  font-size: var(--t-body);
+  line-height: 1.6;
 }
 
-.aboutMore {
-  font-family: var(--sans);
-  font-size: var(--t-sm) !important;
-}
-
-.aboutMore a {
-  color: var(--oxide);
-  text-decoration: none;
-  border-bottom: 1px solid currentColor;
-}
-
+.aboutMore { font-family: var(--sans); font-size: var(--t-sm) !important; }
+.aboutMore a { color: var(--oxide); text-decoration: none; border-bottom: 1px solid currentColor; }
 .aboutMore a:hover { color: var(--ink); }
-
 .doors { min-width: 0; }
 
 .doorList {
-  list-style: none;
-  margin: 0;
-  padding: 0;
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: var(--s-6);
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
-/*
- * The four ways in. These were a border-top and a padding — the same hairline
- * that separated everything else on the page, so they read as list items rather
- * than as doors. They are now surfaces that lift toward the reader.
- */
 .door {
   display: block;
-  text-decoration: none;
-  color: inherit;
   height: 100%;
   padding: var(--s-5) 0 var(--s-6);
   border-top: 2px solid var(--oxide);
-  transition: border-top-color var(--dur-short) var(--ease-out),
-              box-shadow var(--dur-standard) var(--ease-out),
-              transform var(--dur-standard) var(--ease-out);
+  color: inherit;
+  text-decoration: none;
+  transition: transform var(--dur-standard) var(--ease-out);
 }
 
-.door:hover {
-  transform: translateY(calc(var(--s-1) * -1));
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .door:hover { transform: none; }
-}
+.door:hover { transform: translateY(calc(var(--s-1) * -1)); }
 
 .doorTitle {
   display: block;
+  color: var(--oxide);
   font-family: var(--display);
   font-size: var(--t-xl);
   font-weight: var(--w-regular);
   letter-spacing: var(--tracking-tight);
-  color: var(--oxide);
-  transition: color var(--dur-short) var(--ease-out);
 }
-
-.door:hover .doorTitle { color: var(--oxide); }
 
 .doorText {
   display: block;
+  margin-top: var(--s-2);
+  color: var(--ink-muted);
   font-family: var(--sans);
   font-size: var(--t-sm);
   line-height: 1.5;
-  color: var(--ink-muted);
-  margin-top: var(--s-2);
 }
 
-/* ═════════════════════════════════════════════════════════════════ narrower */
+@media (prefers-reduced-motion: reduce) { .door:hover { transform: none; } }
 
 @media (max-width: 1020px) {
-  .personGrid { grid-template-columns: repeat(2, 1fr); }
-  .recordGrid { grid-template-columns: repeat(2, 1fr); }
-  .peerList { grid-template-columns: repeat(3, 1fr); }
+  .hero { gap: var(--s-5) var(--s-6); }
+  .studioWall { aspect-ratio: 4 / 3; }
 }
 
 @media (max-width: 860px) {
   .hero {
     grid-template-columns: 1fr;
-    grid-template-areas: "title" "media" "copy";
+    grid-template-areas: "title" "wall" "copy";
     gap: var(--s-6);
     min-height: auto;
     padding: var(--s-7) 0 var(--s-8);
   }
-
   .heroTitle { text-align: left; }
-
-  .personGrid,
-  .workGrid,
-  .recordGrid,
-  .aboutGrid,
-  .doorList {
-    grid-template-columns: 1fr;
-  }
-
-  .peerList { grid-template-columns: repeat(2, 1fr); }
+  .name { margin-bottom: calc(var(--s-3) * -1); }
+  .studioWall { aspect-ratio: 16 / 12; }
+  .heroText { max-width: var(--measure); padding: 0; }
+  .aboutGrid, .doorList { grid-template-columns: 1fr; }
   .band { padding: var(--s-8) 0; }
+}
+
+@media (max-width: 620px) {
+  .studioWall {
+    display: block;
+    aspect-ratio: 4 / 5;
+    padding: 0;
+  }
+  .work { position: absolute; }
+  .work img { height: auto; object-fit: initial; }
+  .anchor { width: 92%; left: 4%; top: 2%; }
+  .veil { width: 42%; left: 0; top: 43%; }
+  .figures { width: 40%; right: 0; top: 40%; }
+  .blue { width: 38%; left: 5%; bottom: 0; }
+  .umber { width: 36%; right: 5%; bottom: 1%; }
+  .earth { width: 56%; left: 22%; bottom: 5%; }
 }
 
 @media (max-width: 560px) {

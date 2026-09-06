@@ -51,7 +51,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${serif.variable} ${sans.variable} ${display.variable}`} suppressHydrationWarning>
+    <html lang="en" data-site="public" className={`${serif.variable} ${sans.variable} ${display.variable}`} suppressHydrationWarning>
       <head>
         {/*
           Restores an explicit dark choice before first paint. Light is the
