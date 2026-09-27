@@ -55,6 +55,12 @@ shared package and is replaced by the density rule below.
 - Light mode: **a full peer, not a fallback.** It is the reading room — long
   transcripts, metadata proofing, printing — and it has its own elevation model.
   If it looks like a recolouring of the dark theme it has failed review
+- **Print is always light**, whatever theme is on screen. Browsers drop
+  backgrounds when printing, so a dark page prints parchment on white paper.
+  `@media print` repeats the light values and `check-contrast.mjs` fails if they drift
+- **The theme toggle exists only when JavaScript runs.** It is hidden until the
+  pre-paint script stamps `data-js`, so a reader without JavaScript never meets a
+  control that does nothing. Everything else must still read without JavaScript
 - One package, two densities: the public site reads, the admin works
 
 ## Colour

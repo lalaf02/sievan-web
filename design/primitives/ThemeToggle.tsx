@@ -35,7 +35,7 @@ export function ThemeToggle({ className }: { className?: string }) {
     <button
       type="button"
       onClick={toggle}
-      className={className ?? 'sv-button'}
+      className={`sv-theme-toggle ${className ?? 'sv-button'}`}
       aria-label={`Switch to ${next} theme`}
       title={`Switch to ${next} theme`}
     >

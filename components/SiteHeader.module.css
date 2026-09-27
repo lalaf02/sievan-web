@@ -136,3 +136,14 @@
   border-color: var(--rule);
   background: var(--surface-raised);
 }
+
+/*
+ * On paper the header keeps only the wordmark, so a printout still says where it
+ * came from. Navigation, search and the theme control do nothing on a page.
+ */
+@media print {
+  .header nav,
+  .search,
+  .skip,
+  .theme { display: none; }
+}

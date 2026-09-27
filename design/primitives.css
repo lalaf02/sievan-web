@@ -289,6 +289,20 @@ mark {
 .sv-field[aria-invalid='true'] { border-color: var(--danger); }
 .sv-field::placeholder { color: var(--ink-faint); }
 
+/* ══════════════════════════════════════════════════════════════ theme toggle
+ *
+ * The toggle cannot work without JavaScript — a static export has no server to
+ * receive a choice — so it is shown only once the pre-paint script in theme.ts
+ * has stamped data-js. That script runs before first paint, so the toggle is
+ * there from the first frame when it works and never there when it cannot.
+ * Prefixed with html so it outranks a call site's own display.
+ */
+html:not([data-js]) .sv-theme-toggle { display: none; }
+
+@media print {
+  html .sv-theme-toggle { display: none; }
+}
+
 textarea.sv-field { min-height: 7rem; resize: vertical; line-height: 1.5; }
 .sv-field[type='checkbox'] { width: 1.1rem; height: 1.1rem; accent-color: var(--oxide); }
 

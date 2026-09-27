@@ -9,13 +9,18 @@ import { readdirSync, statSync, readFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { join, relative } from 'node:path';
 
-/* MANIFEST.json holds the hash and README.md is generated, so neither is hashed. */
+/*
+ * MANIFEST.json holds the hash and README.md is generated, so neither is hashed.
+ * Dotfiles are skipped too: Finder drops .DS_Store into any folder it opens, and
+ * an untracked file that no build reads must not fail the build.
+ */
 const EXCLUDE = new Set(['MANIFEST.json', 'README.md']);
 
 export function hashTree(dir) {
   const files = [];
   (function walk(d) {
     for (const name of readdirSync(d).sort()) {
+      if (name.startsWith('.')) continue;
       const p = join(d, name);
       if (statSync(p).isDirectory()) walk(p);
       else files.push(p);

@@ -228,6 +228,58 @@
 }
 
 /*
+ * Print is always the reading room. Browsers drop backgrounds when printing, so
+ * the dark theme would put parchment ink on white paper and a transcript would
+ * print near-invisible. CSS cannot share one declaration block between a
+ * selector and a media query, so these values repeat [data-theme='light']
+ * exactly; scripts/check-contrast.mjs fails if the two copies drift apart.
+ */
+@media print {
+  :root {
+    --surface-ground: oklch(97.4% 0.010 84);
+    --surface-raised: oklch(93.8% 0.020 82);
+    --surface-overlay: oklch(99.5% 0.003 84);
+    --surface-sunk: oklch(90.8% 0.024 82);
+
+    --ink: oklch(19% 0.015 82);
+    --ink-muted: oklch(46% 0.022 83);
+    /* Darkened from the archive's original #948b78 (~62% L), which fell short of
+     * 4.5:1 against a card and was carrying real caption text on both sites.
+     * scripts/check-contrast.mjs is what caught it; keep it passing. */
+    --ink-faint: oklch(51% 0.020 83);
+
+    --rule: oklch(85.3% 0.024 83);
+    --rule-strong: oklch(63% 0.028 82);
+
+    --oxide: oklch(45% 0.112 38);
+    --oxide-soft: oklch(91% 0.035 43);
+    --accent-cool: oklch(45% 0.095 250);
+    --accent-cool-soft: oklch(92% 0.030 250);
+    --flag: oklch(52% 0.105 85);
+
+    --danger: oklch(48% 0.160 28);
+    --danger-soft: oklch(93% 0.035 28);
+    --success: oklch(45% 0.105 152);
+    --success-soft: oklch(93% 0.032 152);
+
+    /* Real shadows, warm-tinted: shadow on paper, not grey haze. */
+    --elevation-1: 0 1px 2px oklch(35% 0.020 82 / 0.10);
+    --elevation-2:
+      0 1px 2px oklch(35% 0.020 82 / 0.06),
+      0 6px 16px oklch(35% 0.020 82 / 0.10);
+    --elevation-3:
+      0 2px 4px oklch(35% 0.020 82 / 0.06),
+      0 20px 44px oklch(35% 0.020 82 / 0.16);
+
+    --frame-glow:
+      0 0 0 1px var(--rule),
+      0 8px 24px oklch(35% 0.020 82 / 0.16);
+
+    color-scheme: light;
+  }
+}
+
+/*
  * The admin's working density. The only override of the three density tokens.
  * Set on the admin shell, never on a component.
  */

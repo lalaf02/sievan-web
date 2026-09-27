@@ -11,7 +11,7 @@
  */
 import { cpSync, rmSync, mkdirSync, existsSync, writeFileSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
-import { join, dirname } from 'node:path';
+import { join, dirname, basename } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { hashTree } from './design-hash.mjs';
 
@@ -30,7 +30,14 @@ rmSync(DEST, { recursive: true, force: true });
 mkdirSync(DEST, { recursive: true });
 for (const entry of COPY) {
   const from = join(SRC, entry);
-  if (existsSync(from)) cpSync(from, join(DEST, entry), { recursive: true });
+  /* Dotfiles only, to match design-hash.mjs. OneDrive's "<file> 2.<ext>" copies
+   * are deliberately let through: they should fail check-design loudly. */
+  if (existsSync(from)) {
+    cpSync(from, join(DEST, entry), {
+      recursive: true,
+      filter: (src) => !basename(src).startsWith('.'),
+    });
+  }
 }
 
 let commit = 'unknown';

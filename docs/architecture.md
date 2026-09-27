@@ -20,8 +20,11 @@ described itself as *"the only place in [the archive] where the paintings themse
 be seen"*, and `/works/` said *"No works are catalogued yet"* while showing 25 of Sievan's
 drawings. Do not put artwork imagery on `/life/`, and do not put CV or reception material
 on `/works/`. It exists so the record outlives any hosting
-account: `output: 'export'` produces 265 plain HTML pages that will open from a USB stick
-in twenty years.
+account: `output: 'export'` produces 265 plain HTML pages that can be served from a USB stick
+in twenty years. **Served, not double-clicked:** the export links its CSS, scripts and pages
+by root-absolute paths (`/_next/static/…`, `/life/`), so a page opened directly as a
+`file://` URL loads unstyled and its links lead nowhere. Any static file server works —
+`npx serve out`, `python3 -m http.server -d out` — and needs nothing from this repo.
 
 Next 16 (App Router) · React 19 · TypeScript · **zero UI dependencies**. The entire
 production dependency list is `next`, `react`, `react-dom`. No Tailwind, no CSS-in-JS, no

@@ -95,6 +95,9 @@ Minimum sweep before a commit that touches the UI:
 - [ ] A quote deep link — it must highlight **the phrase**, not every occurrence of "the"
 - [ ] The home mosaic at ≤860px collapses to one column; video tiles show their posters
 - [ ] Nothing invented anywhere: every empty area is a stated gap
+- [ ] Print preview of a transcript and a record page, once in each theme — dark ink on
+      white both times, wordmark kept, no nav, search or theme control
+- [ ] With JS off the header has no theme control; with JS on it is there on first paint
 
 ---
 

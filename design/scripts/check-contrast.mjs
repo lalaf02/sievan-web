@@ -78,5 +78,37 @@ for (const [theme, t] of Object.entries(themes)) {
     console.log(`  ${ok ? 'ok ' : 'FAIL'} ${r.toFixed(2)}:1 (need ${min})  ${fg} on ${bg} — ${what}`);
   }
 }
-console.log(failed ? `\n  ${failed} failing pair(s)\n` : '\n  all pairs pass\n');
+/*
+ * Print repeats the light theme's values inside @media print, because CSS cannot
+ * share one block between a selector and a media query. Every declaration, not
+ * just the colours, must match — a shadow that drifts is a drift.
+ */
+function declarations(body) {
+  const out = new Map();
+  const bare = body.replace(/\/\*[\s\S]*?\*\//g, '');
+  for (const [, k, v] of bare.matchAll(/(--[\w-]+|color-scheme):\s*([^;]+);/g)) {
+    out.set(k, v.replace(/\s+/g, ' ').trim());
+  }
+  return out;
+}
+const lightBody = src.match(/\[data-theme='light'\]\s*\{([\s\S]*?)\n\}/m);
+const printBody = src.match(/@media print\s*\{\s*:root\s*\{([\s\S]*?)\n {2}\}\n\}/m);
+console.log('\n  print');
+if (!lightBody || !printBody) {
+  console.log('  FAIL print or light block not found'); failed++;
+} else {
+  const light = declarations(lightBody[1]);
+  const print = declarations(printBody[1]);
+  let drift = 0;
+  for (const k of new Set([...light.keys(), ...print.keys()])) {
+    if (light.get(k) !== print.get(k)) {
+      console.log(`  FAIL ${k} — light: ${light.get(k) ?? 'missing'}, print: ${print.get(k) ?? 'missing'}`);
+      drift++;
+    }
+  }
+  failed += drift;
+  if (!drift) console.log(`  ok  all ${light.size} declarations match the light theme`);
+}
+
+console.log(failed ? `\n  ${failed} failing check(s)\n` : '\n  all checks pass\n');
 process.exit(failed ? 1 : 0);
